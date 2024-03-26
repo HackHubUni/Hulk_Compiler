@@ -1,6 +1,20 @@
 from cmp.pycompiler import Production, Sentence, Symbol, EOF, Epsilon
 
 class ContainerSet:
+    """
+      Resulta conveniente manejar la pertenencia o no de *epsilon* a un conjunto como un caso extremo. Para ello usaremos la clase `ContainerSet` implementada a continuación.
+
+     - La clase funciona como un conjunto de símbolos.
+
+     - Permite consulta la pertenencia de _epsilon_ al conjunto.
+
+     - Las operaciones que modifican el conjunto devuelven si hubo _cambio_ o _no_.
+
+     - El conjunto puede ser actualizado con la adición de elementos individuales, `add(...)`, o a partir de otro conjunto,`update(...)` y `hard_update(...)`.
+
+     - La actualización _sin epsilon (1)_, _con epsilon (2)_ y de _solo epsilon (3)_, ocurre a través de `update(...)`, `hard_update(...)` y `epsilon_update(...)` respectivamente.
+
+     """
     def __init__(self, *values, contains_epsilon=False):
         self.set = set(values)
         self.contains_epsilon = contains_epsilon
@@ -17,6 +31,7 @@ class ContainerSet:
         return change
 
     def set_epsilon(self, value=True):
+        """Establece si el conjunto contiene o no epsilon. Devuelve si hubo cambio."""
         last = self.contains_epsilon
         self.contains_epsilon = value
         return last != self.contains_epsilon
@@ -30,6 +45,9 @@ class ContainerSet:
         return self.set_epsilon(self.contains_epsilon | other.contains_epsilon)
 
     def hard_update(self, other):
+        """
+        Describe si hubo cambios con añadir other
+        """
         return self.update(other) | self.epsilon_update(other)
 
     def find_match(self, match):
