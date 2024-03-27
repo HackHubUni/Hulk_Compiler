@@ -1,12 +1,18 @@
 import cmp.visitor as visitor
 
+
 class Node:
     def evaluate(self):
         raise NotImplementedError()
 
+
 class AtomicNode(Node):
     def __init__(self, lex):
         self.lex = lex
+
+    def __str__(self):
+        return str(self.lex)
+
 
 class UnaryNode(Node):
     def __init__(self, node):
@@ -19,6 +25,7 @@ class UnaryNode(Node):
     @staticmethod
     def operate(value):
         raise NotImplementedError()
+
 
 class BinaryNode(Node):
     def __init__(self, left, right):
@@ -33,6 +40,7 @@ class BinaryNode(Node):
     @staticmethod
     def operate(lvalue, rvalue):
         raise NotImplementedError()
+
 
 def get_printer(AtomicNode=AtomicNode, UnaryNode=UnaryNode, BinaryNode=BinaryNode, ):
 
@@ -60,3 +68,70 @@ def get_printer(AtomicNode=AtomicNode, UnaryNode=UnaryNode, BinaryNode=BinaryNod
 
     printer = PrintVisitor()
     return (lambda ast: printer.visit(ast))
+
+
+###############################
+# Añadir
+##############################
+
+class ConstantNumberNode(Node):
+    def __init__(self, lex):
+        self.lex = lex
+        self.value = float(lex)
+
+    def evaluate(self):
+        # Insert your code here!!!
+        return self.value
+
+
+class BinaryNode(Node):
+    def __init__(self, left: Node, right: Node):
+        self.left = left
+        self.right = right
+
+    def evaluate(self):
+        ## Insert your code here!!!
+        # lvalue = ???
+        # rvalue = ???
+        lvalue = self.left.evaluate()
+        rvalue = self.right.evaluate()
+        return self.operate(lvalue, rvalue)
+
+    @staticmethod
+    def operate(lvalue, rvalue):
+        raise NotImplementedError()
+
+
+class PlusNode(BinaryNode):
+    @staticmethod
+    def operate(lvalue, rvalue):
+        # Insert your code here!!!
+        return lvalue + rvalue
+
+
+class MinusNode(BinaryNode):
+    @staticmethod
+    def operate(lvalue, rvalue):
+        # Insert your code here!!!
+        return lvalue - rvalue
+
+
+class StarNode(BinaryNode):
+    @staticmethod
+    def operate(lvalue, rvalue):
+        # Insert your code here!!!
+        return lvalue * rvalue
+
+
+class DivNode(BinaryNode):
+    @staticmethod
+    def operate(lvalue, rvalue):
+        # Insert your code here!!!
+        return lvalue / rvalue
+
+
+class EqualNode(BinaryNode):
+    @staticmethod
+    def operate(lvalue, rvalue):
+
+        return lvalue == rvalue

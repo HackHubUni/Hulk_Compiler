@@ -3,9 +3,9 @@ try:
     from automata import State
     from regx import RegexSimple
 except:
-    from tools.pycompiler import Token
-    from tools.automata import State
-    from tools.regx import RegexSimple
+    from cmp.pycompiler import Token
+    from Lexer_Parser.automata import State
+    from Lexer_Parser.regx import RegexSimple
 
 class Lexer:
     def __init__(self, table, eof):

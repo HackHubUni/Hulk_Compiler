@@ -3,9 +3,9 @@ try:
     from pycompiler import Grammar, Token
     from parserLL1 import parser_LL1_generator, evaluate_parse
 except:
-    from tools.automata import NFA, automata_union, automata_concatenation, automata_closure, automata_positive_closure, nfa_to_dfa
-    from tools.pycompiler import Grammar, Token
-    from tools.parserLL1 import parser_LL1_generator, evaluate_parse
+    from Lexer_Parser.automata import NFA, automata_union, automata_concatenation, automata_closure, automata_positive_closure, nfa_to_dfa
+    from cmp.pycompiler import Grammar, Token
+    from Lexer_Parser.parserLL1 import parser_LL1_generator, evaluate_parse
 ########## Clases Base para los nodos del AST ##########
 
 class Node:
