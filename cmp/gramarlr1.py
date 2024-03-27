@@ -7,11 +7,11 @@ class Gramarlr1:
         G = Grammar()
 
         # NonTerminal
-        Program, Expression, Statement = G.NonTerminal('Program Expression Statement')
+        Program, Expression, Statement = G.NonTerminals('Program Expression Statement')
 
-        Parameters, FunctionStyle, TypeDef, ProtocolDeclare = G.NonTerminal('Parameters FunctionStyle TyoeDef ProtocolDeclare')
+        Parameters, FunctionStyle, TypeDef, ProtocolDeclare = G.NonTerminals('Parameters FunctionStyle TyoeDef ProtocolDeclare')
         
-        SimpleExpression, ExpressionBlock = G.NonTerminal('SimpleExpression ExpressionBlock')
+        SimpleExpression, ExpressionBlock = G.NonTerminals('SimpleExpression ExpressionBlock')
         
         ParameterList = G.NonTerminal('ParameterList')
         
@@ -40,9 +40,23 @@ class Gramarlr1:
         Boolean = G.NonTerminal('Boolean')
 
         Concatenation =G.NonTerminal('Concatenation')
+        
+        ArithmeticExpression = G.NonTerminal('ArithmeticExpression')
+
+        Product = G.NonTerminal('Product Modulus')
+        
+        Monomial = G.NonTerminal('Monomial') 
+
+        Module = G.NonTerminal('Module')
+
+        Power = G.NonTerminal('Power')
+
+        HighHierarchyObject = G.NonTerminal('HighHierarchyObject')
+        
+        Object = G.NonTerminal('Object')
         # Terminal
 
-        function, name, type = G.Terminal('function <name> type')
+        function, name, type = G.Terminals('function <name> type')
 
         semi, comma, opar, cpar, arrow, okey, ckey, colon = G.Terminals('; , ( ) => { } :')
         
@@ -52,13 +66,21 @@ class Gramarlr1:
 
         protocol, extends = G.Terminal('protocol extends')
         
-        let, inn, iff, whilee, forr, neww, destruct = G.Terminal('let in  if while for new :=')
+        let, inn, iff, whilee, forr, neww, destruct = G.Terminals('let in  if while for new :=')
         
-        elsee, eliff = G.Terminal('else elif')
+        elsee, eliff = G.Terminals('else elif')
 
-        orr, andd, nott, iss = G.Terminal('| & ! is')
+        orr, andd, nott, iss = G.Terminals('| & ! is')
 
         eq, neq, lte, gte, lt, gt = G.Terminals('== != <= >= < >')
+        
+        concat = G.Terminal('@')
+
+        plus, minus, mult, div, mod = G.Terminals('+ - * / %')
+
+        ass = G.Terminal('as')
+
+        number, string, false, true, 
         #Production
         Program %= Expression, lambda h,s: ProgramNode(s[1])
         Program %= Statement + Program, lambda h,s: s[1], lambda h,s: lambda h,s: s[2]
@@ -155,7 +177,63 @@ class Gramarlr1:
         Boolean %= Boolean +lt+ Concatenation, lambda h,s: s[1], lambda h,s: s[3]
         Boolean %= Boolean +gt+ Concatenation, lambda h,s: s[1], lambda h,s: s[3]
         
-        Concatenation%= 
+        Concatenation %= ArithmeticExpression, lambda h, s: s[1]
+        Concatenation %= ArithmeticExpression + concat + Concatenation, lambda h, s: s[1],lambda h, s: s[3]
+        Concatenation %= ArithmeticExpression + concat+ concat + Concatenation, lambda h, s: s[1],lambda h, s: s[4]
+
+        ArithmeticExpression %= Module, lambda h, s: s[1]
+        ArithmeticExpression %= ArithmeticExpression + plus + Module
+        ArithmeticExpression %= ArithmeticExpression + minus + Module
+
+        Module %= Product, lambda h, s: s[1]
+        Module %= Module + mod + Product
+        
+        Product %= Monomial, lambda h, s: s[1]
+        Product %= Product + mult + Monomial
+        Product %= Product + div + Monomial
+        Product %= Product + div+div + Monomial
+
+        Monomial %= Power, lambda h, s: s[1]
+        Monomial %= minus + Monomial
+        
+        Power %= HighHierarchyObject, lambda h, s: s[1]
+        Power %= Power + mult+mult + HighHierarchyObject
+        Power %= Power + Power + HighHierarchyObject
+
+        HighHierarchyObject %= Object, lambda h, s: s[1]
+        HighHierarchyObject %= HighHierarchyObject + ass + Object
+        
+        Object %= opar + SimpleExpression + cpar, lambda h, s: s[2]
+        Object %= number
+        Object %= string
+        Object %= true
+        Object %= false
+        Object %= identifier, lambda h, s: s[1]
+        Object %= identifier + arguments, lambda h, s: FunctionCallNode(s[1], s[2])
+        Object %= object_exp + period + identifier, lambda h, s: ClassAtributeCallNode(s[1], s[3])
+        Object %= object_exp + period + identifier + arguments, lambda h, s: ClassFunctionCallNode(s[1], s[3], s[4])
+        Object %= lbrack + list_ + rbrack, lambda h, s: s[2]
+        Object %= object_exp + lbrack + simple_expression + rbrack, lambda h, s: InexingNode(s[1], s[3])
+        Object %= print_ + lparen + simple_expression + rparen, lambda h, s: FunctionCallNode(s[1], s[3])
+        Object %= sin + lparen + simple_expression + rparen, lambda h, s: FunctionCallNode(s[1], s[3])
+        Object %= cos + lparen + simple_expression + rparen, lambda h, s: FunctionCallNode(s[1], s[3])
+        Object %= tan + lparen + simple_expression + rparen, lambda h, s: FunctionCallNode(s[1], s[3])
+        Object %= sqrt + lparen + simple_expression + rparen, lambda h, s: FunctionCallNode(s[1], s[3])
+        Object %= exp + lparen + simple_expression + rparen, lambda h, s: FunctionCallNode(s[1], s[3])
+        Object %= log + lparen + simple_expression + comma + simple_expression + rparen, lambda h, s: FunctionCallNode(s[1], s[3] + s[5]) # duda
+        Object %= rand + lparen + rparen, lambda h, s: FunctionCallNode(s[1], [])
+        
+        list_ %= simple_expression, lambda h, s: s[1]
+        list_ %= simple_expression + comma + list_, lambda h, s: ListNode([s[1]] + s[3]) # duda
+        list_ %= simple_expression + list_comprehension + identifier + in_ + simple_expression, lambda h, s: ImplicitListNode(s[1], s[3], s[5])
+
+
+
+
+
+
+
+
 
 
 
