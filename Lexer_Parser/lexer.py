@@ -9,6 +9,11 @@ except:
 
 class Lexer:
     def __init__(self, table, eof):
+        """
+
+        :param table: La tabla tiene que tener (valor, regex) osea es una lista de tuplas
+        :param eof: G.EOF
+        """
         self.eof = eof
         self.regexs = self._build_regexs(table)
         self.automaton = self._build_automaton()
