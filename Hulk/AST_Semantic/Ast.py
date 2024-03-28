@@ -2,6 +2,10 @@ import cmp.visitor as visitor
 from abc import ABC, abstractmethod
 
 
+import cmp.visitor as visitor
+from abc import ABC, abstractmethod
+
+
 class Node:
 
     def evaluate(self):

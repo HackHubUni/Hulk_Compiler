@@ -4,7 +4,6 @@ from abc import ABC, abstractmethod
 
 class Node:
 
-
     def evaluate(self):
         raise NotImplementedError()
 
@@ -45,110 +44,95 @@ class BinaryNode(Node):
         raise NotImplementedError()
 
 
+def get_printer(AtomicNode=AtomicNode, UnaryNode=UnaryNode, BinaryNode=BinaryNode, ):
+    class PrintVisitor(object):
+        @visitor.on('node')
+        def visit(self, node, tabs):
+            pass
+
+        @visitor.when(UnaryNode)
+        def visit(self, node, tabs=0):
+            ans = '\t' * tabs + f'\\__<expr> {node.__class__.__name__}'
+            child = self.visit(node.node, tabs + 1)
+            return f'{ans}\n{child}'
+
+        @visitor.when(BinaryNode)
+        def visit(self, node, tabs=0):
+            ans = '\t' * tabs + f'\\__<expr> {node.__class__.__name__} <expr>'
+            left = self.visit(node.left, tabs + 1)
+            right = self.visit(node.right, tabs + 1)
+            return f'{ans}\n{left}\n{right}'
+
+        @visitor.when(AtomicNode)
+        def visit(self, node, tabs=0):
+            return '\t' * tabs + f'\\__ {node.__class__.__name__}: {node.lex}'
+
+    printer = PrintVisitor()
+    return (lambda ast: printer.visit(ast))
 
 
-#################
-#Nuevos nodos ##
-################
-class ProgramNode(Node):
-    def __init__(self, statements):
-        self.statements = statements
+###############################
+# Añadir
+##############################
+
+class ConstantNumberNode(Node):
+    def __init__(self, lex):
+        self.lex = lex
+        self.value = float(lex)
+
+    def evaluate(self):
+        # Insert your code here!!!
+        return self.value
 
 
-class ParameterNode(Node):
-    pass
+class BinaryNode(Node):
+    def __init__(self, left: Node, right: Node):
+        self.left = left
+        self.right = right
 
-class ProtocolMethodNode(Node):
-    pass
+    def evaluate(self):
+        ## Insert your code here!!!
+        # lvalue = ???
+        # rvalue = ???
+        lvalue = self.left.evaluate()
+        rvalue = self.right.evaluate()
+        return self.operate(lvalue, rvalue)
 
-class StatementNode(Node):
-    pass
+    @staticmethod
+    def operate(lvalue, rvalue):
+        raise NotImplementedError()
 
 
-class ExpressionNode(StatementNode):
-    pass
+class PlusNode(BinaryNode):
+    @staticmethod
+    def operate(lvalue, rvalue):
+        # Insert your code here!!!
+        return lvalue + rvalue
 
-class TypeNode(StatementNode):
-    pass
+
+class MinusNode(BinaryNode):
+    @staticmethod
+    def operate(lvalue, rvalue):
+        # Insert your code here!!!
+        return lvalue - rvalue
 
 
-class ProtocolNode(StatementNode):
-    pass
+class StarNode(BinaryNode):
+    @staticmethod
+    def operate(lvalue, rvalue):
+        # Insert your code here!!!
+        return lvalue * rvalue
 
-class ExpressionNode(StatementNode):
-    pass
 
-## Menor priopridad
+class DivNode(BinaryNode):
+    @staticmethod
+    def operate(lvalue, rvalue):
+        # Insert your code here!!!
+        return lvalue / rvalue
 
-class LetNode(SimpleExpressionNode):
-    pass
 
-class IfElseExpression(SimpleExpressionNode):
-    pass
+class EqualNode(BinaryNode):
+    @staticmethod
+    def operate(lvalue, rvalue):
+        return lvalue == rvalue
 
-class DestructiveExpression(SimpleExpressionNode):
-    pass
-
-class whileNode(SimpleExpressionNode):
-    pass
-
-class forNode(SimpleExpressionNode):
-    pass
-
-class newNode(SimpleExpressionNode):
-    pass
-
-#Operaciones
-
-class OrAndExpression(SimpleExpressionNode):
-    pass
-
-class NotExpression(SimpleExpressionNode):
-    pass
-
-class ComparationExpression(SimpleExpressionNode):
-    pass
-
-class IsExpression(SimpleExpressionNode):
-    pass
-
-class StringConcatenationNode(SimpleExpressionNode):
-    pass
-
-class AritmethicExpression(SimpleExpressionNode):
-    pass
-
-##Prioridad alta
-
-class NumberNode(SimpleExpressionNode):
-    pass
-
-class StringNode(SimpleExpressionNode):
-    pass
-
-class BooleanNode(SimpleExpressionNode):
-    pass
-
-class Variable(SimpleExpressionNode):
-    pass
-
-class FunctionCallNode(SimpleExpressionNode):
-    pass
-
-class ClassAtributeCallNode(SimpleExpressionNode):
-    pass
-
-class ClassFunctionCallNode(SimpleExpressionNode):
-    pass
-
-class ListNode(SimpleExpressionNode):
-    pass
-
-class ImplicitListNode(SimpleExpressionNode):
-    pass
-
-class InexingNode(SimpleExpressionNode):
-    pass
-
-class asNode(SimpleExpressionNode):
-    pass
