@@ -4,7 +4,6 @@ from abc import ABC, abstractmethod
 
 class Node:
 
-   
     def evaluate(self):
         raise NotImplementedError()
 
@@ -46,7 +45,6 @@ class BinaryNode(Node):
 
 
 def get_printer(AtomicNode=AtomicNode, UnaryNode=UnaryNode, BinaryNode=BinaryNode, ):
-
     class PrintVisitor(object):
         @visitor.on('node')
         def visit(self, node, tabs):
@@ -136,5 +134,4 @@ class DivNode(BinaryNode):
 class EqualNode(BinaryNode):
     @staticmethod
     def operate(lvalue, rvalue):
-
         return lvalue == rvalue
