@@ -1,12 +1,13 @@
 from cmp.pycompiler import *  # Gramar Terminal NonTerminal Token
 from cmp.cil import *
+from Hulk.AST_Semantic.Ast import *
 
 
 class Gramarlr1:
     def __init__(self) -> None:
         G = Grammar()
         self.Grammar = G
-        self.EOF=self.Grammar.EOF
+        self.EOF = self.Grammar.EOF
         # NonTerminal
         Program, Expression, Statement = G.NonTerminals('Program Expression Statement')
 
@@ -84,10 +85,30 @@ class Gramarlr1:
 
         number, string, false, true, = G.Terminals("numbers string false true")
 
+        identifier = G.Terminal("id")
+
+        arguments = G.Terminal("arguments")
+
+        object_exp = G.Terminal("object_exp")
+
+        period = G.Terminal("period")
+
+        lbrack, list_,rbrack=G.Terminals("lbrack list rbrack")
+
+        print_ , lparen , simple_expression , rparen=G.Terminals("print lparen simple_expression rparen")
+
+        sin,cos,tan,sqrt,  exp,log,rand=G.Terminals("sin cos tan sqrt exp log rand")
+
+        list_comprehension=G.Terminals("list_comprehension")
+
+        in_=G.Terminal("in")
+
+
+
 
 
         # Production
-        """
+
         Program %= Expression, lambda h, s: ProgramNode(s[1])
         Program %= Statement + Program, lambda h, s: s[1], lambda h, s: lambda h, s: s[2]
 
@@ -113,9 +134,7 @@ class Gramarlr1:
         TypeDef %= inherints + name + ClassBlock, lambda h, s: s[3]
         TypeDef %= opar + ParameterList + cpar + ClassBlock, lambda h, s: s[2], lambda h, s: s[4]
         TypeDef %= opar + ParameterList + cpar + inherints + name + ClassBlock, lambda h, s: s[2], lambda h, s: s[6]
-        TypeDef %= opar + ParameterList + cpar + inherints + name + opar + ArgumentList + cpar + ClassBlock, lambda h,
-                                                                                                                    s: \
-        s[2], lambda h, s: s[7], lambda h, s: s[9]
+        TypeDef %= opar + ParameterList + cpar + inherints + name + opar + ArgumentList + cpar + ClassBlock, lambda h, s: s[2], lambda h, s: s[7], lambda h, s: s[9]
         TypeDef %= inherints + name + opar + ArgumentList + cpar + ClassBlock, lambda h, s: s[4], lambda h, s: s[6]
 
         ClassBlock %= ()
@@ -150,7 +169,7 @@ class Gramarlr1:
         SimpleExpression %= iff + IfBlock + ElseBlock, lambda h, s: s[2], lambda h, s: s[3]
         SimpleExpression %= whilee + opar + SimpleExpression + cpar + Expression, lambda h, s: s[3], lambda h, s: s[5]
         SimpleExpression %= forr + opar + name + inn + SimpleExpression + cpar + Expression, lambda h, s: s[5], lambda \
-            h, s: s[7]
+                h, s: s[7]
         SimpleExpression %= neww + name + Arguments, lambda h, s: s[3]
         SimpleExpression %= Disjuntion, lambda h, s: s[1]
 
@@ -236,9 +255,6 @@ class Gramarlr1:
 
         list_ %= simple_expression, lambda h, s: s[1]
         list_ %= simple_expression + comma + list_, lambda h, s: ListNode([s[1]] + s[3])  # duda
-        list_ %= simple_expression + list_comprehension + identifier + in_ + simple_expression, lambda h,
-                                                                                                       s: ImplicitListNode(
-            s[1], s[3], s[5])
-        """
+        list_ %= simple_expression + list_comprehension + identifier + in_ + simple_expression, lambda h, s: ImplicitListNode( s[1], s[3], s[5])
 
 

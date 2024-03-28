@@ -35,6 +35,12 @@ class ProtocolNode(StatementNode):
 class ExpressionNode(StatementNode):
     pass
 
+
+class  ExpressionBlockNode(ExpressionNode):
+    pass
+class SimpleExpressionNode(ExpressionNode):
+    pass
+
 ## Menor priopridad
 
 class LetNode(SimpleExpressionNode):
