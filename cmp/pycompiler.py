@@ -492,6 +492,16 @@ class Grammar():
 
         self.symbDict = {'$': self.EOF}
 
+    def Get_Terminal(name:str, self):
+        """
+        Este método permite obtener un no terminal de la gramática a partir de su nombre.
+        :param name: Nombre del no terminal a buscar
+        :return: No terminal con el nombre dado
+        """
+        for non_terminal in self.nonTerminals:
+            if non_terminal.Name == name:
+                return non_terminal
+        raise Exception("No se encontro el  terminal")
     def NonTerminal(self, name: str, startSymbol: bool = False):
         """
 

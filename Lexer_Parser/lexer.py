@@ -1,12 +1,8 @@
-try:
-    from pycompiler import Token
-    from automata import State
-    from regx import RegexSimple
-except:
-    from cmp.pycompiler import Token
-    from Lexer_Parser.automata import State
-    from Lexer_Parser.regx import RegexSimple
 
+from cmp.pycompiler import Token
+from Lexer_Parser.automata import State
+from Lexer_Parser.regx import RegexSimple
+from Lexer_Parser.Regex import Hulk_Regex
 class Lexer:
     def __init__(self, table, eof):
         """
@@ -83,3 +79,9 @@ class Lexer:
     
     def __call__(self, text):
         return [ Token(lex, ttype, row, col) for lex, ttype, row, col in self._tokenize(text) ]
+
+
+
+
+def Hulk_Lexer():
+    return Lexer()

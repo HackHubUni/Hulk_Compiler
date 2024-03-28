@@ -1,7 +1,10 @@
 import cmp.visitor as visitor
+from abc import ABC, abstractmethod
 
 
-class Node:
+class Node(ABC):
+
+   
     def evaluate(self):
         raise NotImplementedError()
 
