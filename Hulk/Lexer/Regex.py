@@ -1,19 +1,37 @@
 from Hulk.Grammar.gramarlr1 import Gramarlr1
+from cmp.pycompiler import Terminal
 
 # Get the Hulk Grammar
 gramar = Gramarlr1()
 # Get the Terminals
 s = gramar.Grammar.Get_Terminal
+
+# the result
+regex_list: [(Terminal, str)] = []
 # Get in vars the Terminals
+#for
 for_exp = s('for')
+regex_list.append((for_exp, "for"))
+#let
 let = s('let')
+regex_list.append((let, "let"))
+#if
 if_exp = s('if')
+regex_list.append((if_exp, "if"))
+#else
 else_exp = s('else')
+regex_list.append((else_exp, "else"))
+#elif
 elif_exp = s('elif')
+regex_list.append((elif_exp, "elif"))
 while_exp = s('while')
+regex_list.append((while_exp, "while"))
+#function
 function = s('function')
-"""
+regex_list.append((function, "function"))
+#Print
 print_exp = s('print')
+regex_list.append((print_exp, "print"))
 pi = s('pi')
 e = s('e')
 new = s('new')
@@ -43,18 +61,54 @@ lesst = s('<')
 greatt = s('>')
 lequal = s('<=')
 gequal = s('>=')
+
+#o_par
 lparen = s('(')
+regex_list.append((lparen, "("))
+# c_par
 rparen = s(')')
+regex_list.append((rparen, ")"))
+
+#square_o
 lbrack = s('[')
+regex_list.append((lbrack, "["))
+
+#square_c
 rbrack = s(']')
+regex_list.append((rbrack, "]"))
+
+# curly_o
 lbrace = s('{')
+regex_list.append((lbrace, "{"))
+
+# curly_c
 rbrace = s('}')
+regex_list.append((rbrace, "}"))
+
+#comma
 comma = s(',')
+regex_list.append((comma, ","))
+
 period = s('.')
+
+#colon
 colon = s(':')
+regex_list.append((colon, ":"))
+
+#semicolon
 semicolon = s(';')
+regex_list.append((semicolon, ";"))
+
 arrow = s('->')
+
+#rarrow
 darrow = s('=>')
+regex_list.append((darrow, "=>"))
+
+#given
+given = s('||')
+regex_list.append((given, "||"))
+
 and_exp = s('&')
 or_exp = s('|')
 not_exp = s('!')
@@ -64,9 +118,14 @@ destruct = s(':=')
 concat = s('@')
 is_exp = s('is')
 as_exp = s('as')
-"""
+identifier = s("identifier")
 number = s("numbers")
 string = s("string")
+
+
+
+
+
 
 ###############
 # Hulk Regex  #
@@ -79,12 +138,6 @@ Hulk_Regex = [
     (elif_exp, "elif"),
     (while_exp, "while"),
     (function, "function"),
-
-    (number, "([0..9]+\.)?[0..9]+"),
-    (string, "\"((\\\\\")|(\\A))*\"")
-]
-# Next aft funtion in regex
-"""
     (print_exp, "print"),
     (pi, "pi"),
     (e, "e"),
@@ -117,10 +170,10 @@ Hulk_Regex = [
     (gequal, ">="),
     (lparen, "\("),
     (rparen, "\)"),
-    (lbrack, "\["),
-    (rbrack, "\]"),
-    (lbrace, "{"),
-    (rbrace, "}"),
+    (lbrack, "\["),  #
+    (rbrack, "\]"),  #
+    (lbrace, "{"),  #
+    (rbrace, "}"),  #
     (comma, ","),
     (period, "\."),
     (colon, ":"),
@@ -136,8 +189,14 @@ Hulk_Regex = [
     (concat, "@"),
     (is_exp, "is"),
     (as_exp, "as"),
-    # (identifier, "([a..z]|[A..Z]|_)([a..z]|[A..Z]|_|[0..9])*"),
-"""
+    (identifier, "([a..z]|[A..Z]|_)([a..z]|[A..Z]|_|[0..9])*"),
+    (number, "([0..9]+\.)?[0..9]+"),
+    (string, "\"((\\\\\")|(\\A))*\"")
+]
+
+
+# Next aft funtion in regex
+
 
 def Get_Hulk_Regex():
     """
