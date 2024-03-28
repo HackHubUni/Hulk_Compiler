@@ -80,7 +80,7 @@ class Gramarlr1:
         #
         # #productions
         #
-        # # ------esto no me queda muy claro
+
 
         program %= statement_list + exp + semi_colon, lambda h, s: ProgramNode(s[1], [s[2]])
         program %= statement_list + exp, lambda h,s: ProgramNode(s[1], [s[2]])
@@ -91,10 +91,7 @@ class Gramarlr1:
         statement_list %= type_dec + statement_list, lambda h, s: [s[1]] + s[2]
         statement_list %= def_func + statement_list, lambda h, s: [s[1]] + s[2]
         statement_list %= G.Epsilon, lambda h,s: []
-        # statement %= exp + semi_colon, lambda h, s: s[1]
-        # # statement %= exp, lambda h, s: s[1]
-        # statement %= exp_block, lambda h, s: s[1]
-        # statement %= exp_block + semi_colon, lambda h, s: s[1]
+
 
         exp %= while_block, lambda h, s: s[1]
         exp %= for_exp, lambda h, s: s[1]
@@ -130,7 +127,7 @@ class Gramarlr1:
 
         def_method %= idx + opar + param_list + cpar + colon + possible_types, lambda h, s: MethodDeclaration(s[1], s[3], s[6])
 
-        # method_declarations %= G.Epsilon, lambda h,s: []
+
         method_declarations %= def_method + semi_colon, lambda h, s: [s[1]]
         method_declarations %= def_method + semi_colon + method_declarations, lambda h, s: [s[1]] + s[3]
 
