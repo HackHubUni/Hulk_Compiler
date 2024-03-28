@@ -1,141 +1,111 @@
 import cmp.visitor as visitor
 from abc import ABC, abstractmethod
-
-
-import cmp.visitor as visitor
-from abc import ABC, abstractmethod
-
-
 class Node:
 
+
     def evaluate(self):
         raise NotImplementedError()
 
 
-class AtomicNode(Node):
-    def __init__(self, lex):
-        self.lex = lex
-
-    def __str__(self):
-        return str(self.lex)
+class ProgramNode(Node):
+    def __init__(self, statements):
+        self.statements = statements
 
 
-class UnaryNode(Node):
-    def __init__(self, node):
-        self.node = node
+class ParameterNode(Node):
+    pass
 
-    def evaluate(self):
-        value = self.node.evaluate()
-        return self.operate(value)
+class ProtocolMethodNode(Node):
+    pass
 
-    @staticmethod
-    def operate(value):
-        raise NotImplementedError()
+class StatementNode(Node):
+    pass
 
 
-class BinaryNode(Node):
-    def __init__(self, left, right):
-        self.left = left
-        self.right = right
+class ExpressionNode(StatementNode):
+    pass
 
-    def evaluate(self):
-        lvalue = self.left.evaluate()
-        rvalue = self.right.evaluate()
-        return self.operate(lvalue, rvalue)
-
-    @staticmethod
-    def operate(lvalue, rvalue):
-        raise NotImplementedError()
+class TypeNode(StatementNode):
+    pass
 
 
-def get_printer(AtomicNode=AtomicNode, UnaryNode=UnaryNode, BinaryNode=BinaryNode, ):
-    class PrintVisitor(object):
-        @visitor.on('node')
-        def visit(self, node, tabs):
-            pass
+class ProtocolNode(StatementNode):
+    pass
 
-        @visitor.when(UnaryNode)
-        def visit(self, node, tabs=0):
-            ans = '\t' * tabs + f'\\__<expr> {node.__class__.__name__}'
-            child = self.visit(node.node, tabs + 1)
-            return f'{ans}\n{child}'
+class ExpressionNode(StatementNode):
+    pass
 
-        @visitor.when(BinaryNode)
-        def visit(self, node, tabs=0):
-            ans = '\t' * tabs + f'\\__<expr> {node.__class__.__name__} <expr>'
-            left = self.visit(node.left, tabs + 1)
-            right = self.visit(node.right, tabs + 1)
-            return f'{ans}\n{left}\n{right}'
+## Menor priopridad
 
-        @visitor.when(AtomicNode)
-        def visit(self, node, tabs=0):
-            return '\t' * tabs + f'\\__ {node.__class__.__name__}: {node.lex}'
+class LetNode(SimpleExpressionNode):
+    pass
 
-    printer = PrintVisitor()
-    return (lambda ast: printer.visit(ast))
+class IfElseExpression(SimpleExpressionNode):
+    pass
 
+class DestructiveExpression(SimpleExpressionNode):
+    pass
 
-###############################
-# Añadir
-##############################
+class whileNode(SimpleExpressionNode):
+    pass
 
-class ConstantNumberNode(Node):
-    def __init__(self, lex):
-        self.lex = lex
-        self.value = float(lex)
+class forNode(SimpleExpressionNode):
+    pass
 
-    def evaluate(self):
-        # Insert your code here!!!
-        return self.value
+class newNode(SimpleExpressionNode):
+    pass
 
+#Operaciones
 
-class BinaryNode(Node):
-    def __init__(self, left: Node, right: Node):
-        self.left = left
-        self.right = right
+class OrAndExpression(SimpleExpressionNode):
+    pass
 
-    def evaluate(self):
-        ## Insert your code here!!!
-        # lvalue = ???
-        # rvalue = ???
-        lvalue = self.left.evaluate()
-        rvalue = self.right.evaluate()
-        return self.operate(lvalue, rvalue)
+class NotExpression(SimpleExpressionNode):
+    pass
 
-    @staticmethod
-    def operate(lvalue, rvalue):
-        raise NotImplementedError()
+class ComparationExpression(SimpleExpressionNode):
+    pass
 
+class IsExpression(SimpleExpressionNode):
+    pass
 
-class PlusNode(BinaryNode):
-    @staticmethod
-    def operate(lvalue, rvalue):
-        # Insert your code here!!!
-        return lvalue + rvalue
+class StringConcatenationNode(SimpleExpressionNode):
+    pass
 
+class AritmethicExpression(SimpleExpressionNode):
+    pass
 
-class MinusNode(BinaryNode):
-    @staticmethod
-    def operate(lvalue, rvalue):
-        # Insert your code here!!!
-        return lvalue - rvalue
+##Prioridad alta
 
+class NumberNode(SimpleExpressionNode):
+    pass
 
-class StarNode(BinaryNode):
-    @staticmethod
-    def operate(lvalue, rvalue):
-        # Insert your code here!!!
-        return lvalue * rvalue
+class StringNode(SimpleExpressionNode):
+    pass
 
+class BooleanNode(SimpleExpressionNode):
+    pass
 
-class DivNode(BinaryNode):
-    @staticmethod
-    def operate(lvalue, rvalue):
-        # Insert your code here!!!
-        return lvalue / rvalue
+class Variable(SimpleExpressionNode):
+    pass
 
+class FunctionCallNode(SimpleExpressionNode):
+    pass
 
-class EqualNode(BinaryNode):
-    @staticmethod
-    def operate(lvalue, rvalue):
-        return lvalue == rvalue
+class ClassAtributeCallNode(SimpleExpressionNode):
+    pass
+
+class ClassFunctionCallNode(SimpleExpressionNode):
+    pass
+
+class ListNode(SimpleExpressionNode):
+    pass
+
+class ImplicitListNode(SimpleExpressionNode):
+    pass
+
+class InexingNode(SimpleExpressionNode):
+    pass
+
+class asNode(SimpleExpressionNode):
+    pass
