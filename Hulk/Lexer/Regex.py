@@ -1,16 +1,18 @@
-from gramarlr1 import Gramarlr1
+from Hulk.Grammar.gramarlr1 import Gramarlr1
+
 # Get the Hulk Grammar
 gramar = Gramarlr1()
-#Get the Terminals
+# Get the Terminals
 s = gramar.Grammar.Get_Terminal
-#Get in vars the Terminals
+# Get in vars the Terminals
 for_exp = s('for')
 let = s('let')
 if_exp = s('if')
-else_exp= s('else')
+else_exp = s('else')
 elif_exp = s('elif')
 while_exp = s('while')
 function = s('function')
+"""
 print_exp = s('print')
 pi = s('pi')
 e = s('e')
@@ -62,26 +64,37 @@ destruct = s(':=')
 concat = s('@')
 is_exp = s('is')
 as_exp = s('as')
+"""
+number = s("numbers")
+string = s("string")
 
-
+###############
+# Hulk Regex  #
+###############
 Hulk_Regex = [
     (for_exp, "for"),
     (let, "let"),
     (if_exp, "if"),
-    (else_, "else"),
-    (elif_, "elif"),
-    (while_, "while"),
+    (else_exp, "else"),
+    (elif_exp, "elif"),
+    (while_exp, "while"),
     (function, "function"),
-    (print_, "print"),
+
+    (number, "([0..9]+\.)?[0..9]+"),
+    (string, "\"((\\\\\")|(\\A))*\"")
+]
+# Next aft funtion in regex
+"""
+    (print_exp, "print"),
     (pi, "pi"),
     (e, "e"),
     (new, "new"),
     (inherits, "inherits"),
     (protocol, "protocol"),
-    (type_, "type"),
-    (self_, "self"),
-    (in_, "in"),
-    (range_, "range"),
+    (type_exp, "type"),
+    (self_exp, "self"),
+    (in_exp, "in"),
+    (range_exp, "range"),
     (true, "true"),
     (false, "false"),
     (extends, "extends"),
@@ -114,16 +127,20 @@ Hulk_Regex = [
     (semicolon, ";"),
     (arrow, "->"),
     (darrow, "=>"),
-    (and_, "&"),
-    (or_, "\|"),
-    (not_, "\!"),
+    (and_exp, "&"),
+    (or_exp, "\|"),
+    (not_exp, "\!"),
     (modulus, "%"),
     (power, "^"),
     (destruct, ":="),
     (concat, "@"),
-    (is_, "is"),
-    (as_, "as"),
-    (identifier, "([a..z]|[A..Z]|_)([a..z]|[A..Z]|_|[0..9])*"),
-    (number, "([0..9]+\.)?[0..9]+"),
-    (string, "\"((\\\\\")|(\\A))*\"")
-]
+    (is_exp, "is"),
+    (as_exp, "as"),
+    # (identifier, "([a..z]|[A..Z]|_)([a..z]|[A..Z]|_|[0..9])*"),
+"""
+
+def Get_Hulk_Regex():
+    """
+    Retorna las Regex del Hulk además del EOF de la gramática
+    """
+    return Hulk_Regex, gramar.EOF

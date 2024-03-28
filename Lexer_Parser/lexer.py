@@ -2,7 +2,8 @@
 from cmp.pycompiler import Token
 from Lexer_Parser.automata import State
 from Lexer_Parser.regx import RegexSimple
-from Lexer_Parser.Regex import Hulk_Regex
+
+
 class Lexer:
     def __init__(self, table, eof):
         """

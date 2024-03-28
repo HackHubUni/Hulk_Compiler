@@ -310,7 +310,6 @@ class Epsilon(Terminal, Sentence):
     def __init__(self, grammar):
         super().__init__('epsilon', grammar)
 
-
     def __str__(self):
         return "e"
 
@@ -366,7 +365,6 @@ class Production(object):
     Right = None
 
     def __init__(self, nonTerminal, sentence):
-
         self.Left = nonTerminal
         """
          Poder acceder la cabecera (parte izquierda) y cuerpo (parte derecha) de cada producción a través de los campos `Left` y `Right` respectivamente.
@@ -377,7 +375,6 @@ class Production(object):
         """
 
     def __str__(self):
-
         return '%s := %s' % (self.Left, self.Right)
 
     def __repr__(self):
@@ -429,7 +426,8 @@ class AttributeProduction(Production):
     >
     > La función `lambda_i`, con `i` entre 1 y `n`, computa los atributos heredados de la i-ésima ocurrencia de símbolo en la producción. La evaluación de dicha función produce el valor de `inherited[i]`. El valor de `inherited[0]` se obtiene como el atributo que heredó la instancia concreta del símbolo en la cabecera antes de comenzar a aplicar la producción.
     """
-    def __init__(self, nonTerminal:NonTerminal, sentence:Sentence, attributes):
+
+    def __init__(self, nonTerminal: NonTerminal, sentence: Sentence, attributes):
         """
          - Un no terminal como cabecera. Accesible a través del campo `Left`.
          - Una oración como cuerpo. Accesible a través del campo `Right`.
@@ -453,7 +451,6 @@ class AttributeProduction(Production):
     def __iter__(self):
         yield self.Left
         yield self.Right
-
 
     @property
     def IsEpsilon(self):
@@ -492,16 +489,19 @@ class Grammar():
 
         self.symbDict = {'$': self.EOF}
 
-    def Get_Terminal(name:str, self):
+    def Get_Terminal(self,name: str):
         """
         Este método permite obtener un no terminal de la gramática a partir de su nombre.
         :param name: Nombre del no terminal a buscar
         :return: No terminal con el nombre dado
         """
-        for non_terminal in self.nonTerminals:
-            if non_terminal.Name == name:
-                return non_terminal
-        raise Exception("No se encontro el  terminal")
+        if name in self.symbDict:
+            terminal = self.symbDict[name]
+            if terminal in self.terminals:
+                return terminal
+            raise Exception(f"No se encontro el  terminal {name}")
+        raise Exception(f" No se encontro en el diccionario ningun terminal o no-terminal con {name}")
+
     def NonTerminal(self, name: str, startSymbol: bool = False):
         """
 
@@ -741,6 +741,7 @@ class Item:
     def Center(self):
         return Item(self.production, self.pos)
 
+
 class ContainerSet:
     def __init__(self, *values, contains_epsilon=False):
         self.set = set(values)
@@ -797,7 +798,9 @@ class ContainerSet:
     def __eq__(self, other):
         if isinstance(other, set):
             return self.set == other
-        return isinstance(other, ContainerSet) and self.set == other.set and self.contains_epsilon == other.contains_epsilon
+        return isinstance(other,
+                          ContainerSet) and self.set == other.set and self.contains_epsilon == other.contains_epsilon
+
 
 class Token:
     """
@@ -826,6 +829,7 @@ class Token:
     @property
     def is_valid(self):
         return True
+
 
 class SintacticException(Exception):
     pass
