@@ -122,7 +122,10 @@ class NonTerminal(Symbol):
 
             assert len(other) == len(
                 other[0]) + 2, "Debe definirse una, y solo una, regla por cada símbolo de la producción"
-            # assert len(other) == 2, "Tiene que ser una Tupla de 2 elementos (sentence, attribute)"
+
+            #Cuando se atribute
+            #Quitar para no poner None
+            #assert len(other) == 2, "Tiene que ser una Tupla de 2 elementos (sentence, attribute)"
 
             if isinstance(other[0], Symbol) or isinstance(other[0], Sentence):
                 p = AttributeProduction(self, other[0], other[1:])
