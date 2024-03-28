@@ -2,12 +2,15 @@ try:
     from automata import State
     from pycompiler import Grammar, Item, ContainerSet, EOF, SintacticException
     from parserLL1 import compute_first_follows, compute_firsts, compute_follows, compute_local_first
+except:
+    from Lexer_Parser.automata import State
+    from cmp.pycompiler import Grammar, Item, ContainerSet, EOF, SintacticException
+    from Lexer_Parser.parserLL1 import compute_first_follows, compute_firsts, compute_follows, compute_local_first
 
-
-
-from pandas import DataFrame
-
-
+try:
+    from pandas import DataFrame
+except:
+    pass
 
 def build_LR0_automaton(G: Grammar):
     '''
@@ -28,14 +31,14 @@ def build_LR0_automaton(G: Grammar):
 
     automaton = State(start_item, True)
 
-    pending = [start_item]
-    visited = {start_item: automaton}
+    pending = [ start_item ]
+    visited = { start_item: automaton }
 
     while pending:
         current_item = pending.pop()
         if current_item.IsReduceItem:
             continue
-
+                
         kernel = Item(current_item.production, current_item.pos + 1)
         kernel_state = State(kernel, True)
         visited[kernel] = kernel_state
@@ -49,29 +52,28 @@ def build_LR0_automaton(G: Grammar):
                     visited[no_kernel] = State(no_kernel, True)
                     pending.append(no_kernel)
                 no_kernels.append(no_kernel)
-
-        current_state = visited[current_item]
-
+        
+        current_state = visited[current_item]        
+                
         current_state.add_transition(next_symbol.Name, visited[kernel])
         pending.append(kernel)
         for no_kernel in no_kernels:
-            current_state.add_epsilon_transition(visited[no_kernel])
+            current_state.add_epsilon_transition(visited[no_kernel])            
 
     return automaton
-
 
 class ShiftReduceParser:
     SHIFT = 'SHIFT'
     REDUCE = 'REDUCE'
     OK = 'OK'
-
+    
     def __init__(self, G: Grammar, verbose=False):
         self.G = G
         self.verbose = verbose
         self.action = {}
         self.goto = {}
         self._build_parsing_table()
-
+    
     def _build_parsing_table(self):
         raise NotImplementedError()
 
@@ -81,17 +83,18 @@ class ShiftReduceParser:
         table[key] = value
 
     def __call__(self, w):
-        stack = [0]
+        stack = [ 0 ]
         cursor = 0
         output = []
         operations = []
-        count = 1
+        oper=[]
+        count= 1
         while True:
             state = stack[-1]
             lookahead = w[cursor]
             if self.verbose: print(stack, '<---||--->', w[cursor:], count)
-            count += 1
-
+            count+=1
+                            
             lookahead = lookahead.token_type.Name
             if (state, lookahead) not in self.action.keys():
                 ##########################TODO###########################
@@ -107,11 +110,11 @@ class ShiftReduceParser:
                 err += f'en la linea {token.row} y columna {token.col}.\n'
                 if len(desire) > 0:
                     err += 'Se esperaba:\n'
-                    err += desire
+                    err +=  desire
                 raise SintacticException(err)
-
+            
             action, tag = self.action[state, lookahead]
-
+            
             # SHIFT
             if action == ShiftReduceParser.SHIFT:
                 stack.append(lookahead)
@@ -135,10 +138,9 @@ class ShiftReduceParser:
             elif action == ShiftReduceParser.OK:
                 return output, operations
 
-            # INVALID
+            # INVALID 
             else:
                 raise Exception('Invalid')
-
 
 class SLR1Parser(ShiftReduceParser):
 
@@ -146,7 +148,7 @@ class SLR1Parser(ShiftReduceParser):
         G = self.G.AugmentedGrammar(True)
         firsts = compute_firsts(G)
         follows = compute_follows(G, firsts)
-
+        
         automaton = build_LR0_automaton(G).to_deterministic()
         for i, node in enumerate(automaton):
             if self.verbose: print(i, '\t', '\n\t '.join(str(x) for x in node.state), '\n')
@@ -155,32 +157,32 @@ class SLR1Parser(ShiftReduceParser):
         for node in automaton:
             idx = node.idx
             for state in node.state:
-                item = state.state
+                item = state.state                
 
                 if not item.IsReduceItem:
-                    symbol = item.NextSymbol
-                    if symbol.IsTerminal:
+                    symbol =  item.NextSymbol
+                    if symbol.IsTerminal:                        
                         node_transition = node.transitions.get(symbol.Name, None)
                         if node_transition is not None:
                             assert len(node_transition) == 1, 'Automata No Determinista.'
                             self._register(self.action,
-                                           (idx, item.NextSymbol.Name),
-                                           (ShiftReduceParser.SHIFT, node_transition[0].idx))
+                                        (idx, item.NextSymbol.Name),
+                                        (ShiftReduceParser.SHIFT, node_transition[0].idx))
                     else:
                         node_transition = node.transitions.get(symbol.Name, None)
                         if node_transition is not None:
                             assert len(node_transition) == 1, 'Automata no determinista.'
                             self._register(self.goto,
-                                           (idx, item.NextSymbol.Name),
-                                           (node_transition[0].idx))
+                                        (idx, item.NextSymbol.Name),
+                                        (node_transition[0].idx))                    
                 else:
                     left, right = production = item.production
                     k = G.Productions.index(production)
                     if left.Name == G.startSymbol.Name:
                         k = G.Productions.index(item.production)
                         self._register(self.action,
-                                       (idx, G.EOF.Name),
-                                       (ShiftReduceParser.OK, k))
+                            (idx, G.EOF.Name),
+                            (ShiftReduceParser.OK, k))                    
                     for terminal in follows[left]:
                         ################TODO##############
                         # Mejorar la actualizacion de OK #
@@ -188,16 +190,15 @@ class SLR1Parser(ShiftReduceParser):
                         if terminal == G.EOF and left.Name == G.startSymbol.Name:
                             continue
                         self._register(self.action,
-                                       (idx, terminal.Name),
-                                       (ShiftReduceParser.REDUCE, k))
-
+                                    (idx, terminal.Name),
+                                    (ShiftReduceParser.REDUCE, k))
 
 def expand(item, firsts):
     '''
     Esta recibe un item LR(1) y devuelve el conjunto de items
     que sugiere incluir (directamente) debido a la presencia de un `.`
     delante de un no terminal.
-
+    
     Parametros
     --------------
         `item`: Item LR(1) a expandir
@@ -212,19 +213,18 @@ def expand(item, firsts):
     next_symbol = item.NextSymbol
     if next_symbol is None or not next_symbol.IsNonTerminal:
         return []
-
+    
     lookaheads = ContainerSet()
-
+     
     for preview in item.Preview():
-        local_firsts = compute_local_first(firsts, preview)
+        local_firsts= compute_local_first(firsts, preview)
         for production in next_symbol.productions:
             new_item = Item(production, 0, local_firsts)
             lookaheads.add(new_item)
-
+    
     assert not lookaheads.contains_epsilon
-
+    
     return list(lookaheads)
-
 
 def compress(items):
     '''
@@ -234,7 +234,7 @@ def compress(items):
     Parametros:
     ----------
         `items`: Iterable de `Item` (representaciones de Items LR(1))
-
+    
     Retorna:
     --------
         `items_compress`: Lista de Items ya comprimidos
@@ -249,9 +249,8 @@ def compress(items):
         except KeyError:
             centers[center] = lookaheads = set()
         lookaheads.update(item.lookaheads)
-
-    return {Item(x.production, x.pos, set(lookahead)) for x, lookahead in centers.items()}
-
+    
+    return { Item(x.production, x.pos, set(lookahead)) for x, lookahead in centers.items() }
 
 def closure_lr1(items, firsts):
     '''
@@ -269,22 +268,21 @@ def closure_lr1(items, firsts):
         `closure`: Colecci'on de items resultantes comprimidos
     '''
     closure = ContainerSet(*items)
-
+    
     changed = True
     while changed:
         changed = False
-
+        
         new_items = ContainerSet()
-
+        
         for item in closure:
             if not item.IsReduceItem and item.NextSymbol.IsNonTerminal:
                 exp = expand(item, firsts)
                 new_items.extend(exp)
 
         changed = closure.update(new_items)
-
+        
     return compress(closure)
-
 
 def goto_lr1(items, symbol, firsts=None, just_kernel=False):
     '''
@@ -299,7 +297,7 @@ def goto_lr1(items, symbol, firsts=None, just_kernel=False):
         `symbol`: Simbolo por el que se quiere realizar la transicion
         `firsts`: Firsts de la gramatica. Solo especificarlo si `just_kernel=True`
         `just_kernel`: Para calcular solamente el conjunto de items kernels
-
+    
     Retorna
     ----------
         `new_items`: Conjunto de Items a los que se puede llegar mediante el simbolo
@@ -308,7 +306,6 @@ def goto_lr1(items, symbol, firsts=None, just_kernel=False):
     assert just_kernel or firsts is not None, '`firsts` must be provided if `just_kernel=False`'
     items = frozenset(item.NextItem() for item in items if item.NextSymbol == symbol)
     return items if just_kernel else closure_lr1(items, firsts)
-
 
 def build_LR1_automaton(G):
     '''
@@ -326,26 +323,26 @@ def build_LR1_automaton(G):
     '''
 
     assert len(G.startSymbol.productions) == 1, 'Grammar must be augmented'
-
+    
     firsts = compute_firsts(G)
     firsts[G.EOF] = ContainerSet(G.EOF)
-
+    
     start_production = G.startSymbol.productions[0]
     start_item = Item(start_production, 0, lookaheads=(G.EOF,))
     start = frozenset([start_item])
-
+    
     closure = closure_lr1(start, firsts)
     automaton = State(frozenset(closure), True)
-
-    pending = [start]
-    visited = {start: automaton}
-
+    
+    pending = [ start ]
+    visited = { start: automaton }
+    
     while pending:
         current = pending.pop()
         current_state = visited[current]
-
+        
         for symbol in G.terminals + G.nonTerminals:
-
+                       
             goto = frozenset(goto_lr1(current_state.state, symbol, firsts))
             if len(goto) == 0:
                 continue
@@ -355,11 +352,10 @@ def build_LR1_automaton(G):
                 pending.append(goto)
             else:
                 next_state = visited[goto]
-
+            
             current_state.add_transition(symbol.Name, next_state)
-
+        
     return automaton
-
 
 class LR1Parser(ShiftReduceParser):
     '''
@@ -368,7 +364,7 @@ class LR1Parser(ShiftReduceParser):
 
     def _build_parsing_table(self):
         G = self.G.AugmentedGrammar(True)
-
+        
         automaton = build_LR1_automaton(G)
         for i, node in enumerate(automaton):
             if self.verbose: print(i, '\t', '\n\t '.join(str(x) for x in node.state), '\n')
@@ -379,29 +375,29 @@ class LR1Parser(ShiftReduceParser):
             for item in node.state:
 
                 if not item.IsReduceItem:
-                    symbol = item.NextSymbol
-                    if symbol.IsTerminal:
+                    symbol =  item.NextSymbol
+                    if symbol.IsTerminal:                        
                         node_transition = node.transitions.get(symbol.Name, None)
                         if node_transition is not None:
                             assert len(node_transition) == 1, 'Automata No Determinista.'
                             self._register(self.action,
-                                           (idx, item.NextSymbol.Name),
-                                           (ShiftReduceParser.SHIFT, node_transition[0].idx))
+                                        (idx, item.NextSymbol.Name),
+                                        (ShiftReduceParser.SHIFT, node_transition[0].idx))
                     else:
                         node_transition = node.transitions.get(symbol.Name, None)
                         if node_transition is not None:
                             assert len(node_transition) == 1, 'Automata no determinista.'
                             self._register(self.goto,
-                                           (idx, item.NextSymbol.Name),
-                                           (node_transition[0].idx))
+                                        (idx, item.NextSymbol.Name),
+                                        (node_transition[0].idx))                    
                 else:
                     left, right = production = item.production
                     k = G.Productions.index(production)
                     if left.Name == G.startSymbol.Name:
                         k = G.Productions.index(item.production)
                         self._register(self.action,
-                                       (idx, G.EOF.Name),
-                                       (ShiftReduceParser.OK, k))
+                            (idx, G.EOF.Name),
+                            (ShiftReduceParser.OK, k))                    
                     for terminal in item.lookaheads:
                         ################TODO##############
                         # Mejorar la actualizacion de OK #
@@ -409,9 +405,8 @@ class LR1Parser(ShiftReduceParser):
                         if terminal == G.EOF and left.Name == G.startSymbol.Name:
                             continue
                         self._register(self.action,
-                                       (idx, terminal.Name),
-                                       (ShiftReduceParser.REDUCE, k))
-
+                                    (idx, terminal.Name),
+                                    (ShiftReduceParser.REDUCE, k))
 
 def evaluate_reverse_parse(right_parse, operations, tokens):
     if not right_parse or not operations or not tokens:
@@ -444,7 +439,6 @@ def evaluate_reverse_parse(right_parse, operations, tokens):
     assert isinstance(next(tokens).token_type, EOF)
     return stack[0]
 
-
 def encode_value(value):
     try:
         action, tag = value
@@ -452,13 +446,12 @@ def encode_value(value):
             return 'S' + str(tag)
         elif action == ShiftReduceParser.REDUCE:
             return repr(tag)
-        elif action == ShiftReduceParser.OK:
+        elif action ==  ShiftReduceParser.OK:
             return action
         else:
             return value
     except TypeError:
         return value
-
 
 def table_to_dataframe(table):
     d = {}
@@ -467,6 +460,6 @@ def table_to_dataframe(table):
         try:
             d[state][symbol] = value
         except KeyError:
-            d[state] = {symbol: value}
+            d[state] = { symbol: value }
 
     return DataFrame.from_dict(d, orient='index', dtype=str)

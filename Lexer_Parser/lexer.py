@@ -1,14 +1,16 @@
-try:
-    from pycompiler import Token
-    from automata import State
-    from regx import RegexSimple
-except:
-    from tools.pycompiler import Token
-    from tools.automata import State
-    from tools.regx import RegexSimple
+
+from cmp.pycompiler import Token
+from Lexer_Parser.automata import State
+from Lexer_Parser.regx import RegexSimple
+
 
 class Lexer:
     def __init__(self, table, eof):
+        """
+
+        :param table: La tabla tiene que tener (valor, regex) osea es una lista de tuplas
+        :param eof: G.EOF
+        """
         self.eof = eof
         self.regexs = self._build_regexs(table)
         self.automaton = self._build_automaton()
@@ -78,3 +80,9 @@ class Lexer:
     
     def __call__(self, text):
         return [ Token(lex, ttype, row, col) for lex, ttype, row, col in self._tokenize(text) ]
+
+
+
+
+def Hulk_Lexer():
+    return Lexer()

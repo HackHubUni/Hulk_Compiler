@@ -122,7 +122,10 @@ class NonTerminal(Symbol):
 
             assert len(other) == len(
                 other[0]) + 2, "Debe definirse una, y solo una, regla por cada símbolo de la producción"
-            # assert len(other) == 2, "Tiene que ser una Tupla de 2 elementos (sentence, attribute)"
+
+            #Cuando se atribute
+            #Quitar para no poner None
+            #assert len(other) == 2, "Tiene que ser una Tupla de 2 elementos (sentence, attribute)"
 
             if isinstance(other[0], Symbol) or isinstance(other[0], Sentence):
                 p = AttributeProduction(self, other[0], other[1:])
@@ -426,7 +429,8 @@ class AttributeProduction(Production):
     >
     > La función `lambda_i`, con `i` entre 1 y `n`, computa los atributos heredados de la i-ésima ocurrencia de símbolo en la producción. La evaluación de dicha función produce el valor de `inherited[i]`. El valor de `inherited[0]` se obtiene como el atributo que heredó la instancia concreta del símbolo en la cabecera antes de comenzar a aplicar la producción.
     """
-    def __init__(self, nonTerminal:NonTerminal, sentence:Sentence, attributes):
+
+    def __init__(self, nonTerminal: NonTerminal, sentence: Sentence, attributes):
         """
          - Un no terminal como cabecera. Accesible a través del campo `Left`.
          - Una oración como cuerpo. Accesible a través del campo `Right`.
@@ -487,6 +491,19 @@ class Grammar():
         self.EOF = EOF(self)
 
         self.symbDict = {'$': self.EOF}
+
+    def Get_Terminal(self,name: str):
+        """
+        Este método permite obtener un no terminal de la gramática a partir de su nombre.
+        :param name: Nombre del no terminal a buscar
+        :return: No terminal con el nombre dado
+        """
+        if name in self.symbDict:
+            terminal = self.symbDict[name]
+            if terminal in self.terminals:
+                return terminal
+            raise Exception(f"No se encontro el  terminal {name}")
+        raise Exception(f" No se encontro en el diccionario ningun terminal o no-terminal con {name}")
 
     def NonTerminal(self, name: str, startSymbol: bool = False):
         """
@@ -726,3 +743,96 @@ class Item:
 
     def Center(self):
         return Item(self.production, self.pos)
+
+
+class ContainerSet:
+    def __init__(self, *values, contains_epsilon=False):
+        self.set = set(values)
+        self.contains_epsilon = contains_epsilon
+
+    def add(self, value):
+        n = len(self.set)
+        self.set.add(value)
+        return n != len(self.set)
+
+    def extend(self, values):
+        change = False
+        for value in values:
+            change |= self.add(value)
+        return change
+
+    def set_epsilon(self, value=True):
+        last = self.contains_epsilon
+        self.contains_epsilon = value
+        return last != self.contains_epsilon
+
+    def update(self, other):
+        n = len(self.set)
+        self.set.update(other.set)
+        return n != len(self.set)
+
+    def epsilon_update(self, other):
+        return self.set_epsilon(self.contains_epsilon | other.contains_epsilon)
+
+    def hard_update(self, other):
+        return self.update(other) | self.epsilon_update(other)
+
+    def find_match(self, match):
+        for item in self.set:
+            if item == match:
+                return item
+        return None
+
+    def __len__(self):
+        return len(self.set) + int(self.contains_epsilon)
+
+    def __str__(self):
+        return '%s-%s' % (str(self.set), self.contains_epsilon)
+
+    def __repr__(self):
+        return str(self)
+
+    def __iter__(self):
+        return iter(self.set)
+
+    def __nonzero__(self):
+        return len(self) > 0
+
+    def __eq__(self, other):
+        if isinstance(other, set):
+            return self.set == other
+        return isinstance(other,
+                          ContainerSet) and self.set == other.set and self.contains_epsilon == other.contains_epsilon
+
+
+class Token:
+    """
+    Basic token class.
+
+    Parameters
+    ----------
+    lex : str
+        Token's lexeme.
+    token_type : Enum
+        Token's type.
+    """
+
+    def __init__(self, lex, token_type, row=0, col=0):
+        self.lex = lex
+        self.token_type = token_type
+        self.row = row
+        self.col = col
+
+    def __str__(self):
+        return f'{self.token_type}: {self.lex}'
+
+    def __repr__(self):
+        return str(self)
+
+    @property
+    def is_valid(self):
+        return True
+
+
+class SintacticException(Exception):
+    pass
