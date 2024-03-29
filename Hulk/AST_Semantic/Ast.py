@@ -10,23 +10,18 @@ class Node:
 
 
 
-
+#deep 1
 
 class ProgramNode(Node):
     def __init__(self, statement_list,exp):
-        self.exp = exp
-        self.statements_list = statement_list
+
+        self.exp = exp #list
+        self.statements_list = statement_list #list
 
 class StringExpression(Node):
     def __init__(self,string_type, concatenable):
         self.string_type = string_type
         self.concatenable = concatenable# expresion o string a concatenar
-
-class ConstantStringNode(StringExpression):#tienen el string 
-    def __init__(self, string_lex):
-        super().__init__(string_lex, concatenable = None)
-
-
 
 class TypeDeclarationNode(Node):
     def __init__(self, idx, type_body , idx_inherits, type_args):
@@ -34,6 +29,45 @@ class TypeDeclarationNode(Node):
         self.type_body = type_body
         self.idx_inherits = idx_inherits
         self.type_args = type_args
+
+
+
+class InstantiateNode(Node):#new
+    def __init__(self,idx,exp_list):
+        def __init__(self,idx,exp_list):
+            self.idx = idx
+            self.exp_list = exp_list
+
+
+#nodos de llamada
+class CallNode(Node):
+    def __init__(self,idx,exp_list):
+        self.idx = idx
+        self.exp_list = exp_list
+
+
+#deep 2
+
+
+#nodos de expresion
+class BinaryNode(Node):
+    def __init__(self, left, right):
+        self.left = left
+        self.right = right
+
+class UnaryNode(Node):
+    def __init__(self, node):
+        self.node = node
+
+
+
+class ConstantStringNode(StringExpression):#tienen el string 
+    def __init__(self, string_lex):
+        super().__init__(string_lex, concatenable = None)
+
+
+
+
 
 class FuncDeclarationNode:
     def __init__(self,idx,param_list , exp ) -> None:
@@ -49,18 +83,7 @@ class AttrDeclarationNode:# a=b a:b
         self.exp = exp
 
 
-class InstantiateNode(Node):#new
-    def __init__(self,idx,exp_list):
-        def __init__(self,idx,exp_list):
-            self.idx = idx
-            self.exp_list = exp_list
 
-
-#nodos de llamada
-class CallNode(Node):
-    def __init__(self,idx,exp_list):
-        self.idx = idx
-        self.exp_list = exp_list
 class AttrCallNode(CallNode):
     def __init__(self,idx,exp):
         super().__init__(idx,exp)
@@ -78,16 +101,6 @@ class VoidNode(CallNode):#epsilon
     def __init__(self):
         super().__init__(None,None)
         self.value = None
-
-#nodos de expresion
-class BinaryNode(Node):
-    def __init__(self, left, right):
-        self.left = left
-        self.right = right
-
-class UnaryNode(Node):
-    def __init__(self, node):
-        self.node = node
 
 
 
@@ -299,4 +312,7 @@ class NotNode(AtomicNode):
         super().__init__(right)
         self.right = right
 
-
+class PrintNode(AtomicNode):
+    def __init__(self, right):
+        super().__init__(right)
+        self.right = right

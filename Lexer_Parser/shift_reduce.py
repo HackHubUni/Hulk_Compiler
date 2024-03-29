@@ -1,11 +1,7 @@
-try:
-    from automata import State
-    from pycompiler import Grammar, Item, ContainerSet, EOF, SintacticException
-    from parserLL1 import compute_first_follows, compute_firsts, compute_follows, compute_local_first
-except:
-    from Lexer_Parser.automata import State
-    from cmp.pycompiler import Grammar, Item, ContainerSet, EOF, SintacticException
-    from Lexer_Parser.parserLL1 import compute_first_follows, compute_firsts, compute_follows, compute_local_first
+
+from Lexer_Parser.automata import State
+from cmp.pycompiler import Grammar, Item, ContainerSet, EOF, SintacticException,Token
+from Lexer_Parser.parserLL1 import compute_first_follows, compute_firsts, compute_follows, compute_local_first
 
 try:
     from pandas import DataFrame
@@ -82,7 +78,13 @@ class ShiftReduceParser:
         assert key not in table or table[key] == value, 'Shift-Reduce or Reduce-Reduce conflict!!!'
         table[key] = value
 
-    def __call__(self, w):
+    def __call__(self, w:list[Token]):
+        """
+        A method to parse a given list of tokens using a shift-reduce parser.
+        It takes a list of tokens 'w' as input.
+        Returns the parsed output and the sequence of operations performed.
+        """
+
         stack = [ 0 ]
         cursor = 0
         output = []

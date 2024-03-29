@@ -76,6 +76,7 @@ class Gramarlr1:
         rangex = G.Terminal("range")
         printx = G.Terminal("print")
         PI, E = G.Terminals("PI E")
+        space = G.Terminal("space")
         #
         #
         # #productions

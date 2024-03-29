@@ -4,6 +4,8 @@ from Hulk.Lexer.Hulk_Lexer import get_hulk_lexer
 
 lexer = get_hulk_lexer()
 
+print("Cargado el lexer ")
+print(lexer(f"let casa = \"Caca\" "))
 
 def test(token: str, type_token: str):
 
@@ -19,3 +21,4 @@ def testing_ids():
     print(f"Se ejecutaron correctamente {a}")
 
 testing_ids()
+
