@@ -89,22 +89,6 @@ class UnaryNode(Node):
     def __init__(self, node):
         self.node = node
 
-class ConstantNumNode(Node):
-    def __init__(self, value):
-        self.value = value
-
-class ConstantBoolNode(Node):
-    def __init__(self, value):
-        self.value = value
-
-class VariableNode(Node):
-    def __init__(self, idx):
-        self.idx = idx
-
-class IndexationNode(Node):
-    def __init__(self, idx, exp):
-        self.idx = idx
-        self.exp = exp
 
 
 #nodos de condicionales
@@ -178,142 +162,141 @@ class ModNode(BinaryNode):
         self.left = left
         self.right = right
 
-class ProtocolDeclarationNode:
-    pass
 
+class PlusNode(BinaryNode):
+    def __init__(self, left, right):
+        super().__init__(left, right)
+        self.left = left
+        self.right = right
+
+class MinusNode(BinaryNode):
+    def __init__(self, left, right):
+        super().__init__(left, right)
+        self.left = left
+        self.right = right
+
+class StarNode(BinaryNode):
+    def __init__(self, left, right):
+        super().__init__(left, right)
+        self.left = left
+        self.right = right
+
+class DivNode(BinaryNode):
+    def __init__(self, left, right):
+        super().__init__(left, right)
+        self.left = left
+        self.right = right  
+
+class PowNode(BinaryNode):
+    def __init__(self, left, right):
+        super().__init__(left, right)
+        self.left = left
+        self.right = right
+
+
+# unarios
+class AtomicNode(Node):
+    def __init__(self, lex):
+        self.lex = lex
+
+class VariableNode(AtomicNode):
+    def __init__(self, lex):
+        super().__init__(lex)
+        self.lex = lex
+    
+class ConstantNumNode(AtomicNode):
+    def __init__(self, lex):
+        super().__init__(lex)
+        self.lex = lex
+
+class NegNode(AtomicNode):
+    def __init__(self, lex):
+        super().__init__(lex)
+        self.lex = lex
+
+class sqrtNode(AtomicNode):
+    def __init__(self, lex):
+        super().__init__(lex)
+        self.lex = lex
+
+class CosNode(AtomicNode):
+    def __init__(self, lex):
+        super().__init__(lex)
+        self.lex = lex
+
+class SinNode(AtomicNode):
+    def __init__(self, lex):
+        super().__init__(lex)
+        self.lex = lex
+
+class ExponEulerNode(AtomicNode):
+    def __init__(self, lex):
+        super().__init__(lex)
+        self.lex = lex
+
+class LogNode(AtomicNode):
+    def __init__(self, lex):
+        super().__init__(lex)
+        self.lex = lex
+
+class RandNode(AtomicNode):
+    def __init__(self, lex):
+        super().__init__(lex)
+        self.lex = lex
+
+#condition
+
+class EqualNode(BinaryNode):
+    def __init__(self, left, right):
+        super().__init__(left, right)
+        self.left = left
+        self.right = right
+
+class LessNode(BinaryNode):
+    def __init__(self, left, right):
+        super().__init__(left, right)
+        self.left = left
+        self.right = right
+
+class LeqNode(BinaryNode):
+    def __init__(self, left, right):
+        super().__init__(left, right)
+        self.left = left
+        self.right = right
+
+class AndNode(BinaryNode):
+    def __init__(self, left, right):
+        super().__init__(left, right)
+        self.left = left
+        self.right = right
+
+class OrNode(BinaryNode):
+    def __init__(self, left, right):
+        super().__init__(left, right)
+        self.left = left
+        self.right = right
+
+
+class ConformsNode(BinaryNode): 
+    def __init__(self, left, right):
+        super().__init__(left, right)
+        self.left = left
+        self.right = right
+
+class IsNode(BinaryNode):
+    def __init__(self, left, right):
+        super().__init__(left, right)
+        self.left = left
+        self.right = right
+
+class ConstantBoolNode(AtomicNode):
+    def __init__(self, lex):
+        super().__init__(lex)
+        self.lex = lex
+
+class NotNode(AtomicNode):
+    def __init__(self, right):
+        super().__init__(right)
+        self.right = right
 
-class MethodDeclaration:
-    pass
-
-
-class FuncCallNode:
-    pass
-
-
-
-
-
-
-
-
-class AttrCallNode:
-    pass
-
-
-
-
-
-class DestructiveAssignment:
-    pass
-
-
-class ConditionalNode:
-    pass
-
-
-class ElseBlockNode:
-    pass
-
-
-class LoopNode:
-    pass
-
-
-class ForNode:
-    pass
-
-
-class RangeNode:
-    pass
-
-
-class List_Comprehension:
-    pass
-
-
-class IndexationNode:
-    pass
-
-
-class ModNode:
-    pass
-
-
-class ConstantNumNode:
-    pass
-
-
-class ConstantBoolNode:
-    pass
-
-
-class ConformsNode:
-    pass
-
-
-class IsNode:
-    pass
-
-
-class NotNode:
-    pass
-
-
-class LeqNode:
-    pass
-
-
-class ExponEulerNode:
-    pass
-
-
-class SinNode:
-    pass
-
-
-class VariableNode:
-    pass
-
-
-class NegNode:
-    pass
-
-
-class EqualNode:
-    pass
-
-
-class PowNode:
-    pass
-
-
-class CosNode:
-    pass
-
-
-class LogNode:
-    pass
-
-
-class RandNode:
-    pass
-
-
-class LessNode:
-    pass
-
-
-class SqrtNode:
-    pass
-
-
-class AndNode:
-    pass
-
-
-class OrNode:
-    pass
-
-class LetNode:
-    pass
 
