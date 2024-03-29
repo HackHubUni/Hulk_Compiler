@@ -81,7 +81,6 @@ class Gramarlr1:
         # #productions
         #
 
-
         program %= statement_list + exp + semi_colon, lambda h, s: ProgramNode(s[1], [s[2]])
         program %= statement_list + exp, lambda h,s: ProgramNode(s[1], [s[2]])
         program %= statement_list + exp_block, lambda h, s: ProgramNode(s[1], s[2])
