@@ -1,11 +1,11 @@
 
-from cmp.pycompiler import Token
+from cmp.pycompiler import Token,Terminal
 from Lexer_Parser.automata import State
 from Lexer_Parser.regx import RegexSimple
 
 
 class Lexer:
-    def __init__(self, table, eof):
+    def __init__(self, table:[(Terminal,str)], eof):
         """
 
         :param table: La tabla tiene que tener (valor, regex) osea es una lista de tuplas

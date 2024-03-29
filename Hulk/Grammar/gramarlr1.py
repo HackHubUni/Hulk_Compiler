@@ -79,7 +79,7 @@ class Gramarlr1:
         #
         #
         # #productions
-        #ldl
+        #
 
         program %= statement_list + exp + semi_colon, lambda h, s: ProgramNode(s[1], [s[2]])
         program %= statement_list + exp, lambda h,s: ProgramNode(s[1], [s[2]])

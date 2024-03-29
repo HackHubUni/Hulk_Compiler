@@ -10,6 +10,8 @@ class StringExpression:
     pass
 
 
+class LetNode:
+    pass
 class ConstantStringNode:
     pass
 
