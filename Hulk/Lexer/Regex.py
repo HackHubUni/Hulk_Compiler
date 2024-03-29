@@ -41,23 +41,25 @@ regex_list: [(Terminal, str)] = get_normal_regex(normal_regex)
 assert not " " in regex_list, "Existes espacios en blanco como regex "
 
 
-#TODO:Arreglar esto despues de añadir cambio, hay que arreglar el parseador de [] para regex, tiene error en las producciones del LL1 para ello sustituir por versiones iniciales
-"""
-# str
+#TODO: Ver si se arregla la grámatica LL1 para que coja los ([a..z]|[A..Z]|_)([a..z]|[A..Z]|_|[0..9])*
+
+from Lexer_Parser.regex_utils import Regex_Utils
+ru=Regex_Utils()
+#str
 str_ = s("str")
-str_regex = "\"((\\\\\")|(\\A))*\""
+str_regex = ru.string
 regex_list.append((str_, str_regex))
 # string
 string = s("string")
 regex_list.append((string, str_regex))
 # Id
 id_ = s("id")
-id_regex = "([a..z]|[A..Z]|_)([a..z]|[A..Z]|_|[0..9])*"
+id_regex = ru.id
 regex_list.append((id_, id_regex))
 # number
 number = s("int")
-regex_list.append((number, "([0..9]+\.)?[0..9]+"))
-"""
+regex_list.append((number, ru.numbers))
+
 def Get_Hulk_Regex():
     """
     Retorna las Regex del Hulk además del EOF de la gramática
