@@ -8,6 +8,15 @@ s = gramar.Grammar.Get_Terminal
 
 
 def get_normal_regex(normal_regex: str):
+    """
+    Splits the given `normal_regex` string into a list of individual regex patterns.
+
+    Args:
+        normal_regex (str): The string containing the normal regex patterns.
+
+    Returns:
+        List[Tuple[Terminal, str]]: A list of tuples, where each tuple contains a `Terminal` object and the corresponding regex pattern.
+    """
     lis = normal_regex.split()
     hulk_regex: [(Terminal, str)] = [(s(val), val) for val in lis]
     return hulk_regex
