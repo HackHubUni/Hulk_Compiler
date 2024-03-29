@@ -1,146 +1,67 @@
 from Hulk.Grammar.gramarlr1 import Gramarlr1
+from cmp.pycompiler import Terminal
 
 # Get the Hulk Grammar
 gramar = Gramarlr1()
 # Get the Terminals
 s = gramar.Grammar.Get_Terminal
-# Get in vars the Terminals
-for_exp = s('for')
-let = s('let')
-if_exp = s('if')
-else_exp = s('else')
-elif_exp = s('elif')
-while_exp = s('while')
-function = s('function')
-"""
-print_exp = s('print')
-pi = s('pi')
-e = s('e')
-new = s('new')
-inherits = s('inherits')
-protocol = s('protocol')
-type_exp = s('type')
-self_exp = s('self')
-in_exp = s('in')
-range_exp = s('range')
-true = s('true')
-false = s('false')
-extends = s('extends')
-sin = s('sin')
-cos = s('cos')
-tan = s('tan')
-sqrt = s('sqrt')
-exp = s('exp')
-log = s('log')
-rand = s('rand')
-plus = s('+')
-times = s('*')
-minus = s('-')
-divide = s('/')
-equal = s('=')
-dequal = s('==')
-lesst = s('<')
-greatt = s('>')
-lequal = s('<=')
-gequal = s('>=')
-lparen = s('(')
-rparen = s(')')
-lbrack = s('[')
-rbrack = s(']')
-lbrace = s('{')
-rbrace = s('}')
-comma = s(',')
-period = s('.')
-colon = s(':')
-semicolon = s(';')
-arrow = s('->')
-darrow = s('=>')
-and_exp = s('&')
-or_exp = s('|')
-not_exp = s('!')
-modulus = s('%')
-power = s('^')
-destruct = s(':=')
-concat = s('@')
-is_exp = s('is')
-as_exp = s('as')
-"""
-number = s("numbers")
+
+
+def get_normal_regex(normal_regex: str):
+    """
+    Splits the given `normal_regex` string into a list of individual regex patterns.
+
+    Args:
+        normal_regex (str): The string containing the normal regex patterns.
+
+    Returns:
+        List[Tuple[Terminal, str]]: A list of tuples, where each tuple contains a `Terminal` object and the corresponding regex pattern.
+    """
+    lis = normal_regex.split()
+    hulk_regex: [(Terminal, str)] = [(s(val), val) for val in lis]
+    return hulk_regex
+
+
+# normal Regex las que sus regex son iguales a ellas
+
+normal_regex = " { } [ ]  ; :  , . \( \)  \|\| let in  = :="  #
+normal_regex += " if else elif while for function "
+normal_regex += " <= < == >= > != "
+normal_regex += " sqrt cos sin expon log rand "
+normal_regex += " \+ \- \* \/ % ^ num ! & \| "
+normal_regex += " type new inherits is as "
+normal_regex += " protocol extends "
+normal_regex += " true false "
+normal_regex += " @ @@ "
+normal_regex += " bool  base "
+
+# the result
+regex_list: [(Terminal, str)] = get_normal_regex(normal_regex)
+
+assert not " " in regex_list, "Existes espacios en blanco como regex "
+
+
+#TODO: Ver si se arregla la grámatica LL1 para que coja los ([a..z]|[A..Z]|_)([a..z]|[A..Z]|_|[0..9])*
+
+from Lexer_Parser.regex_utils import Regex_Utils
+ru=Regex_Utils()
+#str
+str_ = s("str")
+str_regex = ru.string
+regex_list.append((str_, str_regex))
+# string
 string = s("string")
-
-###############
-# Hulk Regex  #
-###############
-Hulk_Regex = [
-    (for_exp, "for"),
-    (let, "let"),
-    (if_exp, "if"),
-    (else_exp, "else"),
-    (elif_exp, "elif"),
-    (while_exp, "while"),
-    (function, "function"),
-
-    (number, "([0..9]+\.)?[0..9]+"),
-    (string, "\"((\\\\\")|(\\A))*\"")
-]
-# Next aft funtion in regex
-"""
-    (print_exp, "print"),
-    (pi, "pi"),
-    (e, "e"),
-    (new, "new"),
-    (inherits, "inherits"),
-    (protocol, "protocol"),
-    (type_exp, "type"),
-    (self_exp, "self"),
-    (in_exp, "in"),
-    (range_exp, "range"),
-    (true, "true"),
-    (false, "false"),
-    (extends, "extends"),
-    (sin, "sin"),
-    (cos, "cos"),
-    (tan, "tan"),
-    (sqrt, "sqrt"),
-    (exp, "exp"),
-    (log, "log"),
-    (rand, "rand"),
-    (plus, "\+"),
-    (times, "\*"),
-    (minus, "-"),
-    (divide, "/"),
-    (equal, "="),
-    (dequal, "=="),
-    (lesst, "<"),
-    (greatt, ">"),
-    (lequal, "<="),
-    (gequal, ">="),
-    (lparen, "\("),
-    (rparen, "\)"),
-    (lbrack, "\["),
-    (rbrack, "\]"),
-    (lbrace, "{"),
-    (rbrace, "}"),
-    (comma, ","),
-    (period, "\."),
-    (colon, ":"),
-    (semicolon, ";"),
-    (arrow, "->"),
-    (darrow, "=>"),
-    (and_exp, "&"),
-    (or_exp, "\|"),
-    (not_exp, "\!"),
-    (modulus, "%"),
-    (power, "^"),
-    (destruct, ":="),
-    (concat, "@"),
-    (is_exp, "is"),
-    (as_exp, "as"),
-    # (identifier, "([a..z]|[A..Z]|_)([a..z]|[A..Z]|_|[0..9])*"),
-"""
+regex_list.append((string, str_regex))
+# Id
+id_ = s("id")
+id_regex = ru.id
+regex_list.append((id_, id_regex))
+# number
+number = s("int")
+regex_list.append((number, ru.numbers))
 
 def Get_Hulk_Regex():
     """
     Retorna las Regex del Hulk además del EOF de la gramática
     """
-    return Hulk_Regex, gramar.EOF
+    return regex_list, gramar.EOF

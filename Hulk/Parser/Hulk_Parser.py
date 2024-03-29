@@ -23,6 +23,7 @@ def get_hulk_parser(save_dir: str = 'save'):
         except EOFError:
             # Si hay un error EOF, eliminar el archivo corrupto y crear un nuevo objeto
             os.remove(file_path)
+
             Grammar = Gramarlr1().Grammar
             parser = LR1Parser(Grammar)
             with open(file_path, 'wb') as f:

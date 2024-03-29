@@ -123,9 +123,9 @@ class NonTerminal(Symbol):
             assert len(other) == len(
                 other[0]) + 2, "Debe definirse una, y solo una, regla por cada símbolo de la producción"
 
-            #Cuando se atribute
-            #Quitar para no poner None
-            #assert len(other) == 2, "Tiene que ser una Tupla de 2 elementos (sentence, attribute)"
+            # Cuando se atribute
+            # Quitar para no poner None
+            # assert len(other) == 2, "Tiene que ser una Tupla de 2 elementos (sentence, attribute)"
 
             if isinstance(other[0], Symbol) or isinstance(other[0], Sentence):
                 p = AttributeProduction(self, other[0], other[1:])
@@ -492,12 +492,17 @@ class Grammar():
 
         self.symbDict = {'$': self.EOF}
 
-    def Get_Terminal(self,name: str):
+    def Get_Terminal(self, name: str) -> Terminal:
         """
-        Este método permite obtener un no terminal de la gramática a partir de su nombre.
-        :param name: Nombre del no terminal a buscar
+        Este método permite obtener un  terminal de la gramática a partir de su nombre.
+        :param name: Nombre del  terminal a buscar
         :return: No terminal con el nombre dado
         """
+        #Para el caso que se \( dado que no puedo parsear ( si se añaden comentarios con \\ modificar aca
+        if len(name) > 1 and name.startswith("\\"):
+            name = name[1:]
+            if len(name)>2 and name[1]=="\\":
+                name=name[0]+name[2]
         if name in self.symbDict:
             terminal = self.symbDict[name]
             if terminal in self.terminals:
