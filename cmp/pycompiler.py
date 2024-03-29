@@ -498,6 +498,11 @@ class Grammar():
         :param name: Nombre del  terminal a buscar
         :return: No terminal con el nombre dado
         """
+        #Para el caso que se \( dado que no puedo parsear ( si se añaden comentarios con \\ modificar aca
+        if len(name) > 1 and name.startswith("\\"):
+            name = name[1:]
+            if len(name)>2 and name[1]=="\\":
+                name=name[0]+name[2]
         if name in self.symbDict:
             terminal = self.symbDict[name]
             if terminal in self.terminals:

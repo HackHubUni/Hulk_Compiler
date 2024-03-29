@@ -24,11 +24,11 @@ def get_normal_regex(normal_regex: str):
 
 # normal Regex las que sus regex son iguales a ellas
 
-normal_regex = " { } [ ]  ; :  , . ( ) || let in  = :=   "  #
+normal_regex = " { } [ ]  ; :  , . \( \)  \|\| let in  = :="  #
 normal_regex += " if else elif while for function "
 normal_regex += " <= < == >= > != "
 normal_regex += " sqrt cos sin expon log rand "
-normal_regex += " + - * / % ^ num ! & | "
+normal_regex += " \+ \- \* \/ % ^ num ! & \| "
 normal_regex += " type new inherits is as "
 normal_regex += " protocol extends "
 normal_regex += " true false "

@@ -12,14 +12,14 @@ class Regex_Utils:
         self.letters_ = '|'.join(chr(n) for n in range(ord('a'), ord('z') + 1))
         self.uppercase_letters_ = '|'.join(chr(n) for n in range(ord('A'), ord('Z') + 1))
         self.valid_string_symbols_ = ''.join(c for c in " : ' ; , . _ - + / ^ % & ! = < > \\( \\) { } [ ] @".split())
-        self.valid_id_symbols_ = ['_']
+        self.valid_id_symbols_ = '_'
         self.delim_ = ' |\t|\n'
         self.natural_numbers_ = f'({self.nonzero_digits_})({self.nonzero_digits_}|0)*'
         self.natural_aster_numbers_ = f'({self.natural_numbers_})|0'
         self.floating_point_numbers_ = f'({self.natural_aster_numbers_}).(({self.natural_aster_numbers_})({self.natural_aster_numbers_})*)'
 
         self.string=f'"({self.letters_}|{self.uppercase_letters_}|0|{self.nonzero_digits_}|{self.valid_string_symbols_}|\t| |\|| |\\\\")*"'
-        self.id=f'({self.letters_}|{self.uppercase_letters_})({self.letters_}|{self.uppercase_letters_}|0|{self.nonzero_digits_}|{self.valid_id_symbols_})*'
+        self.id=f'({self.letters_}|{self.uppercase_letters_}|{self.valid_id_symbols_})({self.letters_}|{self.uppercase_letters_}|0|{self.nonzero_digits_}|{self.valid_id_symbols_})*'
         self.numbers=f'({self.natural_aster_numbers_})|({self.floating_point_numbers_})'
 
 
