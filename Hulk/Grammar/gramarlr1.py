@@ -1,5 +1,6 @@
 from cmp.pycompiler import *  # Gramar Terminal NonTerminal Token
 from cmp.cil import *
+
 from Hulk.AST_Semantic.Ast import *
 
 
@@ -125,7 +126,7 @@ class Gramarlr1:
         id_list %= idx, lambda h,s: [s[1]]
         id_list %= idx + comma + id_list, lambda h,s: [s[1]] + s[3]
 
-        def_method %= idx + opar + param_list + cpar + colon + possible_types, lambda h, s: MethodDeclaration(s[1], s[3], s[6])
+        def_method %= idx + opar + param_list + cpar + colon + possible_types, lambda h, s: MethodDeclarationNode(s[1], s[3], s[6])
 
 
         method_declarations %= def_method + semi_colon, lambda h, s: [s[1]]

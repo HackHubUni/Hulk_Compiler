@@ -75,8 +75,8 @@ def parse(text: str):
     print(formatter.visit(ast))
 def ff():
     print("Test 0")
-    # ast=get_ast('-5;')
-    parse('(let a = 4 in a) ')
+    ast=get_ast('-5;')
+    #parse('(let a = 4 in a) ')
     print("Finish test 0")
 
 ff()

@@ -7,9 +7,11 @@ class Node:
         raise NotImplementedError()
     
 
-
-
-
+#TODO: Rellenar
+class MethodDeclarationNode(Node):
+    pass
+class ProtocolDeclarationNode(Node):
+    pass
 #deep 1
 
 class ProgramNode(Node):
@@ -227,7 +229,7 @@ class NegNode(AtomicNode):
         super().__init__(lex)
         self.lex = lex
 
-class sqrtNode(AtomicNode):
+class SqrtNode(AtomicNode):
     def __init__(self, lex):
         super().__init__(lex)
         self.lex = lex
