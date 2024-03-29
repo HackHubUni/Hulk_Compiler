@@ -834,6 +834,19 @@ class Token:
     def __repr__(self):
         return str(self)
 
+
+    def is_space_token(self):
+        """
+        Retorna True si el token_type es Terminal y es el terminal space
+        de lo contrario False
+        """
+        if isinstance(self.token_type, Terminal):
+            t:Terminal=self.token_type
+            if t.Name=="space":
+                return True
+
+        return False
+
     @property
     def is_valid(self):
         return True

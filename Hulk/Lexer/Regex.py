@@ -33,7 +33,8 @@ normal_regex += " type new inherits is as "
 normal_regex += " protocol extends "
 normal_regex += " true false "
 normal_regex += " @ @@ "
-normal_regex += " bool  base "
+normal_regex += " str id bool string int base "
+
 
 # the result
 regex_list: [(Terminal, str)] = get_normal_regex(normal_regex)
@@ -49,17 +50,16 @@ ru=Regex_Utils()
 str_ = s("str")
 str_regex = ru.string
 regex_list.append((str_, str_regex))
-# string
-string = s("string")
-regex_list.append((string, str_regex))
 # Id
 id_ = s("id")
 id_regex = ru.id
 regex_list.append((id_, id_regex))
 # number
-number = s("int")
+number = s("num")
 regex_list.append((number, ru.numbers))
-
+#space
+space=s("space")
+regex_list.append((space,ru.space))
 def Get_Hulk_Regex():
     """
     Retorna las Regex del Hulk además del EOF de la gramática

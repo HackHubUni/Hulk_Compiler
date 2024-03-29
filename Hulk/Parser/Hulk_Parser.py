@@ -1,7 +1,15 @@
 import os
 import dill
-from Lexer_Parser.shift_reduce import LR1Parser
+from Hulk.Parser.utils import Hulk_Parser_Container
 from Hulk.Grammar.gramarlr1 import Gramarlr1
+
+
+def __create_hulk_parser__():
+    Grammar = Gramarlr1().Grammar
+    print("Crear el Parser")
+    parser = Hulk_Parser_Container(Grammar)
+    print("Parser Creado")
+    return parser
 
 
 def get_hulk_parser(save_dir: str = 'save'):
@@ -12,7 +20,7 @@ def get_hulk_parser(save_dir: str = 'save'):
 
     os.makedirs(save_dir, exist_ok=True)  # Crea la carpeta si no existe
     file_path = os.path.join(save_dir, 'parser.pkl')
-    parser: LR1Parser = None
+    parser: Hulk_Parser_Container = None
 
     # Verificar si el archivo serializado existe
     if os.path.exists(file_path):
@@ -24,14 +32,12 @@ def get_hulk_parser(save_dir: str = 'save'):
             # Si hay un error EOF, eliminar el archivo corrupto y crear un nuevo objeto
             os.remove(file_path)
 
-            Grammar = Gramarlr1().Grammar
-            parser = LR1Parser(Grammar)
+            parser = __create_hulk_parser__()
             with open(file_path, 'wb') as f:
                 dill.dump(parser, f)
     else:
         # Si no existe, crear el objeto y serializarlo
-        Grammar = Gramarlr1().Grammar
-        parser = LR1Parser(Grammar)
+        parser=__create_hulk_parser__()
         with open(file_path, 'wb') as f:
             dill.dump(parser, f)
 
