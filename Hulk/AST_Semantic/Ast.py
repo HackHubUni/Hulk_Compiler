@@ -299,4 +299,7 @@ class NotNode(AtomicNode):
         super().__init__(right)
         self.right = right
 
-
+class PrintNode(AtomicNode):
+    def __init__(self, right):
+        super().__init__(right)
+        self.right = right
