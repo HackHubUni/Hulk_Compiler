@@ -5,17 +5,30 @@ class Node:
 
     def evaluate(self):
         raise NotImplementedError()
-
-class StringExpression:
-    pass
+    
 
 
-class ConstantStringNode:
-    pass
+
+class ProgramNode(Node):
+    def __init__(self, statement_list,exp):
+        self.exp = exp
+        self.statements_list = statement_list
+
+class StringExpression(Node):
+    def __init__(self,string_type, concatenable):
+        self.string_type = string_type
+        self.concatenable = concatenable# expresion o string a concatenar
+
+class ConstantStringNode(StringExpression):#tienen el string 
+    def __init__(self, string_lex):
+        super().__init__(string_lex, concatenable = None)
 
 
-class TypeDeclarationNode:
-    pass
+
+
+class TypeDeclarationNode(Node):
+    def __init__(self, idx, type_body , a, type_args):
+        
 
 
 class FuncDeclarationNode:
@@ -159,5 +172,8 @@ class AndNode:
 
 
 class OrNode:
+    pass
+
+class LetNode:
     pass
 
