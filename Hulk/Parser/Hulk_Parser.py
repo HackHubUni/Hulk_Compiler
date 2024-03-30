@@ -1,5 +1,7 @@
 import os
 import dill
+import time
+import sys
 from Hulk.Parser.utils import Hulk_Parser_Container
 from Hulk.Grammar.gramarlr1 import Gramarlr1
 
@@ -12,38 +14,43 @@ def __create_hulk_parser__():
     return parser
 
 
-def get_hulk_parser(save_dir: str = 'save'):
-    """
-    Devuelve el parser del Hulk
-    """
-    # Definir la ruta del archivo serializado
-
-    os.makedirs(save_dir, exist_ok=True)  # Crea la carpeta si no existe
-    file_path = os.path.join(save_dir, 'parser.pkl')
-    parser: Hulk_Parser_Container = None
-
-    # Verificar si el archivo serializado existe
-    if os.path.exists(file_path):
-        try:
-            # Intentar cargar el objeto serializado
-            with open(file_path, 'rb') as f:
-                parser = dill.load(f)
-        except EOFError:
-            # Si hay un error EOF, eliminar el archivo corrupto y crear un nuevo objeto
-            os.remove(file_path)
-
-            parser = __create_hulk_parser__()
-            with open(file_path, 'wb') as f:
-                dill.dump(parser, f)
-    else:
-        # Si no existe, crear el objeto y serializarlo
-        parser=__create_hulk_parser__()
-        with open(file_path, 'wb') as f:
-            dill.dump(parser, f)
-
-    if parser is None:
-        raise Exception("Error al cargar el parser")
-    return parser
 
 
-print("Ready Parser")
+def get_hulk_parser(file_name='parser.pkl', delete_before=False):
+
+    # aumentar el número de llamados para que se pueda guardar el lexer
+    sys.setrecursionlimit(5000)
+
+    start_time = time.time()  # Start the timer
+
+    route = os.getcwd()
+    route = os.path.join(route, 'resources')
+
+    # Check if the directory exists, if not create it
+    if not os.path.exists(route):
+        os.makedirs(route)
+    try:
+        if delete_before:
+            raise "Se mandó a eliminar el parser anterior"
+
+        with open(os.path.join(route, file_name), 'rb') as parser_file:
+            parser = dill.load(parser_file)
+
+        end_time = time.time()  # Stop the timer
+        print(f"Time taken: {end_time - start_time} seconds")  # Print the time taken
+
+        assert parser is not None, "No se puede entregar un parser None"
+        return parser
+    except:
+        parser = __create_hulk_parser__()
+
+        with open(os.path.join(route, file_name), 'wb') as parser_file:
+            dill.dump(parser, parser_file)
+
+        end_time = time.time()  # Stop the timer
+        print(f"Time taken: {end_time - start_time} seconds")  # Print the time taken
+
+        assert parser is not None, "No se puede entregar un parser None"
+        return parser
+
+print("Ready the Parser")
