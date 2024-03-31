@@ -24,5 +24,5 @@ class HulkContext(Context):
 
     def __str__(self):
         types_str = 'Types: {\n\t' + '\n\t'.join(y for x in self.types.values() for y in str(x).split('\n')) + '\n}'
-        func_str = 'Funcs: {\n\t' + '\n\t'.join(y for x in self.function.values() for y in str(x).split('\n')) + '\n}'
+        func_str = 'Functions: {\n\t' + '\n\t'.join(y for x in self.function.values() for y in str(x).split('\n')) + '\n}'
         return types_str + '\n' + func_str

@@ -101,7 +101,7 @@ class TypeBuilder:
             except SemanticError as ex:
                 self.errors.append(ex.text)
             if parents_check(self.current_type.name, self.current_type.parent):
-                error = SemanticError("Cyclic inheritance is not allowed.")
+                error = SemanticError("Herencia cíclica no admitida.")
                 self.errors.append(error)
         for feature in node.features:
             self.visit(feature)
@@ -116,7 +116,7 @@ class TypeBuilder:
                 except SemanticError as ex:
                     self.errors.append(ex.text)
                 if parents_check(self.current_type.name, parent_type):
-                    raise SemanticError("Cyclic inheritance is not allowed.")
+                    raise SemanticError("Herencia cíclica no admitida.")
         for feature in node.methods:
             self.visit(feature)
 

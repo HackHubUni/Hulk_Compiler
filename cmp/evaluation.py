@@ -2,6 +2,10 @@ from cmp.pycompiler import EOF
 from Lexer_Parser.parser.shift_reduce import ShiftReduceParser
 
 def evaluate_reverse_parse(right_parse, operations, tokens):
+    """
+    Evalua el parseo Shift-Reduce  de una gramática
+    Devuelve el Ast generado
+    """
     if not right_parse or not operations or not tokens:
         return
 

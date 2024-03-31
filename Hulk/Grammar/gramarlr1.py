@@ -30,7 +30,7 @@ class Gramarlr1:
         plus_, minus_, star_, div_, mod_, pow_, power_ = G.Terminals('+ - * / % ^ **') #TODO: Unificar bajo Regex ^ **
         eq_, colon_eq_, eq_qu_, not_eq_, less_, greater_, leq_, geq_ = G.Terminals('= := == != < > <= >=')
         and_, or_, not_, or_or_ = G.Terminals('& | ! ||')
-        dot_, comma_, colon_, semi_, at_, at_at_, arrow_ = G.Terminals('. , : ; @ @@ =>')
+        dot_, comma_, colon_, semi_colon_, at_, at_at_, arrow_ = G.Terminals('. , : ; @ @@ =>')
         o_par_, c_par_, o_brack_, c_brack_, o_brace_, c_brace_ = G.Terminals('( ) [ ] { }')
 
         space=G.Terminal("space")
@@ -43,10 +43,12 @@ class Gramarlr1:
         Declaration %= Func_Declaration, lambda h, s: s[1]
         Declaration %= Type_Declaration, lambda h, s: s[1]
         Declaration %= Protocol_Declaration, lambda h, s: s[1]
+        #Declaration %= G.Epsilon agregar nueva
 
-        Statment %= Simple_Expresion + semi_, lambda h, s: s[1]
+        Statment %= Simple_Expresion + semi_colon_, lambda h, s: s[1]
         Statment %= ExprBlock, lambda h, s: s[1]
-        Statment %= ExprBlock + semi_, lambda h, s: s[1]
+        Statment %= ExprBlock + semi_colon_, lambda h, s: s[1]
+        #Statment %= G.Epsilon TODO: Agregar para que que se puedan hacer solo declaraciones
 
         Expresion %= Simple_Expresion, lambda h, s: s[1]
         Expresion %= ExprBlock, lambda h, s: s[1]
@@ -183,7 +185,7 @@ class Gramarlr1:
         Protocol_Declaration %= protocol_ + type_id_ + extends_ + Type_List + o_brace_ + Protocol_Methods + c_brace_, lambda h, s: ProtDeclarationNode(
             s[2], s[6], s[4])
 
-        Protocol_Methods %= id_ + o_par_ + Full_Type_Arguments + c_par_ + colon_ + type_id_ + semi_ + Protocol_Methods, lambda h, s: [
+        Protocol_Methods %= id_ + o_par_ + Full_Type_Arguments + c_par_ + colon_ + type_id_ + semi_colon_ + Protocol_Methods, lambda h, s: [
                                                                                                                   PrototypeMethodNode(
                                                                                                                       s[
                                                                                                                           1],
