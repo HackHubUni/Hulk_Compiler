@@ -12,22 +12,22 @@ class DeclarationNode(Node):
     pass
 
 
-class ExprNode(Node):
+class ExpressionNode(Node):
     pass
 
 
-class ExprBlockNode(ExprNode):
+class ExpressionBlockNode(ExpressionNode):
     def __init__(self, expr_list) -> None:
         self.expr_list = expr_list
 
 
-class LetNode(ExprNode):
+class LetNode(ExpressionNode):
     def __init__(self, assign_list, expr) -> None:
         self.assign_list = assign_list
         self.expr = expr
 
 
-class IfNode(ExprNode):
+class IfNode(ExpressionNode):
     def __init__(self, cond, if_expr, elif_branches, else_expr) -> None:
         self.cond = cond
         self.if_expr = if_expr
@@ -35,20 +35,20 @@ class IfNode(ExprNode):
         self.else_expr = else_expr
 
 
-class WhileNode(ExprNode):
+class WhileNode(ExpressionNode):
     def __init__(self, cond, body) -> None:
         self.cond = cond
         self.body = body
 
 
-class ForNode(ExprNode):
+class ForNode(ExpressionNode):
     def __init__(self, id, iterable, body) -> None:
         self.id = id
         self.iterable = iterable
         self.body = body
 
 
-class DestrAssign(ExprNode):
+class DestrAssign(ExpressionNode):
     def __init__(self, id, expr, is_attr=False) -> None:
         self.id = id
         self.expr = expr
@@ -97,7 +97,7 @@ class NotNode(UnaryNode):
         return not value
 
 
-class DynTestNode(ExprNode):
+class DynTestNode(ExpressionNode):
     def __init__(self, expr, type) -> None:
         self.expr = expr
         self.type = type
@@ -201,50 +201,50 @@ class VarNode(AtomicNode):
     pass
 
 
-class VectorNode(ExprNode):
+class VectorNode(ExpressionNode):
     def __init__(self, expr_list) -> None:
         self.expr_list = expr_list
 
 
-class ImplicitVector(ExprNode):
+class ImplicitVector(ExpressionNode):
     def __init__(self, expr, id, iterable) -> None:
         self.expr = expr
         self.id = id
         self.iterable = iterable
 
 
-class IndexingNode(ExprNode):
+class IndexingNode(ExpressionNode):
     def __init__(self, vector, index):
         self.vector = vector
         self.expr = index
 
 
-class InstantiateNode(ExprNode):
+class InstantiateNode(ExpressionNode):
     def __init__(self, type, expr_list) -> None:
         self.type = type
         self.expr_list = expr_list
 
 
-class DowncastNode(ExprNode):
+class DowncastNode(ExpressionNode):
     def __init__(self, obj, type) -> None:
         self.obj = obj
         self.type = type
 
 
-class FuncCallNode(ExprNode):
+class FuncCallNode(ExpressionNode):
     def __init__(self, id, args):
         self.id = id
         self.args = args
 
 
-class MethodCallNode(ExprNode):
+class MethodCallNode(ExpressionNode):
     def __init__(self, obj, id, args):
         self.obj = obj
         self.id = id
         self.args = args
 
 
-class AttrrCallNode(ExprNode):
+class AttrrCallNode(ExpressionNode):
     def __init__(self, obj, id) -> None:
         self.obj = obj
         self.id = id
