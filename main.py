@@ -51,20 +51,10 @@ def evaluate(text:str):
 
 text = ''' 
 
-type Point {
-    x = 0;
-    y = 0;
-
-    getX() => self.x;
-    getY() => self.y;
-
-    setX(x) => self.x := x;
-    setY(y) => self.y := y;
-   
-   
-}
-  print(4);
-
+  function hola (x){ x+a;}
+ 
+  let a = 9 in print(a);
+  
  '''
 
 evaluate(text)

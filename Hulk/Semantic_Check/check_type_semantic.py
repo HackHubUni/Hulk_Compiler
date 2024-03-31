@@ -49,6 +49,7 @@ class InfoSaverTree(object):
             #Function Declaration
             self.visit(declaration)
 
+
     @visitor.when(TypeDeclarationNode)
     def visit(self, node):
         try:

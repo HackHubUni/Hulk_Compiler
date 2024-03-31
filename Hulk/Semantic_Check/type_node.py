@@ -121,6 +121,8 @@ class HulkScope(HulkScopeBase):
         self.index = 0 if parent is None else len(parent)
         self.types:dict[str,Type] = {}
         self.function:dict[str,Function]={}
+        self.current:int=0
+        self.ord:dict[Function|VariableInfo:int]={}
 #let x=0 in (let y=0 in print(x+y))
     def create_child(self):
         child = HulkScope(self)
