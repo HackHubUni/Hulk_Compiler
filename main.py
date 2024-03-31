@@ -60,6 +60,8 @@ type Point {
 
     setX(x) => self.x := x;
     setY(y) => self.y := y;
+   
+   
 }
   print(4);
 

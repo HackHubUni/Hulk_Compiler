@@ -180,6 +180,9 @@ class VariableInfo:
         self.name = name
         self.type = vtype
 
+    def __str__(self):
+        return f'La variable de tipo {isinstance(self.type)}, con nombre {self.name}'
+
 class Scope:
     def __init__(self, parent=None):
         self.locals = []

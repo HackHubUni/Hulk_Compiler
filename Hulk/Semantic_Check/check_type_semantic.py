@@ -1,6 +1,6 @@
 from Hulk.tools.Ast import *
 from Hulk.Semantic_Check.type_node import *
-from Hulk.Semantic_Check.utils import HulkScope
+
 
 def parents_check(initial_type, parent):
     this_type = parent.name
@@ -27,7 +27,7 @@ class InfoSaverTree(object):
     @visitor.when(ProgramNode)
     def visit(self, node):
 
-        self.context = HulkScope() #Tomar el contexto del hulk
+        self.context = HulkScope(parent=None) #Tomar el contexto del hulk
         # Añadir al contexto los elementos primarios del hulk
         self.context.types['Num'] = NumType()
         self.context.types['Str'] = StringType()
