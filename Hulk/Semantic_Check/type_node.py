@@ -51,9 +51,6 @@ class ErrorType(Type):
     def __eq__(self, other:Type):
         return isinstance(other, Type)
 
-
-
-   
         
 class Function:
     def __init__(self, name, args, return_type):
@@ -112,24 +109,17 @@ class Protocol:
         return output
 
 class HulkScopeBase(ABC):
-    pass
+    def __init__(self) -> None:
+        self.locals:dict[str:VariableInfo] = {} # TODO
+        self.children = []
+        self.types:dict[str,Type] = {}
+        self.function:dict[str,Function]={}
+        
 class HulkScope(HulkScopeBase):
     def __init__(self, parent:HulkScopeBase):
         self.parent: HulkScope = parent
-        self.locals:dict[str:VariableInfo] = {}
-        self.children = []
-        self.index = 0 if parent is None else len(parent)
-        self.types:dict[str,Type] = {}
-        self.function:dict[str,Function]={}
-        self.current:int=0
-        self.ord:dict[Function|VariableInfo:int]={}
-#let x=0 in (let y=0 in print(x+y))
-    def create_child(self):
-        child = HulkScope(self)
-        self.children.append(child)
-        return child
 
-    def define_variable(self, vname:str, vtype):
+    def create_variable(self, vname:str, vtype: str):
         """Create a new variable in the actual scope"""
         info = VariableInfo(vname, vtype)
         if vname in self.locals:
@@ -180,6 +170,7 @@ class HulkScope(HulkScopeBase):
             if _param.type is None:
                 _param.type = NoneType()
         typex = self.function[name] = Function(name, params, return_type)
+        
         return typex
 
     def create_protocol(self, name, parents):

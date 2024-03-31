@@ -29,6 +29,7 @@ class InfoSaverTree(object):
 
         self.context = HulkScope(parent=None) #Tomar el contexto del hulk
         # Añadir al contexto los elementos primarios del hulk
+        # TODO: Hay que cambiar la forma en que se ccede al contexto por las funciones que se agregaron al Hulk Cont
         self.context.types['Num'] = NumType()
         self.context.types['Str'] = StringType()
         self.context.types['Bool'] = BoolType()
@@ -48,8 +49,11 @@ class InfoSaverTree(object):
             #Protocol Declaration
             #Function Declaration
             self.visit(declaration)
-
-
+        for exp in node.exp:
+            #Let
+            self.visit(exp)
+    
+    
     @visitor.when(TypeDeclarationNode)
     def visit(self, node):
         try:
@@ -77,6 +81,12 @@ class InfoSaverTree(object):
             self.errors.append(ex.text)
 
 
+    @visitor.when(VarDefNode)
+    def visit(self, node:Node):
+        try:
+            self.context.create_variable(node.id, node.type)
+        except SemanticError as ex:
+            self.errors.append(ex.text)
 class TypeBuilder:
     def __init__(self, context, errors=[]):
         self.context = context
