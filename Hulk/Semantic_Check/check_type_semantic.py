@@ -1,6 +1,6 @@
 from Hulk.tools.Ast import *
-from Hulk.AST_Semantic.type_node import *
-from Hulk.AST_Semantic.utils import HulkContext
+from Hulk.Semantic_Check.type_node import *
+from Hulk.Semantic_Check.utils import HulkContext
 
 def parents_check(initial_type, parent):
     this_type = parent.name

@@ -62,7 +62,7 @@ class Gramarlr1:
         Simple_Expresion %= id_ + dot_ + id_ + colon_eq_ + Simple_Expresion, lambda h, s: DestrAssign(s[3], s[5], True)
         Simple_Expresion %= Arithmethic_expression, lambda h, s: s[1]
 
-        ExprBlock %= o_brace_ + StatList + c_brace_, lambda h, s: ExprBlockNode(s[2])
+        ExprBlock %= o_brace_ + StatList + c_brace_, lambda h, s: ExpressionBlockNode(s[2])
         ExprBlock %= let_ + Assigment_List + in_ + ExprBlock, lambda h, s: LetNode(s[2], s[4])
         ExprBlock %= if_ + o_par_ + Expresion + c_par_ + Expresion + Elif_Branch + else_ + ExprBlock, lambda h, s: IfNode(s[3], s[5],
                                                                                                          s[6], s[8])
