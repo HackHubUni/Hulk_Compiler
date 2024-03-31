@@ -1,9 +1,5 @@
-from cmp.pycompiler import Grammar, Terminal, NonTerminal, Token
-from cmp.ast import Node, BinaryNode, get_printer
-from Lexer_Parser.shift_reduce import LR1Parser, evaluate_reverse_parse
-from Lexer_Parser.lexer import Lexer
-from cmp.ast import AtomicNode, UnaryNode, BinaryNode, ConstantNumberNode, DivNode, StarNode, MinusNode, PlusNode, \
-    EqualNode, get_printer
+from Lexer_Parser.parser.shift_reduce import evaluate_reverse_parse
+from cmp.ast import BinaryNode, ConstantNumberNode, get_printer
 def parse(text: str):
     """
     Parsea la cadena, printea los token las producciones y las operaciones shift reduce adeams del ast

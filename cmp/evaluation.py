@@ -1,5 +1,5 @@
 from cmp.pycompiler import EOF
-from cmp.tools.parsing import ShiftReduceParser
+from Lexer_Parser.parser.shift_reduce import ShiftReduceParser
 
 def evaluate_reverse_parse(right_parse, operations, tokens):
     if not right_parse or not operations or not tokens:
@@ -29,5 +29,6 @@ def evaluate_reverse_parse(right_parse, operations, tokens):
             raise Exception('Invalid action!!!')
 
     assert len(stack) == 1
-    assert isinstance(next(tokens).token_type, EOF)
+    a=next(tokens).token_type
+    assert isinstance(a, EOF),f"Se esperaba que el sgt token fuera EOF y fue {a}"
     return stack[0]

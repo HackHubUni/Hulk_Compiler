@@ -1,284 +1,206 @@
 from cmp.pycompiler import *  # Gramar Terminal NonTerminal Token
-from cmp.cil import *
-
 from Hulk.AST_Semantic.Ast import *
-
-
-
 
 
 class Gramarlr1:
     def __init__(self) -> None:
         G = Grammar()
         self.Grammar = G
-        self.EOF=self.Grammar.EOF
+        self.EOF = self.Grammar.EOF
 
-        # # non-terminals
-        program = G.NonTerminal("<program>", startSymbol=True)
-        exp, exp_block, exp_list = G.NonTerminals("<exp> <exp-block> <exp-list>")
-        def_func = G.NonTerminal("<def-func>")
-        end_extended = G.NonTerminal("<end-extended>")
-        param_list, param = G.NonTerminals("<param-list> <param>")
-        arg_declaration = G.NonTerminal("<arg-declaration>")
-        let_exp, assign_var, assign_list = G.NonTerminals("<let-exp> <assign-var> <assign-list>")
-        mutate_var = G.NonTerminal("<mutate-var>")
-        conditional, condition = G.NonTerminals("<conditional> <condition>")
-        elif_block = G.NonTerminal("<elif-block>")
-        while_block = G.NonTerminal("<while-block>")
-        for_exp = G.NonTerminal("<for-exp>")
-        type_dec = G.NonTerminal("<type-dec>")
-        term, factor, atom, k, mod_ = G.NonTerminals("<term> <factor> <atom> <k> <mod>")
-        statement = G.NonTerminal("<statement>")
-        def_protocol = G.NonTerminal("<def-protocol>")
-        method_declarations = G.NonTerminal("<method-declarations>")
-        def_method = G.NonTerminal("<def-method>")
-        instance = G.NonTerminal("<instance>")
-        # exp_or_block = G.NonTerminal("<exp-or-block>")
-        list_ = G.NonTerminal("<list>")
-        type_body, type_args = G.NonTerminals("<type-body> <type-args>")
-        attribute = G.NonTerminal("<attribute>")
-        vector, iterable = G.NonTerminals("<vector> <iterable>")
-        func_call = G.NonTerminal("<func-call>")
-        print_exp = G.NonTerminal("<print-exp>")
-        string_exp = G.NonTerminal("<string-exp>")
-        concatenable = G.NonTerminal("<concatenable>")
-        functions_in_type = G.NonTerminal("<functions-in-type>")
-        indexation = G.NonTerminal("<indexation>")
-        boolean_exp = G.NonTerminal("<boolean>")
-        conforms = G.NonTerminal("<conforms>")
-        possible_types = G.NonTerminal("<poss-types>")
-        concatenable_cond = G.NonTerminal("<bool-ext>")
-        statement_list = G.NonTerminal("<stat-list>")
-        id_list = G.NonTerminal("<id-list")
-        call_name = G.NonTerminal("<call-name>")
-        single_func_call = G.NonTerminal("<sing-func-call>")
-        multiple_func_call = G.NonTerminal("<mult-func>")
-        #
-        #
-        # region TERMINALS
-        curly_o , curly_c = G.Terminals("{ }")
-        square_o, square_c = G.Terminals("[ ]")
-        semi_colon , colon = G.Terminals("; :")
-        opar, cpar = G.Terminals("( )")
-        rarrow, given = G.Terminals("=> ||")
-        comma, dot = G.Terminals(", .")
-        let, inx = G.Terminals("let in")
-        equal, mut = G.Terminals("= :=")
-        ifx, elsex, elifx, whilex, forx, function = G.Terminals("if else elif while for function")
-        leq, less, equals, geq, greater, neq = G.Terminals("<= < == >= > !=")
-        sqrt, cos, sin, expon, log, rand = G.Terminals("sqrt cos sin expon log rand")
-        plus, minus, star, div, mod, pow, num, notx, andx, orx = G.Terminals("+ - * / % ^ num ! & |")
-        typex, new, inherits, isx, asx = G.Terminals("type new inherits is as")
-        protocol, extends = G.Terminals("protocol extends")
-        true, false = G.Terminals("true false")
-        concat, concat_space = G.Terminals("@ @@")
-        strx, idx, boolx, string, intx, base = G.Terminals("str id bool string int base")
+        Program = G.NonTerminal('Program', True)
+        #Declaraciones y expresiones
+        Declaration_List, Declaration, Statment, Expresion, Simple_Expresion = G.NonTerminals('DeclList Decl Stat Expr SimpleExpr')
 
-        rangex = G.Terminal("range")
-        printx = G.Terminal("print")
-        PI, E = G.Terminals("PI E")
-        space = G.Terminal("space")
-        #
-        #
-        # #productions
-        #
+        Arithmethic_expression, Disjoin, Conj, Negation, Dyn_Test, Comp, Number_Expression,Term, Factor, Sign, Atomic = G.NonTerminals(
+            'ArithExpr Disj Conj Neg DynTest Comp NumExpr Term Factor Sign Atom')
 
-        program %= statement_list + exp + semi_colon, lambda h, s: ProgramNode(s[1], [s[2]])
-        program %= statement_list + exp, lambda h,s: ProgramNode(s[1], [s[2]])
-        program %= statement_list + exp_block, lambda h, s: ProgramNode(s[1], s[2])
-        program %= statement_list + exp_block + semi_colon, lambda h, s: ProgramNode(s[1], s[2])
+        ExprBlock, StatList, Expression_List, Expression_Trail, Assigment_List, Var_Declaration, Elif_Branch = G.NonTerminals(
+            'ExprBlock StatList ExprList ExprTail AssignList VarDecl ElifBranch')
 
-        statement_list %= def_protocol + statement_list, lambda h, s: [s[1]] + s[2]
-        statement_list %= type_dec + statement_list, lambda h, s: [s[1]] + s[2]
-        statement_list %= def_func + statement_list, lambda h, s: [s[1]] + s[2]
-        statement_list %= G.Epsilon, lambda h,s: []
+        Func_Declaration, Body, Argument_List, Arg_Tail, Type_Declaration, Feature_List = G.NonTerminals(
+            'FuncDecl Body ArgList ArgTail TypeDecl FeatureList')
+
+        Protocol_Declaration, Protocol_Methods, Full_Type_Arguments, Fully_Typed_Tail, Type_List = G.NonTerminals(
+            'ProtDecl ProtMethods FullyTypedArgs FullyTypedTail TypeList')
+
+        number_, string_, bool_, const_, id_, type_id_ = G.Terminals('number string bool const id type_id')
+        let_, in_, if_, elif_, else_, while_, for_, as_, is_, new_ = G.Terminals('let in if elif else while for as is new')
+        function_, type_, inherits_, protocol_, extends_ = G.Terminals('function type inherits protocol extends')
+        plus_, minus_, star_, div_, mod_, pow_, power_ = G.Terminals('+ - * / % ^ **')
+        eq_, colon_eq_, eq_qu_, not_eq_, less_, greater_, leq_, geq_ = G.Terminals('= := == != < > <= >=')
+        and_, or_, not_, or_or_ = G.Terminals('& | ! ||')
+        dot_, comma_, colon_, semi_, at_, at_at_, arrow_ = G.Terminals('. , : ; @ @@ =>')
+        o_par_, c_par_, o_brack_, c_brack_, o_brace_, c_brace_ = G.Terminals('( ) [ ] { }')
+
+        space=G.Terminal("space")
+
+        Program %= Declaration_List + Statment, lambda h, s: ProgramNode(s[1], s[2])
+
+        Declaration_List %= Declaration + Declaration_List, lambda h, s: [s[1]] + s[2]
+        Declaration_List %= G.Epsilon, lambda h, s: []
+
+        Declaration %= Func_Declaration, lambda h, s: s[1]
+        Declaration %= Type_Declaration, lambda h, s: s[1]
+        Declaration %= Protocol_Declaration, lambda h, s: s[1]
+
+        Statment %= Simple_Expresion + semi_, lambda h, s: s[1]
+        Statment %= ExprBlock, lambda h, s: s[1]
+        Statment %= ExprBlock + semi_, lambda h, s: s[1]
+
+        Expresion %= Simple_Expresion, lambda h, s: s[1]
+        Expresion %= ExprBlock, lambda h, s: s[1]
+
+        Simple_Expresion %= let_ + Assigment_List + in_ + Simple_Expresion, lambda h, s: LetNode(s[2], s[4])
+        Simple_Expresion %= if_ + o_par_ + Expresion + c_par_ + Expresion + Elif_Branch + else_ + Simple_Expresion, lambda h, s: IfNode(s[3], s[5],
+                                                                                                           s[6], s[8])
+        Simple_Expresion %= while_ + o_par_ + Expresion + c_par_ + Simple_Expresion, lambda h, s: WhileNode(s[3], s[5])
+        Simple_Expresion %= for_ + o_par_ + id_ + in_ + Expresion + c_par_ + Simple_Expresion, lambda h, s: ForNode(s[3], s[5], s[7])
+        Simple_Expresion %= id_ + colon_eq_ + Simple_Expresion, lambda h, s: DestrAssign(s[1], s[3])
+        Simple_Expresion %= id_ + dot_ + id_ + colon_eq_ + Simple_Expresion, lambda h, s: DestrAssign(s[3], s[5], True)
+        Simple_Expresion %= Arithmethic_expression, lambda h, s: s[1]
+
+        ExprBlock %= o_brace_ + StatList + c_brace_, lambda h, s: ExprBlockNode(s[2])
+        ExprBlock %= let_ + Assigment_List + in_ + ExprBlock, lambda h, s: LetNode(s[2], s[4])
+        ExprBlock %= if_ + o_par_ + Expresion + c_par_ + Expresion + Elif_Branch + else_ + ExprBlock, lambda h, s: IfNode(s[3], s[5],
+                                                                                                         s[6], s[8])
+        ExprBlock %= while_ + o_par_ + Expresion + c_par_ + ExprBlock, lambda h, s: WhileNode(s[3], s[5])
+        ExprBlock %= for_ + o_par_ + id_ + in_ + Expresion + c_par_ + ExprBlock, lambda h, s: ForNode(s[3], s[5], s[7])
+        ExprBlock %= id_ + colon_eq_ + ExprBlock, lambda h, s: DestrAssign(s[1], s[3])
+        ExprBlock %= id_ + dot_ + id_ + colon_eq_ + ExprBlock, lambda h, s: DestrAssign(s[3], s[5], True)
+
+        StatList %= Statment, lambda h, s: [s[1]]
+        StatList %= Statment + StatList, lambda h, s: [s[1]] + s[2]
+
+        Expression_List %= Expresion + Expression_Trail, lambda h, s: [s[1]] + s[2]
+        Expression_List %= G.Epsilon, lambda h, s: []
+
+        Expression_Trail %= comma_ + Expresion + Expression_Trail, lambda h, s: [s[2]] + s[3]
+        Expression_Trail %= G.Epsilon, lambda h, s: []
+
+        Assigment_List %= Var_Declaration + eq_ + Expresion, lambda h, s: [AssignNode(s[1], s[3])]
+        Assigment_List %= Var_Declaration + eq_ + Expresion + comma_ + Assigment_List, lambda h, s: [AssignNode(s[1], s[3])] + s[5]
+
+        Var_Declaration %= id_, lambda h, s: VarDefNode(s[1])
+        Var_Declaration %= id_ + colon_ + type_id_, lambda h, s: VarDefNode(s[1], s[3])
+
+        Elif_Branch %= elif_ + o_par_ + Expresion + c_par_ + Expresion + Elif_Branch, lambda h, s: [(s[3], s[5])] + s[6]
+        Elif_Branch %= G.Epsilon, lambda h, s: []
+
+        Arithmethic_expression %= Disjoin, lambda h, s: s[1]
+        Arithmethic_expression %= Arithmethic_expression + at_ + Disjoin, lambda h, s: ConcatNode(s[1], s[3])
+        Arithmethic_expression %= Arithmethic_expression + at_at_ + Disjoin, lambda h, s: ConcatWithSpaceNode(s[1], s[3])
+
+        Disjoin %= Conj, lambda h, s: s[1]
+        Disjoin %= Disjoin + or_ + Conj, lambda h, s: OrNode(s[1], s[3])
+
+        Conj %= Negation, lambda h, s: s[1]
+        Conj %= Conj + and_ + Negation, lambda h, s: AndNode(s[1], s[3])
+
+        Negation %= Dyn_Test, lambda h, s: s[1]
+        Negation %= not_ + Dyn_Test, lambda h, s: NotNode(s[2])
+
+        Dyn_Test %= Comp, lambda h, s: s[1]
+        Dyn_Test %= Comp + is_ + type_id_, lambda h, s: DynTestNode(s[1], s[3])
+
+        Comp %= Number_Expression, lambda h, s: s[1]
+        Comp %= Number_Expression + eq_qu_ + Number_Expression, lambda h, s: EqualNode(s[1], s[3])
+        Comp %= Number_Expression + not_eq_ + Number_Expression, lambda h, s: NotEqualNode(s[1], s[3])
+        Comp %= Number_Expression + less_ + Number_Expression, lambda h, s: LessNode(s[1], s[3])
+        Comp %= Number_Expression + greater_ + Number_Expression, lambda h, s: GreaterNode(s[1], s[3])
+        Comp %= Number_Expression + leq_ + Number_Expression, lambda h, s: LeqNode(s[1], s[3])
+        Comp %= Number_Expression + geq_ + Number_Expression, lambda h, s: GeqNode(s[1], s[3])
+
+        Number_Expression %= Term, lambda h, s: s[1]
+        Number_Expression %= Number_Expression + plus_ + Term, lambda h, s: PlusNode(s[1], s[3])
+        Number_Expression %= Number_Expression + minus_ + Term, lambda h, s: MinusNode(s[1], s[3])
+
+        Term %= Factor, lambda h, s: s[1]
+        Term %= Term + star_ + Factor, lambda h, s: StarNode(s[1], s[3])
+        Term %= Term + div_ + Factor, lambda h, s: DivNode(s[1], s[3])
+        Term %= Term + mod_ + Factor, lambda h, s: ModNode(s[1], s[3])
+
+        Factor %= Sign, lambda h, s: s[1]
+        Factor %= Sign + pow_ + Factor, lambda h, s: PowNode(s[1], s[3])
+        Factor %= Sign + power_ + Factor, lambda h, s: PowNode(s[1], s[3])
+
+        Sign %= Atomic, lambda h, s: s[1]
+        Sign %= minus_ + Atomic, lambda h, s: NegativeNode(s[2])
+
+        Atomic %= number_, lambda h, s: LiteralNumNode(s[1])
+        Atomic %= string_, lambda h, s: LiteralStrNode(s[1])
+        Atomic %= bool_, lambda h, s: LiteralBoolNode(s[1])
+        Atomic %= const_, lambda h, s: ConstantNode(s[1])
+        Atomic %= id_, lambda h, s: VarNode(s[1])
+        Atomic %= o_brack_ + Expression_List + c_brack_, lambda h, s: VectorNode(s[2])
+        Atomic %= o_brack_ + Expresion + or_or_ + id_ + in_ + Expresion + c_brack_, lambda h, s: ImplicitVector(s[2], s[4], s[6])
+        Atomic %= o_par_ + Expresion + c_par_, lambda h, s: s[2]
+        Atomic %= new_ + type_id_ + o_par_ + Expression_List + c_par_, lambda h, s: InstantiateNode(s[2], s[4])
+        Atomic %= id_ + o_par_ + Expression_List + c_par_, lambda h, s: FuncCallNode(s[1], s[3])
+        Atomic %= Atomic + as_ + type_id_, lambda h, s: DowncastNode(s[1], s[3])
+        Atomic %= Atomic + o_brack_ + Expresion + c_brack_, lambda h, s: IndexingNode(s[1], s[3])
+        Atomic %= id_ + dot_ + id_ + o_par_ + Expression_List + c_par_, lambda h, s: MethodCallNode(s[1], s[3], s[5])
+        Atomic %= id_ + dot_ + id_, lambda h, s: AttrrCallNode(s[1], s[3])
+
+        Func_Declaration %= function_ + id_ + o_par_ + Argument_List + c_par_ + Body, lambda h, s: FuncDeclNode(s[2], s[4], s[6])
+        Func_Declaration %= function_ + id_ + o_par_ + Argument_List + c_par_ + colon_ + type_id_ + Body, lambda h, s: FuncDeclNode(s[2],
+                                                                                                              s[4],
+                                                                                                              s[8],
+                                                                                                              s[7])
+
+        Body %= arrow_ + Statment, lambda h, s: s[2]
+        Body %= o_brace_ + StatList + c_brace_, lambda h, s: s[2]
+
+        Argument_List %= Var_Declaration + Arg_Tail, lambda h, s: [s[1]] + s[2]
+        Argument_List %= G.Epsilon, lambda h, s: []
+
+        Arg_Tail %= comma_ + Var_Declaration + Arg_Tail, lambda h, s: [s[2]] + s[3]
+        Arg_Tail %= G.Epsilon, lambda h, s: []
+
+        Type_Declaration %= type_ + type_id_ + o_brace_ + Feature_List + c_brace_, lambda h, s: TypeDeclNode(s[2], s[4])
+        Type_Declaration %= type_ + type_id_ + o_par_ + Argument_List + c_par_ + o_brace_ + Feature_List + c_brace_, lambda h, s: TypeDeclNode(
+            s[2], s[7], s[4])
+        Type_Declaration %= type_ + type_id_ + inherits_ + type_id_ + o_brace_ + Feature_List + c_brace_, lambda h, s: TypeDeclNode(s[2],
+                                                                                                                   s[6],
+                                                                                                                   None,
+                                                                                                                   s[4])
+        Type_Declaration %= type_ + type_id_ + o_par_ + Argument_List + c_par_ + inherits_ + type_id_ + o_par_ + Expression_List + c_par_ + o_brace_ + Feature_List + c_brace_, lambda \
+            h, s: TypeDeclNode(s[2], s[12], s[4], s[7], s[9])
+
+        Feature_List %= Var_Declaration + eq_ + Statment + Feature_List, lambda h, s: [AssignNode(s[1], s[3])] + s[4]
+        Feature_List %= id_ + o_par_ + Argument_List + c_par_ + Body + Feature_List, lambda h, s: [MethodNode(s[1], s[3], s[5])] + s[
+            6]
+        Feature_List %= id_ + o_par_ + Argument_List + c_par_ + colon_ + type_id_ + Body + Feature_List, lambda h, s: [MethodNode(s[1],
+                                                                                                                   s[3],
+                                                                                                                   s[7],
+                                                                                                                   s[
+                                                                                                                       6])] +  s[8]
 
 
-        exp %= while_block, lambda h, s: s[1]
-        exp %= for_exp, lambda h, s: s[1]
-        exp %= print_exp, lambda h, s: s[1]
-        exp %= instance, lambda h, s: s[1]
-        exp %= mutate_var, lambda h, s: s[1]
-        exp %= string_exp, lambda h, s: s[1]
-        exp %= iterable, lambda h, s: s[1]
-        string_exp %= conforms, lambda h, s: s[1]
+        Feature_List %= G.Epsilon, lambda h, s: []
 
-        string_exp %= let_exp, lambda h, s: s[1]
-        string_exp %= conditional, lambda h, s: s[1]
+        Protocol_Declaration %= protocol_ + type_id_ + o_brace_ + Protocol_Methods + c_brace_, lambda h, s: ProtDeclNode(s[2], s[4])
+        Protocol_Declaration %= protocol_ + type_id_ + extends_ + Type_List + o_brace_ + Protocol_Methods + c_brace_, lambda h, s: ProtDeclNode(
+            s[2], s[6], s[4])
 
-        string_exp %= indexation + concatenable, lambda h, s: StringExpression(s[1], s[2])
-        string_exp %= indexation, lambda h,s: s[1]
+        Protocol_Methods %= id_ + o_par_ + Full_Type_Arguments + c_par_ + colon_ + type_id_ + semi_ + Protocol_Methods, lambda h, s: [
+                                                                                                                  ProtMethodNode(
+                                                                                                                      s[
+                                                                                                                          1],
+                                                                                                                      s[
+                                                                                                                          3],
 
-        string_exp %= term + concatenable, lambda h, s: StringExpression(s[1],s[2])
-        string_exp %= term, lambda h,s: s[1]
+                                                                                                                      s[
+                                                                                                                          6])] + \
+                                                                                                              s[8]
 
-        string_exp %= strx + concatenable, lambda h, s: StringExpression(ConstantStringNode(s[1].lex), s[2])
-        string_exp %= strx, lambda h,s: ConstantStringNode(s[1].lex)
+        Protocol_Methods %= G.Epsilon, lambda h, s: []
 
+        Full_Type_Arguments %= id_ + colon_ + type_id_ + Fully_Typed_Tail, lambda h, s: [VarDefNode(s[1], s[3])] + s[4]
+        Full_Type_Arguments %= G.Epsilon, lambda h, s: []
 
-        concatenable %= concat + string_exp, lambda h, s: StringExpression(ConstantStringNode(""), s[2])
-        concatenable %= concat_space + string_exp, lambda h, s: StringExpression(ConstantStringNode(" "),s[2])
+        Fully_Typed_Tail %= comma_ + id_ + colon_ + type_id_ + Fully_Typed_Tail, lambda h, s: [VarDefNode(s[2], s[4])] + s[5]
+        Fully_Typed_Tail %= G.Epsilon, lambda h, s: []
 
-        #---------- Protocol Declaration Stuff ----------------
-        def_protocol %= protocol + idx + curly_o + method_declarations + curly_c, lambda h, s: ProtocolDeclarationNode(s[2], s[4], None)
-        def_protocol %= protocol + idx + extends + id_list + curly_o + method_declarations + curly_c, lambda h, s: ProtocolDeclarationNode(s[2], s[6], s[4])
-
-        id_list %= idx, lambda h,s: [s[1]]
-        id_list %= idx + comma + id_list, lambda h,s: [s[1]] + s[3]
-
-        def_method %= idx + opar + param_list + cpar + colon + possible_types, lambda h, s: MethodDeclarationNode(s[1], s[3], s[6])
-
-
-        method_declarations %= def_method + semi_colon, lambda h, s: [s[1]]
-        method_declarations %= def_method + semi_colon + method_declarations, lambda h, s: [s[1]] + s[3]
-
-        #-----------Type Declaration Stuff ---------------------
-        type_dec %= typex + idx + type_args + curly_o + type_body + curly_c, lambda h, s: TypeDeclarationNode(s[2], s[5], None, s[3])
-        type_dec %= typex + idx + inherits + idx + curly_o + type_body + curly_c, lambda h, s: TypeDeclarationNode(s[2], s[6], s[4], None)
-        #empty body
-        type_dec %= typex + idx + inherits + idx + curly_o + curly_c, lambda h, s: TypeDeclarationNode(s[2], [], s[4], None)
-        type_dec %= typex + idx + type_args + curly_o + curly_c, lambda h, s: TypeDeclarationNode(s[2], [], None, s[3])
-
-        type_args %= opar + param_list + cpar, lambda h, s: s[2]
-        type_args %= G.Epsilon, lambda h, s: []
-
-        type_body %= functions_in_type, lambda h, s: [s[1]]
-        type_body %= functions_in_type + type_body, lambda h, s: [s[1]] + s[3]
-        type_body %= attribute + semi_colon, lambda h, s: [s[1]]
-        type_body %= attribute + semi_colon + type_body, lambda h, s: [s[1]] + s[3]
-
-        functions_in_type %= idx + opar + param_list + cpar + rarrow + exp + semi_colon, lambda h, s: FuncDeclarationNode(s[1], s[3], s[6])
-        functions_in_type %= idx + opar + param_list + cpar + exp_block, lambda h, s: FuncDeclarationNode(s[1], s[3], s[5])
-
-        attribute %= idx + equal + exp, lambda h, s: AttrDeclarationNode(s[1], s[3], None)
-        attribute %= idx + colon + possible_types, lambda h, s: AttrDeclarationNode(s[1], None, s[3])
-
-        instance %= new + idx + opar + param_list + cpar, lambda h, s: InstantiateNode(s[2], s[4])
-
-        exp_block %= curly_o + exp_list + curly_c, lambda h, s: s[2]
-
-        exp_list %= exp + semi_colon + exp_list, lambda h, s: [s[1]] + s[3]
-        exp_list %= exp + semi_colon, lambda h, s: [s[1]]
-
-        def_func %= function + idx + opar + param_list + cpar + rarrow + exp + semi_colon, lambda h, s: FuncDeclarationNode(s[2], s[4], s[7])
-        def_func %= function + idx + opar + param_list + cpar + exp_block, lambda h, s: FuncDeclarationNode(s[2], s[4], s[6])
-
-        func_call %= idx + dot + idx, lambda h,s: AttrCallNode(s[1], s[3])
-        func_call %= idx + dot + multiple_func_call, lambda h,s : FuncCallNode(s[1],[s[3]])
-        func_call %= multiple_func_call, lambda h,s: s[1]
-
-        multiple_func_call %= single_func_call , lambda h,s: s[1]
-        multiple_func_call %= single_func_call + dot + multiple_func_call, lambda h,s: FuncCallNode(s[1], [s[3]])
-
-        single_func_call %= idx + opar + param_list + cpar, lambda h,s: FuncCallNode(s[1], s[3])
-
-        param_list %= param, lambda h, s: [s[1]]
-        param_list %= param + comma + param_list, lambda h, s: [s[1]] + s[3]
-
-        arg_declaration %= idx + colon + possible_types, lambda h, s: (s[1],s[3])
-        arg_declaration %= term, lambda h,s: (s[1],None)
-        arg_declaration %= G.Epsilon, lambda h, s: (VoidNode(None),None)
-
-        param %= arg_declaration, lambda h, s: s[1]
-
-        let_exp %= let + assign_list + inx + exp, lambda h, s: LetNode(s[2], [s[4]])
-        let_exp %= let + assign_list + inx + exp_block, lambda h, s: LetNode(s[2], s[4])
-
-        assign_list %= assign_var, lambda h, s: [s[1]]
-        assign_list %= assign_var + comma + assign_list, lambda h, s: [s[1]] + s[3]
-
-        assign_var %= idx + equal + exp, lambda h, s: AssignNode(s[1], s[3])
-
-        mutate_var %= idx + mut + exp, lambda h, s: DestructiveAssignment(s[1], s[3])
-
-        conditional %= ifx + opar + boolean_exp + cpar + exp + elif_block, lambda h, s: ConditionalNode(s[3], [s[5]], s[6])
-        conditional %= ifx + opar + boolean_exp + cpar + exp_block + elif_block, lambda h, s: ConditionalNode(s[3], s[5], s[6])
-
-        elif_block %= elsex + exp, lambda h, s: ElseBlockNode([s[2]])
-        elif_block %= elsex + exp_block, lambda h, s: ElseBlockNode(s[2])
-        elif_block %= elifx + opar + boolean_exp + cpar + exp + elif_block, lambda h, s: ConditionalNode(s[3], [s[5]], s[6])
-        elif_block %= elifx + opar + boolean_exp + cpar + exp_block + elif_block, lambda h, s: ConditionalNode(s[3], s[5], s[6])
-
-        while_block %= whilex + opar + boolean_exp + cpar + exp + elsex + exp , lambda h, s: LoopNode(s[3], [s[5]], [s[7]])
-        while_block %= whilex + opar + boolean_exp + cpar + exp + elsex + exp_block, lambda h, s: LoopNode(s[3], [s[5]], s[7])
-        while_block %= whilex + opar + boolean_exp + cpar + exp_block + elsex + exp , lambda h, s: LoopNode(s[3], s[5], [s[7]])
-        while_block %= whilex + opar + boolean_exp + cpar + exp_block + elsex + exp_block, lambda h, s: LoopNode(s[3], s[5], s[7])
-
-        for_exp %= forx + opar + idx + inx + exp + cpar + exp + elsex + exp, lambda h, s: ForNode(s[5],[s[7]],s[3], s[9])
-        for_exp %= forx + opar + idx + inx + exp + cpar + exp + elsex + exp_block, lambda h, s: ForNode(s[5],[s[7]],s[3], s[9])
-        for_exp %= forx + opar + idx + inx + exp + cpar + exp_block + elsex + exp, lambda h, s: ForNode(s[5],s[7],s[3],s[9])
-        for_exp %= forx + opar + idx + inx + exp + cpar + exp_block + elsex + exp_block, lambda h, s: ForNode(s[5],s[7],s[3],s[9])
-
-        iterable %= vector, lambda h, s: s[1]
-        iterable %= rangex + opar + exp + comma + exp + cpar, lambda h, s: RangeNode(s[3], s[5])
-
-        vector %= square_o + list_ + square_c, lambda h, s: s[2]
-        vector %= square_o + exp + given + idx + inx + iterable + square_c, lambda h, s: List_Comprehension(s[4], [s[2]],s[6])
-
-        list_ %= exp, lambda h, s: [s[1]]
-        list_ %= exp + comma + list_, lambda h, s: [s[1]] + s[3]
-
-        indexation %= idx + square_o + exp + square_c, lambda h, s: IndexationNode(s[1], s[3])
-        indexation %= iterable + square_o + exp + square_c, lambda h, s: IndexationNode(s[1], s[3])
-        indexation %= func_call + square_o + exp + square_c, lambda h,s: IndexationNode(s[1], s[3])
-
-        term %= factor, lambda h, s: s[1]
-        term %= term + plus + factor, lambda h, s: PlusNode(s[1], s[3])
-        term %= term + minus + factor, lambda h, s: MinusNode(s[1], s[3])
-
-        factor %= mod_, lambda h, s: s[1]
-        factor %= factor + star + mod_, lambda h, s: StarNode(s[1], s[3])
-        factor %= factor + div + mod_, lambda h, s: DivNode(s[1], s[3])
-
-        mod_ %= k, lambda h, s: s[1]
-        mod_ %= mod_ + mod + k, lambda h, s: ModNode(s[1], s[3])
-
-        k %= atom, lambda h, s: s[1]
-        k %= k + pow + atom, lambda h, s: PowNode(s[1], s[3])
-
-        atom %= idx, lambda h, s: VariableNode(s[1])
-        atom %= num, lambda h, s: ConstantNumNode(s[1])
-        atom %= minus + num, lambda h, s: NegNode(ConstantNumNode(s[2]))
-        atom %= opar + exp + cpar, lambda h, s: s[2]
-        atom %= sqrt + opar + exp + cpar, lambda h, s: SqrtNode(s[3])
-        atom %= cos + opar + exp + cpar, lambda h, s: CosNode(s[3])
-        atom %= sin + opar + exp + cpar, lambda h, s: SinNode(s[3])
-        atom %= expon + opar + exp + cpar, lambda h, s: ExponEulerNode(s[3])
-        atom %= log + opar + exp + comma + exp + cpar, lambda h, s: LogNode(s[3], s[5])
-        atom %= rand + opar + cpar, lambda h, s: RandNode(s[2])
-        atom %= PI, lambda h, s: ConstantNumNode(s[1])
-        atom %= E, lambda h, s: ConstantNumNode(s[1])
-        atom %= func_call, lambda h, s: s[1]
-
-        #boolean expressions as described in hulk
-        #TODO: (condition)
-        #TODO: check all AST nodes
-        condition %= exp + leq + exp, lambda h, s: LeqNode(s[1], s[3])
-        condition %= exp + less + exp, lambda h, s: LessNode(s[1], s[3])
-        condition %= exp + equals + exp, lambda h, s: EqualNode(s[1], s[3])
-        condition %= exp + geq + exp, lambda h, s: LessNode(s[3], s[1])
-        condition %= exp + greater + exp, lambda h, s: LeqNode(s[3], s[1])
-        condition %= exp + neq + exp, lambda h, s: NotNode(EqualNode(s[1], s[3]))
-
-        condition %= true, lambda h, s: ConstantBoolNode(s[1])
-        condition %= false, lambda h, s: ConstantBoolNode(s[1])
-        condition %= opar + exp + cpar, lambda h, s: s[2]
-        condition %= notx + exp, lambda h, s: NotNode(s[2])
-        condition %= exp + isx + possible_types, lambda h, s: IsNode(s[1], s[3])
-        condition %= func_call, lambda h,s: s[1]
-        condition %= idx, lambda h,s: s[1]
-
-        concatenable_cond %= condition + andx + concatenable_cond, lambda h,s: AndNode(s[1], s[3])
-        concatenable_cond %= condition + orx + concatenable_cond, lambda h,s: OrNode(s[1], s[3])
-        concatenable_cond %= condition, lambda h,s: s[1]
-
-        boolean_exp %= concatenable_cond, lambda h,s: s[1]
-
-        print_exp %= printx + opar + exp + cpar, lambda h, s: PrintNode(s[3])
-
-        conforms %= term + asx + possible_types, lambda h,s: ConformsNode(s[1], s[3])
-
-        possible_types %= idx, lambda h,s: s[1]
-        possible_types %= string, lambda h,s : s[1]
-        possible_types %= boolx, lambda h,s: s[1]
-        possible_types %= intx, lambda h,s: s[1]
+        Type_List %= type_id_, lambda h, s: [s[1]]
+        Type_List %= type_id_ + comma_ + Type_List, lambda h, s: [s[1]] + s[3]

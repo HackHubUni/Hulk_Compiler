@@ -1,7 +1,7 @@
 
-from Lexer_Parser.automata import State
+from Lexer_Parser.utils.automata import State
 from cmp.pycompiler import Grammar, Item, ContainerSet, EOF, SintacticException,Token
-from Lexer_Parser.parserLL1 import compute_first_follows, compute_firsts, compute_follows, compute_local_first
+from Lexer_Parser.utils.parserLL1 import compute_firsts, compute_follows, compute_local_first
 
 try:
     from pandas import DataFrame

@@ -1,320 +1,289 @@
 import cmp.visitor as visitor
 from abc import ABC, abstractmethod
-class Node:
-
-
-    def evaluate(self):
-        raise NotImplementedError()
-    
-
-#TODO: Rellenar
-class MethodDeclarationNode(Node):
-    pass
-class ProtocolDeclarationNode(Node):
-    pass
-#deep 1
+from cmp.ast import *
 
 class ProgramNode(Node):
-    def __init__(self, statement_list,exp):
-
-        self.exp = exp #list
-        self.statements_list = statement_list #list
-
-class StringExpression(Node):
-    def __init__(self,string_type, concatenable):
-        self.string_type = string_type
-        self.concatenable = concatenable# expresion o string a concatenar
-
-class TypeDeclarationNode(Node):
-    def __init__(self, idx, type_body , idx_inherits, type_args):
-        self.idx = idx
-        self.type_body = type_body
-        self.idx_inherits = idx_inherits
-        self.type_args = type_args
+    def __init__(self, decl_list, expr):
+        self.decl_list = decl_list
+        self.expr = expr
 
 
-
-class InstantiateNode(Node):#new
-    def __init__(self,idx,exp_list):
-        def __init__(self,idx,exp_list):
-            self.idx = idx
-            self.exp_list = exp_list
+class DeclNode(Node):
+    pass
 
 
-#nodos de llamada
-class CallNode(Node):
-    def __init__(self,idx,exp_list):
-        self.idx = idx
-        self.exp_list = exp_list
+class ExprNode(Node):
+    pass
 
 
-#deep 2
+class ExprBlockNode(ExprNode):
+    def __init__(self, expr_list) -> None:
+        self.expr_list = expr_list
 
 
-#nodos de expresion
-class BinaryNode(Node):
-    def __init__(self, left, right):
-        self.left = left
-        self.right = right
-
-class UnaryNode(Node):
-    def __init__(self, node):
-        self.node = node
+class LetNode(ExprNode):
+    def __init__(self, assign_list, expr) -> None:
+        self.assign_list = assign_list
+        self.expr = expr
 
 
-
-class ConstantStringNode(StringExpression):#tienen el string 
-    def __init__(self, string_lex):
-        super().__init__(string_lex, concatenable = None)
-
-
-
-
-
-class FuncDeclarationNode:
-    def __init__(self,idx,param_list , exp ) -> None:
-        self.idx = idx
-        self.param_list = param_list
-        self.exp = exp
+class IfNode(ExprNode):
+    def __init__(self, cond, if_expr, elif_branches, else_expr) -> None:
+        self.cond = cond
+        self.if_expr = if_expr
+        self.elif_branches = elif_branches  # lista de tuplas de expresiones del tipo (elif_cond, elif_expr)
+        self.else_expr = else_expr
 
 
-class AttrDeclarationNode:# a=b a:b
-    def __init__(self,idx,exp, type_exp):
-        self.idx = idx
-        self.type_exp = type_exp
-        self.exp = exp
+class WhileNode(ExprNode):
+    def __init__(self, cond, body) -> None:
+        self.cond = cond
+        self.body = body
 
 
-
-class AttrCallNode(CallNode):
-    def __init__(self,idx,exp):
-        super().__init__(idx,exp)
-        self.idx = idx
-        self.exp = exp
-
-class FuncCallNode(CallNode):
-   def __init__(self,idx,exp_list):
-        super().__init__(idx,exp_list)
-        self.idx = idx
-        self.exp_list = exp_list
+class ForNode(ExprNode):
+    def __init__(self, id, iterable, body) -> None:
+        self.id = id
+        self.iterable = iterable
+        self.body = body
 
 
-class VoidNode(CallNode):#epsilon
-    def __init__(self):
-        super().__init__(None,None)
-        self.value = None
+class DestrAssign(ExprNode):
+    def __init__(self, id, expr, is_attr=False) -> None:
+        self.id = id
+        self.expr = expr
+        self.is_attr = is_attr
 
 
-
-#nodos de condicionales
-
-class LetNode(BinaryNode):
-    def __init__(self, let_exp, in_exp):
-        super().__init__(let_exp, in_exp)
-        self.let_exp = let_exp
-        self.in_exp = in_exp
-
-class AssignNode(BinaryNode):#a =b
-    def __init__(self, idx, value):
-        super().__init__(idx, value)
-        self.idx = idx
-        self.value = value
-    
-class DestructiveAssignment(AssignNode):#a:=b
-    def __init__(self, idx, value):
-        super().__init__(idx, value)
-        self.idx = idx
-        self.value = value
-                
-class ConditionalNode(Node):
-    def __init__(self, if_exp, if_body, else_body):
-        self.if_exp = if_exp
-        self.if_body = if_body
-        self.else_body = else_body
-
-class ElseBlockNode(UnaryNode):
-    def __init__(self, else_body):
-        super().__init__(else_body)
-        self.else_body = else_body
-
-class LoopNode(ConditionalNode):
-    def __init__(self, if_exp, if_body, else_body):
-        super().__init__(if_exp, if_body, else_body)
-        self.while_exp = if_exp
-        self.while_body = if_body
-        self.else_body = else_body
+class AssignNode(Node):
+    def __init__(self, var, expr) -> None:
+        self.var = var
+        self.expr = expr
 
 
-class ForNode(Node):
-    def __init__(self,  range_exp, for_body,idx,for_else_body):
-        self.idx = idx
-        self.range_exp = range_exp
-        self.for_body = for_body
-        self.for_else_body = for_else_body
+class VarDefNode(Node):
+    def __init__(self, id, type=None) -> None:
+        self.id = id
+        self.type = type
 
-#iterables
-class RangeNode(BinaryNode):
-    def __init__(self, start, end):
-        super().__init__(start, end)
-        self.start = start
-        self.end = end
 
-class List_Comprehension(Node):
-    def __init__(self, exp, for_exp, if_exp):
-        self.exp = exp
-        self.for_exp = for_exp
-        self.if_exp = if_exp
+class ConcatNode(BinaryNode):
+    @staticmethod
+    def operate(lvalue, rvalue):
+        return str(lvalue) + str(rvalue)
 
-class IndexationNode(BinaryNode):
-    def __init__(self, idx, exp):
-        self.idx = idx
-        self.exp = exp
 
-#operaciones binarias
-class ModNode(BinaryNode):  
-    def __init__(self, left, right):
-        super().__init__(left, right)
-        self.left = left
-        self.right = right
+class ConcatWithSpaceNode(BinaryNode):
+    @staticmethod
+    def operate(lvalue, rvalue):
+        return str(lvalue) + " " + str(rvalue)
+
+
+class OrNode(BinaryNode):
+    @staticmethod
+    def operate(lvalue, rvalue):
+        return lvalue or rvalue
+
+
+class AndNode(BinaryNode):
+    @staticmethod
+    def operate(lvalue, rvalue):
+        return lvalue and rvalue
+
+
+class NotNode(UnaryNode):
+    @staticmethod
+    def operate(value):
+        return not value
+
+
+class DynTestNode(ExprNode):
+    def __init__(self, expr, type) -> None:
+        self.expr = expr
+        self.type = type
+
+
+class EqualNode(BinaryNode):
+    @staticmethod
+    def operate(lvalue, rvalue):
+        return lvalue == rvalue
+
+
+class NotEqualNode(BinaryNode):
+    @staticmethod
+    def operate(lvalue, rvalue):
+        return lvalue != rvalue
+
+
+class LessNode(BinaryNode):
+    @staticmethod
+    def operate(lvalue, rvalue):
+        return lvalue < rvalue
+
+
+class GreaterNode(BinaryNode):
+    @staticmethod
+    def operate(lvalue, rvalue):
+        return lvalue > rvalue
+
+
+class LeqNode(BinaryNode):
+    @staticmethod
+    def operate(lvalue, rvalue):
+        return lvalue <= rvalue
+
+
+class GeqNode(BinaryNode):
+    @staticmethod
+    def operate(lvalue, rvalue):
+        return lvalue >= rvalue
 
 
 class PlusNode(BinaryNode):
-    def __init__(self, left, right):
-        super().__init__(left, right)
-        self.left = left
-        self.right = right
+    @staticmethod
+    def operate(lvalue, rvalue):
+        return lvalue + rvalue
+
 
 class MinusNode(BinaryNode):
-    def __init__(self, left, right):
-        super().__init__(left, right)
-        self.left = left
-        self.right = right
+    @staticmethod
+    def operate(lvalue, rvalue):
+        return lvalue - rvalue
+
 
 class StarNode(BinaryNode):
-    def __init__(self, left, right):
-        super().__init__(left, right)
-        self.left = left
-        self.right = right
+    @staticmethod
+    def operate(lvalue, rvalue):
+        return lvalue * rvalue
+
 
 class DivNode(BinaryNode):
-    def __init__(self, left, right):
-        super().__init__(left, right)
-        self.left = left
-        self.right = right  
+    @staticmethod
+    def operate(lvalue, rvalue):
+        return lvalue / rvalue
+
+
+class ModNode(BinaryNode):
+    @staticmethod
+    def operate(lvalue, rvalue):
+        return lvalue % rvalue
+
 
 class PowNode(BinaryNode):
-    def __init__(self, left, right):
-        super().__init__(left, right)
-        self.left = left
-        self.right = right
+    @staticmethod
+    def operate(lvalue, rvalue):
+        return lvalue ** rvalue
 
 
-# unarios
-class AtomicNode(Node):
-    def __init__(self, lex):
-        self.lex = lex
-
-class VariableNode(AtomicNode):
-    def __init__(self, lex):
-        super().__init__(lex)
-        self.lex = lex
-    
-class ConstantNumNode(AtomicNode):
-    def __init__(self, lex):
-        super().__init__(lex)
-        self.lex = lex
-
-class NegNode(AtomicNode):
-    def __init__(self, lex):
-        super().__init__(lex)
-        self.lex = lex
-
-class SqrtNode(AtomicNode):
-    def __init__(self, lex):
-        super().__init__(lex)
-        self.lex = lex
-
-class CosNode(AtomicNode):
-    def __init__(self, lex):
-        super().__init__(lex)
-        self.lex = lex
-
-class SinNode(AtomicNode):
-    def __init__(self, lex):
-        super().__init__(lex)
-        self.lex = lex
-
-class ExponEulerNode(AtomicNode):
-    def __init__(self, lex):
-        super().__init__(lex)
-        self.lex = lex
-
-class LogNode(AtomicNode):
-    def __init__(self, lex):
-        super().__init__(lex)
-        self.lex = lex
-
-class RandNode(AtomicNode):
-    def __init__(self, lex):
-        super().__init__(lex)
-        self.lex = lex
-
-#condition
-
-class EqualNode(BinaryNode):
-    def __init__(self, left, right):
-        super().__init__(left, right)
-        self.left = left
-        self.right = right
-
-class LessNode(BinaryNode):
-    def __init__(self, left, right):
-        super().__init__(left, right)
-        self.left = left
-        self.right = right
-
-class LeqNode(BinaryNode):
-    def __init__(self, left, right):
-        super().__init__(left, right)
-        self.left = left
-        self.right = right
-
-class AndNode(BinaryNode):
-    def __init__(self, left, right):
-        super().__init__(left, right)
-        self.left = left
-        self.right = right
-
-class OrNode(BinaryNode):
-    def __init__(self, left, right):
-        super().__init__(left, right)
-        self.left = left
-        self.right = right
+class NegativeNode(UnaryNode):
+    @staticmethod
+    def operate(value):
+        return - value
 
 
-class ConformsNode(BinaryNode): 
-    def __init__(self, left, right):
-        super().__init__(left, right)
-        self.left = left
-        self.right = right
+class LiteralNumNode(AtomicNode):
+    pass
 
-class IsNode(BinaryNode):
-    def __init__(self, left, right):
-        super().__init__(left, right)
-        self.left = left
-        self.right = right
 
-class ConstantBoolNode(AtomicNode):
-    def __init__(self, lex):
-        super().__init__(lex)
-        self.lex = lex
+class LiteralBoolNode(AtomicNode):
+    pass
 
-class NotNode(AtomicNode):
-    def __init__(self, right):
-        super().__init__(right)
-        self.right = right
 
-class PrintNode(AtomicNode):
-    def __init__(self, right):
-        super().__init__(right)
-        self.right = right
+class LiteralStrNode(AtomicNode):
+    pass
+
+
+class ConstantNode(AtomicNode):
+    pass
+
+
+class VarNode(AtomicNode):
+    pass
+
+
+class VectorNode(ExprNode):
+    def __init__(self, expr_list) -> None:
+        self.expr_list = expr_list
+
+
+class ImplicitVector(ExprNode):
+    def __init__(self, expr, id, iterable) -> None:
+        self.expr = expr
+        self.id = id
+        self.iterable = iterable
+
+
+class IndexingNode(ExprNode):
+    def __init__(self, vector, index):
+        self.vector = vector
+        self.expr = index
+
+
+class InstantiateNode(ExprNode):
+    def __init__(self, type, expr_list) -> None:
+        self.type = type
+        self.expr_list = expr_list
+
+
+class DowncastNode(ExprNode):
+    def __init__(self, obj, type) -> None:
+        self.obj = obj
+        self.type = type
+
+
+class FuncCallNode(ExprNode):
+    def __init__(self, id, args):
+        self.id = id
+        self.args = args
+
+
+class MethodCallNode(ExprNode):
+    def __init__(self, obj, id, args):
+        self.obj = obj
+        self.id = id
+        self.args = args
+
+
+class AttrrCallNode(ExprNode):
+    def __init__(self, obj, id) -> None:
+        self.obj = obj
+        self.id = id
+
+
+class FuncDeclNode(DeclNode):
+    def __init__(self, id, args, body, return_type=None) -> None:
+        self.id = id
+        self.args = args
+        self.return_type = return_type
+        self.body = body
+
+
+class TypeDeclNode(DeclNode):
+    def __init__(self, id, features, args=None, parent=None, parent_constructor_args=None) -> None:
+        self.id = id
+        self.features = features
+        self.args = args
+        self.parent = parent
+        self.parent_constructor_args = parent_constructor_args
+
+
+class MethodNode(Node):
+    def __init__(self, id, args, body, return_type=None) -> None:
+        self.id = id
+        self.args = args
+        self.return_type = return_type
+        self.body = body
+
+
+class ProtDeclNode(DeclNode):
+    def __init__(self, id, methods, parents=None) -> None:
+        self.id = id
+        self.methods = methods
+        self.parents = parents
+
+
+class ProtMethodNode(Node):
+    def __init__(self, id, args: list[VarDefNode], return_type) -> None:
+        self.id = id
+        self.args = args
+        self.return_type = return_type

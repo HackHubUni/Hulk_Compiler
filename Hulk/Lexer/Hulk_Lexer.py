@@ -2,14 +2,14 @@ from Hulk.Lexer.Regex import Get_Hulk_Regex
 import os
 import dill
 import time
-from Lexer_Parser.lexer import Lexer
+from Hulk.Lexer.utils import HulkLexer
 import sys
 
 
 
 def __create_hulk_lexer__():
     regex, eof = Get_Hulk_Regex()
-    return Lexer(regex, eof)
+    return HulkLexer(regex, eof)
 
 
 def get_hulk_lexer(file_name='lexer.pkl', delete_before=False):
@@ -54,8 +54,9 @@ def get_hulk_lexer(file_name='lexer.pkl', delete_before=False):
 
 
 
-
+"""
 a=get_hulk_lexer()
 
 s=a("kdks")
 print(s)
+"""

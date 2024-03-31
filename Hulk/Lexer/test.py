@@ -1,5 +1,3 @@
-from Lexer_Parser.lexer import Lexer
-
 from Hulk.Lexer.Hulk_Lexer import get_hulk_lexer
 
 lexer = get_hulk_lexer()

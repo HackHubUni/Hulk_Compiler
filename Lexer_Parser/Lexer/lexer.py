@@ -1,7 +1,7 @@
 
 from cmp.pycompiler import Token,Terminal
-from Lexer_Parser.automata import State
-from Lexer_Parser.regx import RegexSimple
+from Lexer_Parser.utils.automata import State
+from Lexer_Parser.Lexer.regx import RegexSimple
 
 
 class Lexer:

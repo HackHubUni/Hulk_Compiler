@@ -20,11 +20,12 @@ class Regex_Utils:
         self.delim_ = ' |\t|\n'
 
         self.string=f'"({self.letters_}|{self.uppercase_letters_}|0|{self.nonzero_digits_}|{self.valid_string_symbols_}|\t| |\|| |\\\\")*"'
-        self.id=f'({self.letters_}|{self.uppercase_letters_}|{self.valid_id_symbols_})({self.letters_}|{self.uppercase_letters_}|0|{self.nonzero_digits_}|{self.valid_id_symbols_})*'
+        self.id=f'({self.letters_}|{self.valid_id_symbols_})({self.letters_}|{self.uppercase_letters_}|0|{self.nonzero_digits_}|{self.valid_id_symbols_})*'
         self.numbers=f'({self.natural_aster_numbers_})|({self.floating_point_numbers_})'
         self.space=f'({self.delim_})({self.delim_})*'
-
-
+        self.bool=f'(true|false)'
+        self.const=f"(PI|E)"
+        self.type_id=f'({self.uppercase_letters_})({self.letters_}|{self.uppercase_letters_}|0|{self.nonzero_digits_}|{self.valid_id_symbols_})*'
 #a=Regex_Utils()
 #print(a.string)
 #print(a.id)

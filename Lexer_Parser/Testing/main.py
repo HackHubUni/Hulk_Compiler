@@ -1,8 +1,7 @@
-from cmp.pycompiler import Grammar, Terminal, NonTerminal, Token
-from cmp.ast import Node, BinaryNode, get_printer
-from Lexer_Parser.shift_reduce import LR1Parser, evaluate_reverse_parse
-from Lexer_Parser.lexer import Lexer
-from cmp.ast import AtomicNode, UnaryNode, BinaryNode, ConstantNumberNode, DivNode, StarNode, MinusNode, PlusNode, \
+from cmp.pycompiler import Grammar
+from Lexer_Parser.parser.shift_reduce import LR1Parser, evaluate_reverse_parse
+from Lexer_Parser.Lexer.lexer import Lexer
+from cmp.ast import BinaryNode, ConstantNumberNode, PlusNode, \
     EqualNode, get_printer
 
 G = Grammar()  # Crear gramatica
