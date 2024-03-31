@@ -49,6 +49,9 @@ class ErrorType(Type):
         return isinstance(other, Type)
 
 
+
+   
+        
 class Function:
     def __init__(self, name, args, return_type):
         self.name = name
@@ -73,7 +76,7 @@ class Function:
 class Protocol:
     def __init__(self, name: str, parent=None):
         self.name = name
-        self.parent = parent
+        self.parent:HulkContext = parent
         self.methods = []
 
     def define_method(self, name: str, param_names: list, param_types: list, return_type):

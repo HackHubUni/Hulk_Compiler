@@ -1,6 +1,6 @@
 from Hulk.tools.Ast import *
 from Hulk.Semantic_Check.type_node import *
-from Hulk.Semantic_Check.utils import HulkContext
+from Hulk.Semantic_Check.utils import HulkScope
 
 def parents_check(initial_type, parent):
     this_type = parent.name
@@ -27,7 +27,7 @@ class InfoSaverTree(object):
     @visitor.when(ProgramNode)
     def visit(self, node):
 
-        self.context = HulkContext() #Tomar el contexto del hulk
+        self.context = HulkScope() #Tomar el contexto del hulk
         # Añadir al contexto los elementos primarios del hulk
         self.context.types['Num'] = NumType()
         self.context.types['Str'] = StringType()
@@ -43,8 +43,11 @@ class InfoSaverTree(object):
         self.context.function['exp'] = self.context.create_function('exp', [VarDefNode('value', NumType())], NumType())
         self.context.function['rand'] = self.context.create_function('rand', [], NumType())
         #LLamar a cada declariacion del metodo
-        for class_declaration in node.decl_list:
-            self.visit(class_declaration)
+        for declaration in node.decl_list:
+            #Type Declaration
+            #Protocol Declaration
+            #Function Declaration
+            self.visit(declaration)
 
     @visitor.when(TypeDeclarationNode)
     def visit(self, node):
@@ -87,6 +90,7 @@ class TypeBuilder:
     def visit(self, node):
         for class_declaration in node.decl_list:
             self.visit(class_declaration)
+        
 
     @visitor.when(TypeDeclarationNode)
     def visit(self, node):

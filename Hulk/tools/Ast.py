@@ -4,7 +4,7 @@ from cmp.ast import *
 
 class ProgramNode(Node):
     def __init__(self, decl_list, expr):
-        self.decl_list = decl_list
+        self.decl_list:list[DeclarationNode] = decl_list
         self.expr = expr
 
 
