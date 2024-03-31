@@ -250,7 +250,7 @@ class AttrrCallNode(ExprNode):
         self.id = id
 
 
-class FuncDeclNode(DeclNode):
+class FunctionDeclaretionNode(DeclNode):
     def __init__(self, id, args, body, return_type=None) -> None:
         self.id = id
         self.args = args
@@ -258,7 +258,7 @@ class FuncDeclNode(DeclNode):
         self.body = body
 
 
-class TypeDeclNode(DeclNode):
+class TypeDeclaretionNode(DeclNode):
     def __init__(self, id, features, args=None, parent=None, parent_constructor_args=None) -> None:
         self.id = id
         self.features = features
@@ -275,7 +275,7 @@ class MethodNode(Node):
         self.body = body
 
 
-class ProtDeclNode(DeclNode):
+class ProtDeclaretionNode(DeclNode):
     def __init__(self, id, methods, parents=None) -> None:
         self.id = id
         self.methods = methods

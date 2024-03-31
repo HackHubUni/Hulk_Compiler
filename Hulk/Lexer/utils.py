@@ -1,5 +1,5 @@
 from Lexer_Parser.Lexer.lexer import Lexer
-from Hulk.utils import contains_space
+from Hulk.tools.utils import contains_space
 class HulkLexer(Lexer):
 
     def __call__(self, text):

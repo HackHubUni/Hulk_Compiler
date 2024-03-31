@@ -1,5 +1,5 @@
 from cmp.pycompiler import *  # Gramar Terminal NonTerminal Token
-from Hulk.AST_Semantic.Ast import *
+from Hulk.tools.Ast import *
 
 
 class Gramarlr1:
@@ -142,11 +142,11 @@ class Gramarlr1:
         Atomic %= id_ + dot_ + id_ + o_par_ + Expression_List + c_par_, lambda h, s: MethodCallNode(s[1], s[3], s[5])
         Atomic %= id_ + dot_ + id_, lambda h, s: AttrrCallNode(s[1], s[3])
 
-        Func_Declaration %= function_ + id_ + o_par_ + Argument_List + c_par_ + Body, lambda h, s: FuncDeclNode(s[2], s[4], s[6])
-        Func_Declaration %= function_ + id_ + o_par_ + Argument_List + c_par_ + colon_ + type_id_ + Body, lambda h, s: FuncDeclNode(s[2],
-                                                                                                              s[4],
-                                                                                                              s[8],
-                                                                                                              s[7])
+        Func_Declaration %= function_ + id_ + o_par_ + Argument_List + c_par_ + Body, lambda h, s: FunctionDeclaretionNode(s[2], s[4], s[6])
+        Func_Declaration %= function_ + id_ + o_par_ + Argument_List + c_par_ + colon_ + type_id_ + Body, lambda h, s: FunctionDeclaretionNode(s[2],
+                                                                                                                                               s[4],
+                                                                                                                                               s[8],
+                                                                                                                                               s[7])
 
         Body %= arrow_ + Statment, lambda h, s: s[2]
         Body %= o_brace_ + StatList + c_brace_, lambda h, s: s[2]
@@ -157,15 +157,15 @@ class Gramarlr1:
         Arg_Tail %= comma_ + Var_Declaration + Arg_Tail, lambda h, s: [s[2]] + s[3]
         Arg_Tail %= G.Epsilon, lambda h, s: []
 
-        Type_Declaration %= type_ + type_id_ + o_brace_ + Feature_List + c_brace_, lambda h, s: TypeDeclNode(s[2], s[4])
-        Type_Declaration %= type_ + type_id_ + o_par_ + Argument_List + c_par_ + o_brace_ + Feature_List + c_brace_, lambda h, s: TypeDeclNode(
+        Type_Declaration %= type_ + type_id_ + o_brace_ + Feature_List + c_brace_, lambda h, s: TypeDeclaretionNode(s[2], s[4])
+        Type_Declaration %= type_ + type_id_ + o_par_ + Argument_List + c_par_ + o_brace_ + Feature_List + c_brace_, lambda h, s: TypeDeclaretionNode(
             s[2], s[7], s[4])
-        Type_Declaration %= type_ + type_id_ + inherits_ + type_id_ + o_brace_ + Feature_List + c_brace_, lambda h, s: TypeDeclNode(s[2],
-                                                                                                                   s[6],
-                                                                                                                   None,
-                                                                                                                   s[4])
+        Type_Declaration %= type_ + type_id_ + inherits_ + type_id_ + o_brace_ + Feature_List + c_brace_, lambda h, s: TypeDeclaretionNode(s[2],
+                                                                                                                                           s[6],
+                                                                                                                                           None,
+                                                                                                                                           s[4])
         Type_Declaration %= type_ + type_id_ + o_par_ + Argument_List + c_par_ + inherits_ + type_id_ + o_par_ + Expression_List + c_par_ + o_brace_ + Feature_List + c_brace_, lambda \
-            h, s: TypeDeclNode(s[2], s[12], s[4], s[7], s[9])
+            h, s: TypeDeclaretionNode(s[2], s[12], s[4], s[7], s[9])
 
         Feature_List %= Var_Declaration + eq_ + Statment + Feature_List, lambda h, s: [AssignNode(s[1], s[3])] + s[4]
         Feature_List %= id_ + o_par_ + Argument_List + c_par_ + Body + Feature_List, lambda h, s: [MethodNode(s[1], s[3], s[5])] + s[
@@ -179,8 +179,8 @@ class Gramarlr1:
 
         Feature_List %= G.Epsilon, lambda h, s: []
 
-        Protocol_Declaration %= protocol_ + type_id_ + o_brace_ + Protocol_Methods + c_brace_, lambda h, s: ProtDeclNode(s[2], s[4])
-        Protocol_Declaration %= protocol_ + type_id_ + extends_ + Type_List + o_brace_ + Protocol_Methods + c_brace_, lambda h, s: ProtDeclNode(
+        Protocol_Declaration %= protocol_ + type_id_ + o_brace_ + Protocol_Methods + c_brace_, lambda h, s: ProtDeclaretionNode(s[2], s[4])
+        Protocol_Declaration %= protocol_ + type_id_ + extends_ + Type_List + o_brace_ + Protocol_Methods + c_brace_, lambda h, s: ProtDeclaretionNode(
             s[2], s[6], s[4])
 
         Protocol_Methods %= id_ + o_par_ + Full_Type_Arguments + c_par_ + colon_ + type_id_ + semi_ + Protocol_Methods, lambda h, s: [

@@ -1,6 +1,6 @@
 from Lexer_Parser.parser.shift_reduce import LR1Parser
 from cmp.pycompiler import Token,Grammar
-from Hulk.utils import contains_space
+from Hulk.tools.utils import contains_space
 
 class Hulk_Parser_Container(LR1Parser):
 

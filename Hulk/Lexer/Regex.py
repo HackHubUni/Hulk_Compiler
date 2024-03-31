@@ -1,6 +1,6 @@
 from Hulk.Grammar.gramarlr1 import Gramarlr1
 from cmp.pycompiler import Terminal
-from Lexer_Parser.Lexer.regex_utils import Regex_Utils
+from Lexer_Parser.Lexer.Regex.regex_utils import Regex_Utils
 
 # Get the Hulk Grammar
 gramar = Gramarlr1()
