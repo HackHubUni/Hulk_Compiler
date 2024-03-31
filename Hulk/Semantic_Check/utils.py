@@ -1,5 +1,5 @@
 from cmp.semantic import  Context, SemanticError
-from Hulk.AST_Semantic.type_node import *
+from Hulk.Semantic_Check.type_node import *
 class HulkContext(Context):
     def __init__(self):
         Context.__init__(self)

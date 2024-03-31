@@ -1,6 +1,6 @@
 from Hulk.Lexer.Hulk_Lexer import get_hulk_lexer
 from Hulk.Parser.Hulk_Parser import get_hulk_parser
-from Hulk.AST_Semantic.check_type_semantic import InfoSaverTree,TypeBuilder
+from Hulk.Semantic_Check.check_type_semantic import InfoSaverTree,TypeBuilder
 from cmp.evaluation import evaluate_reverse_parse
 
 
