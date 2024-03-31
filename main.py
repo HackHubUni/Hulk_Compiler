@@ -27,53 +27,34 @@ type Point {
 
 #text="function f(x,y) => (x+y);"
 
-text = ''' type Point {
-    x = 0;
-    y = 0;
-
-    getX() => self.x;
-    getY() => self.y;
-
-    setX(x) => self.x := x;
-    setY(y) => self.y := y;
-}
-type Bird inherits Superman {
-
-}
-
-type Plane inherits Bird{
-
-}
-
-type Superman inherits Plane {
-
-}
-
-function cot(x) => 1 / tan(x);
-function tan(x) => sin(x) / cos(x);
-
-let x = new Superman() in {
-    print(
-        if (x is Bird) "It's bird!"
-        elif (x is Plane) "It's a plane!"
-        else "No, it's Superman!"
-    ); print(tan(PI) ** 2 + cot(PI) ** 2); }
-
- '''
 
 
 
 
-tokens = lexer(text)
+def test():
+    test=['let msg = "Hello" in print(msg);',
+    ' let number = 42, test = "The meaning of life is" in print(test@@number);',
+    'let number = 42 in (let text = "The meaning of life is" in ( print(test@number)));',
+    'let a = 6, b = a*7 in print(b);',
+    'let a=7, b=10,c=20 in {print(a);print(b);print(c);};',
+    'let a = (let b =6 in b*7) in print(a);',
+    'print(let b =6 in b*7);',
+    'let a =20 in {let a =42 in print (a); print(a);};',
+    'let a=0 in {print(a); a := 1; print(a);};',
+    'let a =0 in let b = a := 1 in {print(a); print(b);};',
+    'let a = 42 in if (a == 2) print(1) else print(2);',
+    'let a = 2 in if (a ==2) {print(1);} else print(2);']
+    for text in test:
+        tokens = lexer(text)
 
 
 
-print(tokens)
-parsedd, operationsdd = parser(tokens)
-print(len(parsedd),"parser")
-print(len(operationsdd),"operation")
-print(len(tokens),"len tokens")
+        print(tokens)
+        parsedd, operationsdd = parser(tokens)
+        print(len(parsedd),"parser")
+        print(len(operationsdd),"operation")
+        print(len(tokens),"len tokens")
 
 
-ast = evaluate_reverse_parse(parsedd, operationsdd, tokens)
+        ast = evaluate_reverse_parse(parsedd, operationsdd, tokens)
 
