@@ -11,10 +11,11 @@ def test(token: str, type_token: str):
     assert str(a[0].token_type) == type_token, f"El token {a[0]} de tipo {a[0].token_type} se esperaba {type_token} "
 
 def testing_ids():
-    ids_=["el_glsorwjonerv9495849,personas59,__comomucho,__comoicnru049__"]
+    ids_=[":= ","="]
+    tokens=[":=","="]
     a=0
     for i,val in enumerate(ids_,1):
-        test(val,"id")
+        test(val,tokens[i-1])
         a=i
     print(f"Se ejecutaron correctamente {a}")
 
