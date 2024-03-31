@@ -8,7 +8,7 @@ class ProgramNode(Node):
         self.expr = expr
 
 
-class DeclNode(Node):
+class DeclarationNode(Node):
     pass
 
 
@@ -250,7 +250,7 @@ class AttrrCallNode(ExprNode):
         self.id = id
 
 
-class FunctionDeclaretionNode(DeclNode):
+class FunctionDeclarationNode(DeclarationNode):
     def __init__(self, id, args, body, return_type=None) -> None:
         self.id = id
         self.args = args
@@ -258,7 +258,7 @@ class FunctionDeclaretionNode(DeclNode):
         self.body = body
 
 
-class TypeDeclaretionNode(DeclNode):
+class TypeDeclarationNode(DeclarationNode):
     def __init__(self, id, features, args=None, parent=None, parent_constructor_args=None) -> None:
         self.id = id
         self.features = features
@@ -275,14 +275,14 @@ class MethodNode(Node):
         self.body = body
 
 
-class ProtDeclaretionNode(DeclNode):
+class ProtDeclarationNode(DeclarationNode):
     def __init__(self, id, methods, parents=None) -> None:
         self.id = id
         self.methods = methods
         self.parents = parents
 
 
-class ProtMethodNode(Node):
+class PrototypeMethodNode(Node):
     def __init__(self, id, args: list[VarDefNode], return_type) -> None:
         self.id = id
         self.args = args

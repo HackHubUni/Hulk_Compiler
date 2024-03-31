@@ -1,7 +1,6 @@
 from Hulk.Lexer.Hulk_Lexer import get_hulk_lexer
 from Hulk.Parser.Hulk_Parser import get_hulk_parser
-from Hulk.AST_Semantic.check_type_semantic import InfoSaverTree,TypeBuilder
-
+from Hulk.AST_Semantic.check_type_semantic import InfoSaverTree, TypeBuilder
 
 from cmp.evaluation import evaluate_reverse_parse
 
@@ -26,45 +25,39 @@ type Point {
 
  '''
 
-#text="function f(x,y) => (x+y);"
+
+# text="function f(x,y) => (x+y);"
 
 
+def evaluate(text: str):
+    tokens = lexer(text)
+
+    print(tokens)
+    parsedd, operationsdd = parser(tokens)
+    print(len(parsedd), "parser")
+    print(len(operationsdd), "operation")
+    print(len(tokens), "len tokens")
+
+    ast = evaluate_reverse_parse(parsedd, operationsdd, tokens)
+
+    errors = []
+    collector = InfoSaverTree(errors)
+    collector.visit(ast)
+    print(f"El ast es \n {ast}")
+    context = collector.context
+
+    builder = TypeBuilder(context, errors)
+    assert len(errors) == 0, "No puede tener errores de semántica"
+    builder.visit(ast)
+
+    print('Errors:', errors)
+    print("contexto \n ", 'Context:')
+    print(context)
 
 
-
-def evaluate(text:str):
-
-
-        tokens = lexer(text)
-
-
-
-        print(tokens)
-        parsedd, operationsdd = parser(tokens)
-        print(len(parsedd),"parser")
-        print(len(operationsdd),"operation")
-        print(len(tokens),"len tokens")
-
-
-        ast = evaluate_reverse_parse(parsedd, operationsdd, tokens)
-
-        errors = []
-        collector = InfoSaverTree(errors)
-        collector.visit(ast)
-        print(f"El ast es \n {ast}")
-        context = collector.context
-
-        builder = TypeBuilder(context, errors)
-        assert len(errors)==0, "No puede tener errores de semántica"
-        builder.visit(ast)
-
-        print('Errors:', errors)
-        print("contexto \n ", 'Context:')
-        print(context)
-
-evaluate(text)
+#evaluate(text)
 print("00000000000000000000000000000000000")
-"""
+
 def test():
     test = ['let msg = "Hello" in print(msg);',
             ' let number = 42, test = "The meaning of life is" in print(test@@number);',
@@ -81,5 +74,4 @@ def test():
 
     for text in test:
         evaluate(text)
-        
-"""
+

@@ -46,22 +46,22 @@ class InfoSaverTree(object):
         for class_declaration in node.decl_list:
             self.visit(class_declaration)
 
-    @visitor.when(TypeDeclaretionNode)
+    @visitor.when(TypeDeclarationNode)
     def visit(self, node):
         try:
             self.context.create_type(node.id)
         except SemanticError as ex:
             self.errors.append(ex.text)
 
-    @visitor.when(ProtDeclaretionNode)
+    @visitor.when(ProtDeclarationNode)
     def visit(self, node):
         try:
             self.context.create_protocol(node.id, node.parents)
         except SemanticError as ex:
             self.errors.append(ex.text)
 
-    @visitor.when(FunctionDeclaretionNode)
-    def visit(self, node: FunctionDeclaretionNode):
+    @visitor.when(FunctionDeclarationNode)
+    def visit(self, node: FunctionDeclarationNode):
         try:
             if node.return_type == None:
                 type = self.context.get_type('None')
@@ -88,7 +88,7 @@ class TypeBuilder:
         for class_declaration in node.decl_list:
             self.visit(class_declaration)
 
-    @visitor.when(TypeDeclaretionNode)
+    @visitor.when(TypeDeclarationNode)
     def visit(self, node):
         self.current_type = self.context.get_type(node.id)
         if node.parent:
@@ -106,8 +106,8 @@ class TypeBuilder:
         for feature in node.features:
             self.visit(feature)
 
-    @visitor.when(ProtDeclaretionNode)
-    def visit(self, node: ProtDeclaretionNode):
+    @visitor.when(ProtDeclarationNode)
+    def visit(self, node: ProtDeclarationNode):
         self.current_type = self.context.get_type(node.id)
         if node.parents:
             for parent in node.parents:
@@ -120,8 +120,8 @@ class TypeBuilder:
         for feature in node.methods:
             self.visit(feature)
 
-    @visitor.when(ProtMethodNode)
-    def visit(self, node: ProtMethodNode):
+    @visitor.when(PrototypeMethodNode)
+    def visit(self, node: PrototypeMethodNode):
         param_names = []
         param_types = []
         for args_name in node.args:
