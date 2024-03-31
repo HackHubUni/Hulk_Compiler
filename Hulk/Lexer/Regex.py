@@ -29,7 +29,7 @@ normal_regex = " { } [ ]  ; :  , . \( \)  \|\| let in  = :="  #
 normal_regex += " if else elif while for function "
 normal_regex += " <= < == >= > != "
 # normal_regex += " sqrt cos sin expon log rand "
-normal_regex += " \+ \- \* \/ % ^ ! & \| "
+normal_regex += " \+ \- \* \/ % ^ \*\* ! & \| "
 normal_regex += " type new inherits is as "
 normal_regex += " protocol extends "
 # normal_regex += " true false "
@@ -68,6 +68,7 @@ regex_list.append((const_, ru.const))
 # type_id
 type_id_ = s("type_id")
 regex_list.append((type_id_, ru.type_id))
+
 
 
 def Get_Hulk_Regex():

@@ -27,10 +27,7 @@ type Point {
 
 #text="function f(x,y) => (x+y);"
 
-text="""
-
-
-type Point {
+text = ''' type Point {
     x = 0;
     y = 0;
 
@@ -40,11 +37,33 @@ type Point {
     setX(x) => self.x := x;
     setY(y) => self.y := y;
 }
-  print("hola");
+type Bird inherits Superman {
+
+}
+
+type Plane inherits Bird{
+
+}
+
+type Superman inherits Plane {
+
+}
+
+function cot(x) => 1 / tan(x);
+function tan(x) => sin(x) / cos(x);
+
+let x = new Superman() in {
+    print(
+        if (x is Bird) "It's bird!"
+        elif (x is Plane) "It's a plane!"
+        else "No, it's Superman!"
+    ); print(tan(PI) ** 2 + cot(PI) ** 2); }
+
+ '''
 
 
 
-"""
+
 tokens = lexer(text)
 
 
@@ -57,3 +76,4 @@ print(len(tokens),"len tokens")
 
 
 ast = evaluate_reverse_parse(parsedd, operationsdd, tokens)
+

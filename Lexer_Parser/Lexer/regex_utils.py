@@ -11,7 +11,7 @@ class Regex_Utils:
         self.nonzero_digits_ = '|'.join(str(n) for n in range(1, 10))
         self.letters_ = '|'.join(chr(n) for n in range(ord('a'), ord('z') + 1))
         self.uppercase_letters_ = '|'.join(chr(n) for n in range(ord('A'), ord('Z') + 1))
-        self.valid_string_symbols_ = ''.join(c for c in " : ' ; , . _ - + / ^ % & ! = < > \\( \\) { } [ ] @".split())
+        self.valid_string_symbols_ = '|'.join(c for c in " : ' ; , . _ - \+ / ^ % & ! = < > \\( \\) { } [ ] @".split())
         self.valid_id_symbols_ = '_'
         self.delim_ = ' |\t|\n'
         self.natural_numbers_ = f'({self.nonzero_digits_})({self.nonzero_digits_}|0)*'

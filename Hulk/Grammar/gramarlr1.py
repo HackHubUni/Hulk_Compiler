@@ -27,7 +27,7 @@ class Gramarlr1:
         number_, string_, bool_, const_, id_, type_id_ = G.Terminals('number string bool const id type_id')
         let_, in_, if_, elif_, else_, while_, for_, as_, is_, new_ = G.Terminals('let in if elif else while for as is new')
         function_, type_, inherits_, protocol_, extends_ = G.Terminals('function type inherits protocol extends')
-        plus_, minus_, star_, div_, mod_, pow_, power_ = G.Terminals('+ - * / % ^ **')
+        plus_, minus_, star_, div_, mod_, pow_, power_ = G.Terminals('+ - * / % ^ **') #TODO: Unificar bajo Regex ^ **
         eq_, colon_eq_, eq_qu_, not_eq_, less_, greater_, leq_, geq_ = G.Terminals('= := == != < > <= >=')
         and_, or_, not_, or_or_ = G.Terminals('& | ! ||')
         dot_, comma_, colon_, semi_, at_, at_at_, arrow_ = G.Terminals('. , : ; @ @@ =>')
