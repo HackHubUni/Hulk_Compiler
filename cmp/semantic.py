@@ -179,6 +179,7 @@ class VariableInfo:
     def __init__(self, name, vtype):
         self.name = name
         self.type = vtype
+        self.value = None
 
     def __str__(self):
         return f'La variable de tipo {isinstance(self.type)}, con nombre {self.name}'

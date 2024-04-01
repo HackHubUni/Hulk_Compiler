@@ -17,7 +17,10 @@ class ExpressionNode(Node):
 
 
 class ExpressionBlockNode(ExpressionNode):
-    def __init__(self, expr_list) -> None:
+    def __init__(self, expr_list:list) -> None:
+        """
+        Recibe  una lista de estamentos
+        """
         self.expr_list = expr_list
 
 
@@ -256,6 +259,25 @@ class FunctionDeclarationNode(DeclarationNode):
         self.args = args
         self.return_type = return_type
         self.body = body
+
+class BuiltinFunction(FunctionDeclarationNode):
+    def evaluate(self):
+        pass
+    
+
+class SinBuiltingFunction(BuiltinFunction):
+    def __init__(self) -> None:
+        super().__init__()
+        self.id = 'sin'
+        self.args = [VarDefNode('x','Num')]
+        self.return_type = 'Num'
+    
+class CosBuiltingFunction(BuiltinFunction):
+    def __init__(self, id, args, body, return_type=None) -> None:
+        super().__init__()
+        self.id = 'cos'
+        self.args = [VarDefNode('x', 'Num')]
+        self.return_type = 'Num'
 
 
 class TypeDeclarationNode(DeclarationNode):
