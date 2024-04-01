@@ -1,7 +1,7 @@
 import cmp.visitor as visitor
 from abc import ABC, abstractmethod
 from cmp.ast import *
-
+from Hulk.Semantic_Check.type_node import *
 class ProgramNode(Node):
     def __init__(self, decl_list, expr):
         self.decl_list = decl_list
@@ -182,20 +182,24 @@ class NegativeNode(UnaryNode):
 
 
 class LiteralNumNode(AtomicNode):
-    pass
-
+    def __init__(self, lex):
+        AtomicNode.__init__(self,lex)
+        self.inferred_type= NumType()
 
 class LiteralBoolNode(AtomicNode):
-    pass
-
+    def __init__(self, lex):
+        AtomicNode.__init__(self,lex)
+        self.inferred_type= BoolType()
 
 class LiteralStrNode(AtomicNode):
-    pass
-
+    def __init__(self, lex):
+        AtomicNode.__init__(self,lex)
+        self.inferred_type= StringType()
 
 class ConstantNode(AtomicNode):
-    pass
-
+    def __init__(self, lex):
+        AtomicNode.__init__(self,lex)
+        self.inferred_type= NumType()
 
 class VarNode(AtomicNode):
     pass

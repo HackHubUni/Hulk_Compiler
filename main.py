@@ -2,7 +2,11 @@ from Hulk.Lexer.Hulk_Lexer import get_hulk_lexer
 from Hulk.Parser.Hulk_Parser import get_hulk_parser
 from Hulk.Semantic_Check.check_type_semantic import InfoSaverTree,TypeBuilder
 from cmp.evaluation import evaluate_reverse_parse
-
+from Hulk.Semantic_Check.type_inferator import *
+from Hulk.Semantic_Check.type_node import *
+from Hulk.Semantic_Check.type_inferator import *
+from Hulk.Semantic_Check.checker import *
+from Hulk.Semantic_Check.type_node import *
 
 # import lexer and parser
 lexer = get_hulk_lexer()
@@ -45,8 +49,10 @@ def evaluate(text:str):
         print('Errors:', errors)
         print("contexto \n ", 'Context:')
         print(context)
-
-
+        checker = TypeChecker(context, errors)
+        print(checker)
+        scope = checker.visit(ast)
+        print(scope)
 
 
 text = ''' 

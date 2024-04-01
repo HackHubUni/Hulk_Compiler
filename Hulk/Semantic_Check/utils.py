@@ -14,7 +14,11 @@ class HulkContext(Context):
         typex = self.function[name] = Function(name, params, return_type)
         return typex
 
-
+    def get_func(self, name: str):
+        try:
+            return self.func[name]
+        except KeyError:
+            raise SemanticError(f'Type "{name}" is not defined.')
 
     def create_protocol(self, name, parents):
         if name in self.types:
