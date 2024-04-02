@@ -1,6 +1,6 @@
 from Hulk.Lexer.Hulk_Lexer import get_hulk_lexer
 from Hulk.Parser.Hulk_Parser import get_hulk_parser
-from Hulk.Semantic_Check.check_type_semantic import InfoSaverTree,TypeBuilder
+# from Hulk.Semantic_Check.check_type_semantic import CheckTypes,TypeBuilder
 from cmp.evaluation import evaluate_reverse_parse
 
 
@@ -19,8 +19,6 @@ def evaluate(text:str):
 
         tokens = lexer(text)
 
-
-
         print(f"Los tokens son: \n {tokens}")
         #Parsear
         parse, operations = parser(tokens)
@@ -31,20 +29,20 @@ def evaluate(text:str):
 
 
         ast = evaluate_reverse_parse(parse, operations, tokens)
+        print(f"El ast es \n {str(ast)}")
 
-        errors = []
-        collector = InfoSaverTree(errors)
-        collector.visit(ast)
-        print(f"El ast es \n {ast}")
-        context = collector.context
+        # errors = []
+        # collector = CheckTypes(errors)
+        # collector.visit(ast)
+        # context = collector.context
 
-        builder = TypeBuilder(context, errors)
-        assert len(errors)==0, "No puede tener errores de semántica"
-        builder.visit(ast)
-
-        print('Errors:', errors)
-        print("contexto \n ", 'Context:')
-        print(context)
+        # builder = TypeBuilder(context, errors)
+        # assert len(errors)==0, "No puede tener errores de semántica"
+        # builder.visit(ast)
+        
+        # print('Errors:', errors)
+        # print("contexto \n ", 'Context:')
+        # print(context)
 
 
 
@@ -52,8 +50,26 @@ def evaluate(text:str):
 text = ''' 
 
   function hola (x){ x+a;}
- 
-  let a = 9 in print(a);
+  type Point {
+     x = 0;
+     y = 0;
+
+     getX() => self.x;
+     getY() => self.y;
+  }
+
+  type PolarPoint(phi, rho) inherits Point(rho * sin(phi), rho * cos(phi)) {
+  }
+
+  protocol Hashable {
+     hash(): Number;
+  }
+
+  protocol Equatable extends Hashable {
+     equals(other: Object): Boolean;
+  }
+
+  let a = 9 in print(a * 2);
   
  '''
 

@@ -164,7 +164,7 @@ class Gramarlr1:
             s[2], s[7], s[4])
         Type_Declaration %= type_ + type_id_ + inherits_ + type_id_ + o_brace_ + Feature_List + c_brace_, lambda h, s: TypeDeclarationNode(s[2],
                                                                                                                                            s[6],
-                                                                                                                                           None,
+                                                                                                                                           [],
                                                                                                                                            s[4])
         Type_Declaration %= type_ + type_id_ + o_par_ + Argument_List + c_par_ + inherits_ + type_id_ + o_par_ + Expression_List + c_par_ + o_brace_ + Feature_List + c_brace_, lambda \
             h, s: TypeDeclarationNode(s[2], s[12], s[4], s[7], s[9])

@@ -53,14 +53,19 @@ class ErrorType(Type):
 
 
 class Function:
-    def __init__(self, name, function_pointer: FunctionDeclarationNode):
+    def __init__(self, name, param_names:list[VariableInfo], return_type: str, function_pointer: FunctionDeclarationNode):
         self.name = name
-        self.param_names = function_pointer.args
-        self.return_type = function_pointer.return_type
-        self.function_point:FunctionDeclarationNode = function_pointer
+        self.param_names:list[VariableInfo] = param_names
+        """This is the list of Variable Info that represents each parameter of the function.
+        The variable info contains information like the name of the variable and the type asociated"""
+        self.return_type: str = return_type
+        """This is the string with the name of the type"""
+        self.function_pointer:FunctionDeclarationNode = function_pointer
+        """This is the pointer to the AST where the Function is declared.
+        It is needed for the step of interpreting the tree"""
 
     def __str__(self):
-        output = f"func {self.name}"
+        output = f"function {self.name}"
         output += " ("
         params = ", ".join(f"{n.id}:{n.type.name}" for n in self.param_names)
         output += params

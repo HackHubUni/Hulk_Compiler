@@ -2,9 +2,10 @@ import cmp.visitor as visitor
 from abc import ABC, abstractmethod
 from cmp.ast import *
 
+
 class ProgramNode(Node):
     def __init__(self, decl_list, expr):
-        self.decl_list:list[DeclarationNode] = decl_list
+        self.decl_list: list[DeclarationNode] = decl_list
         self.expr = expr
 
 
@@ -17,7 +18,7 @@ class ExpressionNode(Node):
 
 
 class ExpressionBlockNode(ExpressionNode):
-    def __init__(self, expr_list:list) -> None:
+    def __init__(self, expr_list: list) -> None:
         """
         Recibe  una lista de estamentos
         """
@@ -58,16 +59,16 @@ class DestrAssign(ExpressionNode):
         self.is_attr = is_attr
 
 
-class AssignNode(Node):
-    def __init__(self, var, expr) -> None:
-        self.var = var
-        self.expr = expr
-
-
 class VarDefNode(Node):
     def __init__(self, id, type=None) -> None:
         self.id = id
         self.type = type
+
+
+class AssignNode(Node):
+    def __init__(self, var: VarDefNode, expr) -> None:
+        self.var: VarDefNode = var
+        self.expr = expr
 
 
 class ConcatNode(BinaryNode):
@@ -100,7 +101,7 @@ class NotNode(UnaryNode):
         return not value
 
 
-class DynTestNode(ExpressionNode):
+class DynTestNode(ExpressionNode):  # TODO: Que es esto?
     def __init__(self, expr, type) -> None:
         self.expr = expr
         self.type = type
@@ -175,13 +176,13 @@ class ModNode(BinaryNode):
 class PowNode(BinaryNode):
     @staticmethod
     def operate(lvalue, rvalue):
-        return lvalue ** rvalue
+        return lvalue**rvalue
 
 
 class NegativeNode(UnaryNode):
     @staticmethod
     def operate(value):
-        return - value
+        return -value
 
 
 class LiteralNumNode(AtomicNode):
@@ -254,42 +255,39 @@ class AttrrCallNode(ExpressionNode):
 
 
 class FunctionDeclarationNode(DeclarationNode):
-    def __init__(self, id, args, body, return_type=None) -> None:
-        self.id = id
-        self.args = args
-        self.return_type = return_type
+    def __init__(
+        self, id: str, args: list[VarDefNode], body, return_type: str = None
+    ) -> None:
+        self.id: str = id
+        self.args: list[VarDefNode] = args
+        self.return_type: str = return_type
         self.body = body
+
 
 class BuiltinFunction(FunctionDeclarationNode):
     def evaluate(self):
         pass
-    
+
 
 class SinBuiltingFunction(BuiltinFunction):
     def __init__(self) -> None:
         super().__init__()
-        self.id = 'sin'
-        self.args = [VarDefNode('x','Num')]
-        self.return_type = 'Num'
-    
+        self.id = "sin"
+        self.args = [VarDefNode("x", "Num")]
+        self.return_type = "Num"
+
+
 class CosBuiltingFunction(BuiltinFunction):
     def __init__(self, id, args, body, return_type=None) -> None:
         super().__init__()
-        self.id = 'cos'
-        self.args = [VarDefNode('x', 'Num')]
-        self.return_type = 'Num'
+        self.id = "cos"
+        self.args = [VarDefNode("x", "Num")]
+        self.return_type = "Num"
 
 
-class TypeDeclarationNode(DeclarationNode):
-    def __init__(self, id, features, args=None, parent=None, parent_constructor_args=None) -> None:
-        self.id = id
-        self.features = features
-        self.args = args
-        self.parent = parent
-        self.parent_constructor_args = parent_constructor_args
+class MethodNode(Node):  # MethodDeclarationNode
+    """This is the Node for method Declarations"""
 
-
-class MethodNode(Node):
     def __init__(self, id, args, body, return_type=None) -> None:
         self.id = id
         self.args = args
@@ -297,15 +295,37 @@ class MethodNode(Node):
         self.body = body
 
 
-class ProtDeclarationNode(DeclarationNode):
-    def __init__(self, id, methods, parents=None) -> None:
-        self.id = id
-        self.methods = methods
-        self.parents = parents
+class TypeDeclarationNode(DeclarationNode):
+    """This node represents the construction of a Type"""
+
+    def __init__(
+        self,
+        id: str,
+        features: list[AssignNode | MethodNode],
+        args: list[VarDefNode] = [],
+        parent: str = None,
+        parent_constructor_args=None,
+    ) -> None:
+        self.id: str = id
+        self.features: list[AssignNode | MethodNode] = features
+        self.args: list[VarDefNode] = args
+        self.parent: str = parent
+        """This is a string with the name of the parent"""
+        self.parent_constructor_args = parent_constructor_args
+        """This is a list of Expressions. Could be None"""
 
 
 class PrototypeMethodNode(Node):
-    def __init__(self, id, args: list[VarDefNode], return_type) -> None:
-        self.id = id
+    def __init__(self, id: str, args: list[VarDefNode], return_type) -> None:
+        self.id: str = id
         self.args = args
         self.return_type = return_type
+
+
+class ProtDeclarationNode(DeclarationNode):
+    def __init__(
+        self, id: str, methods: list[PrototypeMethodNode], parents: list[str] = None
+    ) -> None:
+        self.id: str = id
+        self.methods = methods
+        self.parents = parents
