@@ -75,7 +75,7 @@ class ShiftReduceParser:
 
     @staticmethod
     def _register(table, key, value):
-        assert key not in table or table[key] == value, 'Shift-Reduce or Reduce-Reduce conflict!!!'
+        assert key not in table or table[key] == value, f'Shift-Reduce or Reduce-Reduce conflict!!! se quiere poner{key } en la tabla pero esta {value}'
         table[key] = value
 
     def __call__(self, w:list[Token]):

@@ -35,7 +35,11 @@ class Gramarlr1:
 
         space=G.Terminal("space")
 
+        self_=G.Terminal("self")
+
         Program %= Declaration_List + Statment, lambda h, s: ProgramNode(s[1], s[2])
+        Program %= Declaration_List, lambda h, s: ProgramNode(s[1],[])
+
 
         Declaration_List %= Declaration + Declaration_List, lambda h, s: [s[1]] + s[2]
         Declaration_List %= G.Epsilon, lambda h, s: []
@@ -43,12 +47,11 @@ class Gramarlr1:
         Declaration %= Func_Declaration, lambda h, s: s[1]
         Declaration %= Type_Declaration, lambda h, s: s[1]
         Declaration %= Protocol_Declaration, lambda h, s: s[1]
-        #Declaration %= G.Epsilon agregar nueva
+
 
         Statment %= Simple_Expresion + semi_colon_, lambda h, s: s[1]
         Statment %= ExprBlock, lambda h, s: s[1]
         Statment %= ExprBlock + semi_colon_, lambda h, s: s[1]
-        #Statment %= G.Epsilon TODO: Agregar para que que se puedan hacer solo declaraciones
 
         Expresion %= Simple_Expresion, lambda h, s: s[1]
         Expresion %= ExprBlock, lambda h, s: s[1]
@@ -142,11 +145,20 @@ class Gramarlr1:
         Atomic %= Atomic + as_ + type_id_, lambda h, s: DowncastNode(s[1], s[3])
         Atomic %= Atomic + o_brack_ + Expresion + c_brack_, lambda h, s: IndexingNode(s[1], s[3])
         Atomic %= id_ + dot_ + id_ + o_par_ + Expression_List + c_par_, lambda h, s: MethodCallNode(s[1], s[3], s[5])
-        Atomic %= id_ + dot_ + id_, lambda h, s: AttrrCallNode(s[1], s[3])
 
+
+        Atomic %= self_ + dot_ + id_ + o_par_ + Expression_List + c_par_, lambda h, s: MethodCallNode(s[1], s[3], s[5])
+
+
+
+        Atomic %= self_ + dot_ + id_, lambda h, s: AttrrCallNode(s[1], s[3])
+
+       # Func_Declaration %= id_ + o_par_ + Argument_List + c_par_ + Body, lambda h, s: FunctionDeclarationNode(s[1],
+       #                                                                                                        s[3],
+       #                                                                                                        s[5]) #TODO: new
         Func_Declaration %= function_ + id_ + o_par_ + Argument_List + c_par_ + Body, lambda h, s: FunctionDeclarationNode(s[2], s[4], s[6])
         Func_Declaration %= function_ + id_ + o_par_ + Argument_List + c_par_ + colon_ + type_id_ + Body, lambda h, s: FunctionDeclarationNode(s[2],
-                                                                                                                                               s[4],
+                                                                                                                                             s[4],
                                                                                                                                                s[8],
                                                                                                                                                s[7])
 

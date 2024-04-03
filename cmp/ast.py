@@ -1,7 +1,7 @@
 import cmp.visitor as visitor
 from abc import ABC, abstractmethod
 
-
+from cmp.pycompiler import Terminal
 import cmp.visitor as visitor
 
 class Node:
@@ -9,7 +9,7 @@ class Node:
         raise NotImplementedError()
 
 class AtomicNode(Node):
-    def __init__(self, lex):
+    def __init__(self, lex:Terminal|str):
         self.lex = lex
 
 class UnaryNode(Node):

@@ -35,6 +35,7 @@ normal_regex += " protocol extends "
 # normal_regex += " true false "
 normal_regex += " @ @@ "
 normal_regex += "  bool  => "
+normal_regex += " self "
 
 # the result
 regex_list: [(Terminal, str)] = get_normal_regex(normal_regex)
@@ -68,6 +69,7 @@ regex_list.append((const_, ru.const))
 # type_id
 type_id_ = s("type_id")
 regex_list.append((type_id_, ru.type_id))
+
 
 
 
