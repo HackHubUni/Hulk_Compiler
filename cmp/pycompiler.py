@@ -199,6 +199,7 @@ class Terminal(Symbol):
         return False
 
 
+
 class EOF(Terminal):
     """
     Modelaremos el símbolo de fin de cadena con la clase `EOF`. Dicha clase extiende la clases `Terminal` para heradar su comportamiento.
