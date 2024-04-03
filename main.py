@@ -12,9 +12,6 @@ parser = get_hulk_parser()
 print("Lexer and parser Ok")
 
 
-# text="function f(x,y) => (x+y);"
-
-
 def evaluate(text: str):
 
     tokens = lexer(text)
@@ -24,9 +21,6 @@ def evaluate(text: str):
     print("\nComenzando a Parsear:\n")
     parse, operations = parser(tokens)
 
-    # print(len(parse),"parser")
-    # print(len(operations),"operation")
-    # print(len(tokens),"len tokens")
     print(parse)
     ast = evaluate_reverse_parse(parse, operations, tokens)
     print(f"El ast es \n {str(ast)}")
@@ -35,5 +29,3 @@ def evaluate(text: str):
 with open("./examples/simple.hulk", "r") as file:
     text: str = file.read()
     evaluate(text)
-
-# evaluate(text)
