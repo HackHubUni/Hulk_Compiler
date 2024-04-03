@@ -79,7 +79,7 @@ class CheckTypes(object):
         except SemanticError as ex:
             self.errors.append(ex.text)
 
-    @visitor.when(ProtDeclarationNode)
+    @visitor.when(ProtocolDeclarationNode)
     def visit(self, node, scope: HulkScope):
         try:
             self.context.create_protocol(node.id, node.parents)

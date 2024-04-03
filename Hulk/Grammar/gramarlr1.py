@@ -58,20 +58,20 @@ class Gramarlr1:
         Expresion %= ExprBlock, lambda h, s: s[1]
 
         Simple_Expresion %= let_ + Assigment_List + in_ + Simple_Expresion, lambda h, s: LetNode(s[2], s[4])
-        Simple_Expresion %= if_ + o_par_ + Expresion + c_par_ + Expresion + Elif_Branch + else_ + Simple_Expresion, lambda h, s: IfNode(s[3], s[5],
-                                                                                                           s[6], s[8])
-        Simple_Expresion %= while_ + o_par_ + Expresion + c_par_ + Simple_Expresion, lambda h, s: WhileNode(s[3], s[5])
-        Simple_Expresion %= for_ + o_par_ + id_ + in_ + Expresion + c_par_ + Simple_Expresion, lambda h, s: ForNode(s[3], s[5], s[7])
+        Simple_Expresion %= if_ + o_par_ + Expresion + c_par_ + Expresion + Elif_Branch + else_ + Simple_Expresion, lambda h, s: IfNodeExpression(s[3], s[5],
+                                                                                                           ElifNodeExpressionList(s[6]), s[8])
+        Simple_Expresion %= while_ + o_par_ + Expresion + c_par_ + Simple_Expresion, lambda h, s: WhileExpressionNode(s[3], s[5])
+        Simple_Expresion %= for_ + o_par_ + id_ + in_ + Expresion + c_par_ + Simple_Expresion, lambda h, s: ForExpressionNode(s[3], s[5], s[7])
         Simple_Expresion %= id_ + colon_eq_ + Simple_Expresion, lambda h, s: DestructionAssignmentBasicExpression(s[1], s[3])
         Simple_Expresion %= Attr_Call + colon_eq_ + Simple_Expresion, lambda h, s: DestructionAssignmentWithAttributeCallExpression(s[1], s[3])
         Simple_Expresion %= Arithmethic_expression, lambda h, s: s[1]
 
         ExprBlock %= o_brace_ + StatList + c_brace_, lambda h, s: ExpressionBlockNode(s[2])
         ExprBlock %= let_ + Assigment_List + in_ + ExprBlock, lambda h, s: LetNode(s[2], s[4])
-        ExprBlock %= if_ + o_par_ + Expresion + c_par_ + Expresion + Elif_Branch + else_ + ExprBlock, lambda h, s: IfNode(s[3], s[5],
-                                                                                                         s[6], s[8])
-        ExprBlock %= while_ + o_par_ + Expresion + c_par_ + ExprBlock, lambda h, s: WhileNode(s[3], s[5])
-        ExprBlock %= for_ + o_par_ + id_ + in_ + Expresion + c_par_ + ExprBlock, lambda h, s: ForNode(s[3], s[5], s[7])
+        ExprBlock %= if_ + o_par_ + Expresion + c_par_ + Expresion + Elif_Branch + else_ + ExprBlock, lambda h, s: IfNodeExpression(s[3], s[5],
+                                                                                                         ElifNodeExpressionList(s[6]), s[8])
+        ExprBlock %= while_ + o_par_ + Expresion + c_par_ + ExprBlock, lambda h, s: WhileExpressionNode(s[3], s[5])
+        ExprBlock %= for_ + o_par_ + id_ + in_ + Expresion + c_par_ + ExprBlock, lambda h, s: ForExpressionNode(s[3], s[5], s[7])
         ExprBlock %= id_ + colon_eq_ + ExprBlock, lambda h, s: DestructionAssignmentBasicExpression(s[1], s[3])
         ExprBlock %= Attr_Call + colon_eq_ + ExprBlock, lambda h, s: DestructionAssignmentWithAttributeCallExpression(s[1], s[3])
 
@@ -90,7 +90,7 @@ class Gramarlr1:
         Var_Declaration %= id_, lambda h, s: VarDefNode(s[1])
         Var_Declaration %= id_ + colon_ + type_id_, lambda h, s: VarDefNode(s[1], s[3])
 
-        Elif_Branch %= elif_ + o_par_ + Expresion + c_par_ + Expresion + Elif_Branch, lambda h, s: [(s[3], s[5])] + s[6]
+        Elif_Branch %= elif_ + o_par_ + Expresion + c_par_ + Expresion + Elif_Branch, lambda h, s: [ElifNodeAtomExpression(s[3], s[5])] + s[6]
         Elif_Branch %= G.Epsilon, lambda h, s: []
 
         Arithmethic_expression %= Disjoin, lambda h, s: s[1]
@@ -151,7 +151,7 @@ class Gramarlr1:
         Atomic %= Method_Call, lambda h, s: MethodCallListNode(s[1])
         
         Attr_Call %= self_ + dot_ + id_, lambda h, s: AttrCallNode(s[3])  # self.x
-        Function_Call %= id_ + o_par_ + Expression_List + c_par_, lambda h, s: FuncCallNode(s[1], s[3])   #  sin(180)
+        Function_Call %= id_ + o_par_ + Expression_List + c_par_, lambda h, s: FunctionCallNode(s[1], s[3])   #  sin(180)
         Closed_Expression %= o_par_ + Expresion + c_par_, lambda h, s: s[2]
 
         # Atomic %= id_ + dot_ + id_ + o_par_ + Expression_List + c_par_, lambda h, s: MethodCallNode(s[1], s[3], s[5])  # TODO: This was the original
@@ -202,12 +202,12 @@ class Gramarlr1:
 
         Feature_List %= G.Epsilon, lambda h, s: []
 
-        Protocol_Declaration %= protocol_ + type_id_ + o_brace_ + Protocol_Methods + c_brace_, lambda h, s: ProtDeclarationNode(s[2], s[4])
-        Protocol_Declaration %= protocol_ + type_id_ + extends_ + Type_List + o_brace_ + Protocol_Methods + c_brace_, lambda h, s: ProtDeclarationNode(
+        Protocol_Declaration %= protocol_ + type_id_ + o_brace_ + Protocol_Methods + c_brace_, lambda h, s: ProtocolDeclarationNode(s[2], s[4])
+        Protocol_Declaration %= protocol_ + type_id_ + extends_ + Type_List + o_brace_ + Protocol_Methods + c_brace_, lambda h, s: ProtocolDeclarationNode(
             s[2], s[6], s[4])
 
         Protocol_Methods %= id_ + o_par_ + Full_Type_Arguments + c_par_ + colon_ + type_id_ + semi_colon_ + Protocol_Methods, lambda h, s: [
-                                                                                                                  PrototypeMethodNode(
+                                                                                                                  ProtocolMethodNode(
                                                                                                                       s[
                                                                                                                           1],
                                                                                                                       s[

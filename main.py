@@ -21,7 +21,7 @@ def evaluate(text: str):
     print("\nComenzando a Parsear:\n")
     parse, operations = parser(tokens)
 
-    print(parse)
+    # print(parse)
     ast = evaluate_reverse_parse(parse, operations, tokens)
     print(f"El ast es \n {str(ast)}")
 

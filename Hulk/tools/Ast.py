@@ -22,9 +22,52 @@ class ExpressionNode(AstNode):
     pass
 
 
+class ExpressionBlockNode(ExpressionNode):
+    def __init__(
+        self,
+        expr_list: list,
+    ):
+        """
+        Recibe una lista de statements
+        """
+        self.expr_list: list = expr_list
+
+
 class UnaryExpressionNode(ExpressionNode):
     def __init__(self, value: ExpressionNode) -> None:
         self.value: ExpressionNode = value
+
+
+class BinaryExpressionNode(ExpressionNode):
+    def __init__(self, left: ExpressionNode, right: ExpressionNode):
+        self.left: ExpressionNode = left
+        self.right: ExpressionNode = right
+
+
+# region Atomic Units of the Language  ----->   Literals and ¿VarNode?
+class LiteralNumNode(UnaryExpressionNode):
+    pass
+
+
+class LiteralBoolNode(UnaryExpressionNode):
+    pass
+
+
+class LiteralStrNode(UnaryExpressionNode):
+    pass
+
+
+class ConstantNode(UnaryExpressionNode):
+    pass
+
+
+class VarNode(UnaryExpressionNode):
+    pass
+
+
+# endregion
+
+# region Operators
 
 
 # region UnaryNumExpressions
@@ -49,12 +92,6 @@ class NotNode(UnaryBoolExpressionNode):
 
 
 # endregion
-
-
-class BinaryExpressionNode(ExpressionNode):
-    def __init__(self, left: ExpressionNode, right: ExpressionNode):
-        self.left: ExpressionNode = left
-        self.right: ExpressionNode = right
 
 
 # region BinaryStringExpressions
@@ -164,18 +201,10 @@ class DynTestNode(ExpressionNode):  # This is for expression like --> Expression
 
 # endregion
 
-
-class ExpressionBlockNode(ExpressionNode):
-    def __init__(
-        self,
-        expr_list: list,
-    ):
-        """
-        Recibe una lista de statements
-        """
-        self.expr_list: list = expr_list
+# endregion
 
 
+# region Calling Expressions
 class AttrCallNode(ExpressionNode):
     """This node represents the intent of accessing a variable in the 'self' instance"""
 
@@ -187,167 +216,7 @@ class AttrCallNode(ExpressionNode):
         """This is the variable that you want to access in the self instance"""
 
 
-class LetNode(ExpressionNode):
-    def __init__(
-        self,
-        assign_list,
-        expr,
-    ):
-        self.assign_list = assign_list
-        self.expr = expr
-
-
-class IfNode(ExpressionNode):
-    def __init__(
-        self,
-        cond,
-        if_expr,
-        elif_branches,
-        else_expr,
-    ):
-        self.cond = cond
-        self.if_expr = if_expr
-        self.elif_branches = elif_branches  # lista de tuplas de expresiones del tipo (elif_cond, elif_expr)
-        self.else_expr = else_expr
-
-
-class WhileNode(ExpressionNode):
-    def __init__(
-        self,
-        cond,
-        body,
-    ):
-        self.cond = cond
-        self.body = body
-
-
-class ForNode(ExpressionNode):
-    def __init__(
-        self,
-        id,
-        iterable,
-        body,
-    ):
-        self.id = id
-        self.iterable = iterable
-        self.body = body
-
-
-class DestructionAssignmentBasicExpression(ExpressionNode):
-    def __init__(
-        self,
-        id: str,
-        expr: ExpressionNode,
-    ):
-        self.id: str = id
-        """This is the identifier of the variable to update it's value"""
-        self.expr: ExpressionNode = expr
-        """The result of this expression is the value that will update the previous one"""
-
-
-class DestructionAssignmentWithAttributeCallExpression(ExpressionNode):
-    def __init__(
-        self,
-        attribute_call_expression: AttrCallNode,
-        expression: ExpressionNode,
-    ):
-        self.attribute_call_expression: AttrCallNode = attribute_call_expression
-        """This is a pointer to the AttributeCallNode that when evaluated """
-        self.expression: ExpressionNode = expression
-        """This is the expression whose value must go in the value of the Variable Info returned by the attribute_call_expression"""
-
-
-class VarDefNode(AstNode):
-    def __init__(
-        self,
-        id: str,
-        type: str = None,
-    ):
-        self.id: str = id
-        self.type: str = type
-
-
-class AssignNode(AstNode):
-    def __init__(
-        self,
-        var: VarDefNode,
-        expr,
-    ):
-        self.var: VarDefNode = var
-        self.expr = expr
-
-
-class LiteralNumNode(UnaryExpressionNode):
-    pass
-
-
-class LiteralBoolNode(UnaryExpressionNode):
-    pass
-
-
-class LiteralStrNode(UnaryExpressionNode):
-    pass
-
-
-class ConstantNode(UnaryExpressionNode):
-    pass
-
-
-class VarNode(UnaryExpressionNode):
-    pass
-
-
-class VectorNode(ExpressionNode):
-    def __init__(
-        self,
-        expr_list,
-    ):
-        self.expr_list = expr_list
-
-
-class ImplicitVector(ExpressionNode):
-    def __init__(
-        self,
-        expr,
-        id,
-        iterable,
-    ):
-        self.expr = expr
-        self.id = id
-        self.iterable = iterable
-
-
-class IndexingNode(ExpressionNode):
-    def __init__(
-        self,
-        vector,
-        index,
-    ):
-        self.vector = vector
-        self.expr = index
-
-
-class InstantiateNode(ExpressionNode):
-    def __init__(
-        self,
-        type,
-        expr_list,
-    ):
-        self.type = type
-        self.expr_list = expr_list
-
-
-class DowncastNode(ExpressionNode):
-    def __init__(
-        self,
-        obj,
-        type,
-    ):
-        self.obj = obj
-        self.type = type
-
-
-class FuncCallNode(ExpressionNode):
+class FunctionCallNode(ExpressionNode):
     def __init__(
         self,
         id: str,
@@ -410,34 +279,247 @@ class MethodCallListNode(ExpressionNode):
         self.methods: list[MethodCallNode] = methods
 
 
+# endregion
+
+# region Variable Related Nodes
+
+
+class VarDefNode(AstNode):
+    def __init__(
+        self,
+        id: str,
+        type: str = None,
+    ):
+        self.id: str = id
+        self.type: str = type
+
+
+class AssignNode(ExpressionNode):
+    def __init__(
+        self,
+        var: VarDefNode,
+        expr,
+    ):
+        self.var: VarDefNode = var
+        self.expr = expr
+
+
+class DestructionAssignmentBasicExpression(ExpressionNode):
+    def __init__(
+        self,
+        id: str,
+        expr: ExpressionNode,
+    ):
+        self.id: str = id
+        """This is the identifier of the variable to update it's value"""
+        self.expr: ExpressionNode = expr
+        """The result of this expression is the value that will update the previous one"""
+
+
+class DestructionAssignmentWithAttributeCallExpression(ExpressionNode):
+    def __init__(
+        self,
+        attribute_call_expression: AttrCallNode,
+        expression: ExpressionNode,
+    ):
+        self.attribute_call_expression: AttrCallNode = attribute_call_expression
+        """This is a pointer to the AttributeCallNode that when evaluated """
+        self.expression: ExpressionNode = expression
+        """This is the expression whose value must go in the value of the Variable Info returned by the attribute_call_expression"""
+
+
+# endregion
+
+
+# region Conditional Related Expressions
+class ElifNodeAtomExpression(ExpressionNode):
+    def __init__(
+        self,
+        conditional_expression: ExpressionNode,
+        body_expression: ExpressionNode,
+    ):
+        self.conditional_expression: ExpressionNode = conditional_expression
+        """This is the expression that MUST evaluate True"""
+        self.body_expression: ExpressionNode = body_expression
+        """This is the body of the ElifNodeAtom this branch should execute if the condition is true"""
+
+
+class ElifNodeExpressionList(ExpressionNode):
+    def __init__(self, elif_expressions: list[ElifNodeAtomExpression]):
+        self.elif_expressions: list[ElifNodeAtomExpression] = elif_expressions
+        """This value could be empty"""
+
+
+class IfNodeExpression(ExpressionNode):
+    def __init__(
+        self,
+        conditional_expression: ExpressionNode,
+        if_body_expression: ExpressionNode,
+        elif_branches: ElifNodeExpressionList,
+        else_expression: ExpressionNode,
+    ):
+        self.conditional_expression: ExpressionNode = conditional_expression
+        """This is the expression inside the parenthesis of the If expression. It must be a bool"""
+        self.if_body_expression: ExpressionNode = if_body_expression
+        """This is the body that should get executed if the conditional expression is True"""
+        self.elif_branches: ElifNodeExpressionList = elif_branches
+        """This is a Node that contains a List of ElifNodeAtom"""
+        self.else_expression: ExpressionNode = else_expression
+        """This is the expression that will be executed in the Else branch"""
+
+
+# endregion
+
+
+# region Loop Related Expressions
+class WhileExpressionNode(ExpressionNode):
+    def __init__(
+        self,
+        conditional_expression: ExpressionNode,
+        body_expression: ExpressionNode,
+    ):
+        self.conditional_expression: ExpressionNode = conditional_expression
+        self.body_expression: ExpressionNode = body_expression
+
+
+class ForExpressionNode(ExpressionNode):
+    def __init__(
+        self,
+        id: str,
+        iterable: ExpressionNode,
+        body: ExpressionNode,
+    ):
+        self.id: str = id
+        """This is the name of the identifier that will store the value of the current element of the iterable"""
+        self.iterable: ExpressionNode = iterable
+        """This is an Expression that Must evaluate to a Type that implements the Iterable Protocol"""
+        self.body: ExpressionNode = body
+        """This is the body of the For. The code that must be evaluated in each cicle of the iterable"""
+
+
+# endregion
+
+
+# region Nodes related with Vectors
+class VectorNode(ExpressionNode):
+    """This node represents the creation of a vector"""
+
+    def __init__(
+        self,
+        expression_list: list[ExpressionNode],
+    ):
+        self.expression_list: list[ExpressionNode] = expression_list
+
+
+class ImplicitVector(ExpressionNode):
+    """Represents the creation of a vector in its implicit form"""
+
+    def __init__(
+        self,
+        expression_body: ExpressionNode,
+        id: str,
+        iterable: ExpressionNode,
+    ):
+        self.expression_body: ExpressionNode = expression_body
+        """This expression represents the code that will be executed for each element of the Iterable"""
+        self.id: str = id
+        """The name of the variable that will represents the current value of the iterable"""
+        self.iterable: ExpressionNode = iterable
+        """This expression should evaluate to a type that implements the Iterable Protocol"""
+
+
+class IndexingNode(ExpressionNode):
+    def __init__(
+        self,
+        vector_expression: ExpressionNode,
+        index: str,
+    ):
+        self.vector_expression: ExpressionNode = vector_expression
+        """This is an expression that Must return a Vector Type"""
+        self.index: str = index
+        """This string Must be a number. But remember to cast it to INT"""
+
+
+# endregion
+
+
+# region Nodes related to Type Handling
+class DowncastNode(ExpressionNode):
+    """This is the expression for the code:\n
+    x as Point\n
+    Where Point is a Type"""
+
+    def __init__(
+        self,
+        obj_expression: ExpressionNode,
+        type: str,
+    ):
+        self.obj_expression: ExpressionNode = obj_expression
+        self.type: str = type
+
+
+class InstantiateNode(ExpressionNode):
+    """This node creates a new instance of a type"""
+
+    def __init__(
+        self,
+        type_id: str,
+        initialization_expressions: list[ExpressionNode],
+    ):
+        self.type_id: str = type_id
+        self.initialization_expressions: list[ExpressionNode] = (
+            initialization_expressions
+        )
+
+
+# endregion
+
+
+# region Nodes related with declarations
+class LetNode(ExpressionNode):
+    def __init__(
+        self,
+        assign_list: list[AssignNode],
+        expr: ExpressionNode,
+    ):
+        self.assign_list: list[AssignNode] = assign_list
+        """The list of all the Variables created in this let expression"""
+        self.expr: ExpressionNode = expr
+        """The Expression after the 'in'"""
+
+
 class FunctionDeclarationNode(DeclarationNode):
     def __init__(
         self,
         id: str,
         args: list[VarDefNode],
-        body,
+        body: ExpressionNode,
+        return_type: str = None,
+    ):
+        self.id: str = id
+        """This is the name of the function"""
+        self.args: list[VarDefNode] = args
+        """This is the List of the Arguments of the Function"""
+        self.return_type: str = return_type
+        """This is the return Type"""
+        self.body: ExpressionNode = body
+        """This is the expression body of the Function"""
+
+
+class MethodNode(DeclarationNode):  # MethodDeclarationNode
+    """This is the Node for method Declarations inside Types"""
+
+    def __init__(
+        self,
+        id: str,
+        args: list[VarDefNode],
+        body: ExpressionNode,
         return_type: str = None,
     ):
         self.id: str = id
         self.args: list[VarDefNode] = args
         self.return_type: str = return_type
-        self.body = body
-
-
-class MethodNode(AstNode):  # MethodDeclarationNode
-    """This is the Node for method Declarations"""
-
-    def __init__(
-        self,
-        id,
-        args,
-        body,
-        return_type=None,
-    ):
-        self.id = id
-        self.args = args
-        self.return_type = return_type
-        self.body = body
+        self.body: ExpressionNode = body
 
 
 class TypeDeclarationNode(DeclarationNode):
@@ -449,36 +531,42 @@ class TypeDeclarationNode(DeclarationNode):
         features: list[AssignNode | MethodNode],
         args: list[VarDefNode] = [],
         parent: str = None,
-        parent_constructor_args=None,
+        parent_constructor_args: list[ExpressionNode] = None,
     ):
         self.id: str = id
         self.features: list[AssignNode | MethodNode] = features
         self.args: list[VarDefNode] = args
         self.parent: str = parent
         """This is a string with the name of the parent"""
-        self.parent_constructor_args = parent_constructor_args
+        self.parent_constructor_args: list[ExpressionNode] = parent_constructor_args
         """This is a list of Expressions. Could be None"""
 
 
-class PrototypeMethodNode(AstNode):
+class ProtocolMethodNode(DeclarationNode):
     def __init__(
         self,
         id: str,
         args: list[VarDefNode],
-        return_type,
+        return_type: str,
     ):
         self.id: str = id
-        self.args = args
-        self.return_type = return_type
+        self.args: list[VarDefNode] = args
+        self.return_type: str = return_type
 
 
-class ProtDeclarationNode(DeclarationNode):
+class ProtocolDeclarationNode(DeclarationNode):
     def __init__(
         self,
         id: str,
-        methods: list[PrototypeMethodNode],
+        methods: list[ProtocolMethodNode],
         parents: list[str] = None,
     ):
         self.id: str = id
-        self.methods = methods
-        self.parents = parents
+        """This is the name of the Protocol"""
+        self.methods: list[ProtocolMethodNode] = methods
+        """A list with all the protocol methods"""
+        self.parents: list[str] = parents
+        """A list with all the protocol parents that this protocol extends"""
+
+
+# endregion
