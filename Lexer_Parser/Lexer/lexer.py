@@ -5,7 +5,7 @@ from Lexer_Parser.Lexer.Regex.regx import RegexSimple
 
 
 class Lexer:
-    def __init__(self, table:[(Terminal,str)], eof):
+    def __init__(self, table:list[(Terminal,str)], eof):
         """
 
         :param table: La tabla tiene que tener (valor, regex) osea es una lista de tuplas

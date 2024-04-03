@@ -14,6 +14,8 @@ class Gramarlr1:
 
         Arithmethic_expression, Disjoin, Conj, Negation, Dyn_Test, Comp, Number_Expression,Term, Factor, Sign, Atomic = G.NonTerminals(
             'ArithExpr Disj Conj Neg DynTest Comp NumExpr Term Factor Sign Atom')
+        
+        Attr_Call, Closed_Expression, Function_Call, Method_Call, Method_Call_List = G.NonTerminals('Attr_Call Closed_Expression Function_Call Method_Call Method_Call_List')
 
         ExprBlock, StatList, Expression_List, Expression_Trail, Assigment_List, Var_Declaration, Elif_Branch = G.NonTerminals(
             'ExprBlock StatList ExprList ExprTail AssignList VarDecl ElifBranch')
@@ -24,7 +26,7 @@ class Gramarlr1:
         Protocol_Declaration, Protocol_Methods, Full_Type_Arguments, Fully_Typed_Tail, Type_List = G.NonTerminals(
             'ProtDecl ProtMethods FullyTypedArgs FullyTypedTail TypeList')
 
-        number_, string_, bool_, const_, id_, type_id_ = G.Terminals('number string bool const id type_id')
+        number_, string_, bool_, const_, self_, id_, type_id_ = G.Terminals('number string bool const self id type_id')
         let_, in_, if_, elif_, else_, while_, for_, as_, is_, new_ = G.Terminals('let in if elif else while for as is new')
         function_, type_, inherits_, protocol_, extends_ = G.Terminals('function type inherits protocol extends')
         plus_, minus_, star_, div_, mod_, pow_, power_ = G.Terminals('+ - * / % ^ **') #TODO: Unificar bajo Regex ^ **
@@ -34,6 +36,8 @@ class Gramarlr1:
         o_par_, c_par_, o_brack_, c_brack_, o_brace_, c_brace_ = G.Terminals('( ) [ ] { }')
 
         space=G.Terminal("space")
+
+        # self_=G.Terminal("self")
 
         Program %= Declaration_List + Statment, lambda h, s: ProgramNode(s[1], s[2])
 
@@ -58,8 +62,8 @@ class Gramarlr1:
                                                                                                            s[6], s[8])
         Simple_Expresion %= while_ + o_par_ + Expresion + c_par_ + Simple_Expresion, lambda h, s: WhileNode(s[3], s[5])
         Simple_Expresion %= for_ + o_par_ + id_ + in_ + Expresion + c_par_ + Simple_Expresion, lambda h, s: ForNode(s[3], s[5], s[7])
-        Simple_Expresion %= id_ + colon_eq_ + Simple_Expresion, lambda h, s: DestrAssign(s[1], s[3])
-        Simple_Expresion %= id_ + dot_ + id_ + colon_eq_ + Simple_Expresion, lambda h, s: DestrAssign(s[3], s[5], True)
+        Simple_Expresion %= id_ + colon_eq_ + Simple_Expresion, lambda h, s: DestructionAssignmentBasicExpression(s[1], s[3])
+        Simple_Expresion %= Attr_Call + colon_eq_ + Simple_Expresion, lambda h, s: DestructionAssignmentWithAttributeCallExpression(s[1], s[3])
         Simple_Expresion %= Arithmethic_expression, lambda h, s: s[1]
 
         ExprBlock %= o_brace_ + StatList + c_brace_, lambda h, s: ExpressionBlockNode(s[2])
@@ -68,8 +72,8 @@ class Gramarlr1:
                                                                                                          s[6], s[8])
         ExprBlock %= while_ + o_par_ + Expresion + c_par_ + ExprBlock, lambda h, s: WhileNode(s[3], s[5])
         ExprBlock %= for_ + o_par_ + id_ + in_ + Expresion + c_par_ + ExprBlock, lambda h, s: ForNode(s[3], s[5], s[7])
-        ExprBlock %= id_ + colon_eq_ + ExprBlock, lambda h, s: DestrAssign(s[1], s[3])
-        ExprBlock %= id_ + dot_ + id_ + colon_eq_ + ExprBlock, lambda h, s: DestrAssign(s[3], s[5], True)
+        ExprBlock %= id_ + colon_eq_ + ExprBlock, lambda h, s: DestructionAssignmentBasicExpression(s[1], s[3])
+        ExprBlock %= Attr_Call + colon_eq_ + ExprBlock, lambda h, s: DestructionAssignmentWithAttributeCallExpression(s[1], s[3])
 
         StatList %= Statment, lambda h, s: [s[1]]
         StatList %= Statment + StatList, lambda h, s: [s[1]] + s[2]
@@ -136,13 +140,30 @@ class Gramarlr1:
         Atomic %= id_, lambda h, s: VarNode(s[1])
         Atomic %= o_brack_ + Expression_List + c_brack_, lambda h, s: VectorNode(s[2])
         Atomic %= o_brack_ + Expresion + or_or_ + id_ + in_ + Expresion + c_brack_, lambda h, s: ImplicitVector(s[2], s[4], s[6])
-        Atomic %= o_par_ + Expresion + c_par_, lambda h, s: s[2]
         Atomic %= new_ + type_id_ + o_par_ + Expression_List + c_par_, lambda h, s: InstantiateNode(s[2], s[4])
-        Atomic %= id_ + o_par_ + Expression_List + c_par_, lambda h, s: FuncCallNode(s[1], s[3])
         Atomic %= Atomic + as_ + type_id_, lambda h, s: DowncastNode(s[1], s[3])
         Atomic %= Atomic + o_brack_ + Expresion + c_brack_, lambda h, s: IndexingNode(s[1], s[3])
-        Atomic %= id_ + dot_ + id_ + o_par_ + Expression_List + c_par_, lambda h, s: MethodCallNode(s[1], s[3], s[5])
-        Atomic %= id_ + dot_ + id_, lambda h, s: AttrrCallNode(s[1], s[3])
+        # Atomic %= o_par_ + Expresion + c_par_, lambda h, s: s[2]  # Mira aqui el problema                        -------------- Ahhhhhh ----------
+
+        Atomic %= Attr_Call, lambda h, s: s[1]
+        Atomic %= Closed_Expression, lambda h, s: s[1]
+        Atomic %= Function_Call, lambda h, s: s[1]
+        Atomic %= Method_Call, lambda h, s: MethodCallListNode(s[1])
+        
+        Attr_Call %= self_ + dot_ + id_, lambda h, s: AttrCallNode(s[3])  # self.x
+        Function_Call %= id_ + o_par_ + Expression_List + c_par_, lambda h, s: FuncCallNode(s[1], s[3])   #  sin(180)
+        Closed_Expression %= o_par_ + Expresion + c_par_, lambda h, s: s[2]
+
+        # Atomic %= id_ + dot_ + id_ + o_par_ + Expression_List + c_par_, lambda h, s: MethodCallNode(s[1], s[3], s[5])  # TODO: This was the original
+        Method_Call %= self_ + dot_ + id_ + o_par_ + Expression_List + c_par_ + Method_Call_List, lambda h, s: [MethodCallWithIdentifierNode(s[1], s[3], s[5])] + s[7]   # self.something()
+        Method_Call %= Attr_Call + dot_ + id_ + o_par_ + Expression_List + c_par_ + Method_Call_List, lambda h, s: [MethodCallWithExpressionNode(s[1], s[3], s[5])] + s[7]  # self.x.something()
+        Method_Call %= id_ + dot_ + id_ + o_par_ + Expression_List + c_par_ + Method_Call_List, lambda h, s: [MethodCallWithIdentifierNode(s[1], s[3], s[5])] + s[7]    # x.something()
+        Method_Call %= Function_Call + dot_ + id_ + o_par_ + Expression_List + c_par_ + Method_Call_List, lambda h, s: [MethodCallWithExpressionNode(s[1], s[3], s[5])] + s[7]   # get_default_triangle().get_point(1).get_norm()
+        Method_Call %= Closed_Expression + dot_ + id_ + o_par_ + Expression_List + c_par_ + Method_Call_List, lambda h, s: [MethodCallWithExpressionNode(s[1], s[3], s[5])] + s[7]   # (expression).get_something()
+
+        Method_Call_List %= dot_ + id_ + o_par_ + Expression_List + c_par_ + Method_Call_List, lambda h, s: [MethodCallWithIdentifierNode('result', s[2], s[4])] + s[6]
+        Method_Call_List %= G.Epsilon, lambda h, s: []
+
 
         Func_Declaration %= function_ + id_ + o_par_ + Argument_List + c_par_ + Body, lambda h, s: FunctionDeclarationNode(s[2], s[4], s[6])
         Func_Declaration %= function_ + id_ + o_par_ + Argument_List + c_par_ + colon_ + type_id_ + Body, lambda h, s: FunctionDeclarationNode(s[2],

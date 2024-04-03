@@ -1,0 +1,10 @@
+type Point {
+     x = 0;
+     y = 0;
+
+     getX() => self.x.get_norm().mul();
+     getY() => self.y;
+     getT() => get_default_triangle().get_point().get_norm();
+}
+
+print(4);

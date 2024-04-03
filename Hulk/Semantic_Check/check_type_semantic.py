@@ -99,7 +99,7 @@ class CheckTypes(object):
             self.errors.append(ex.text)
 
     @visitor.when(VarDefNode)
-    def visit(self, node: Node, scope: HulkScope):
+    def visit(self, node: AstNode, scope: HulkScope):
         try:
             self.context.create_variable(node.id, node.type)
         except SemanticError as ex:
