@@ -21,7 +21,7 @@ def evaluate(text: str):
 
     print(f"Los tokens son: \n {tokens}")
     # Parsear
-    print('\nComenzando a Parsear:\n')
+    print("\nComenzando a Parsear:\n")
     parse, operations = parser(tokens)
 
     # print(len(parse),"parser")
@@ -31,48 +31,9 @@ def evaluate(text: str):
     ast = evaluate_reverse_parse(parse, operations, tokens)
     print(f"El ast es \n {str(ast)}")
 
-    # errors = []
-    # collector = CheckTypes(errors)
-    # collector.visit(ast)
-    # context = collector.context
 
-    # builder = TypeBuilder(context, errors)
-    # assert len(errors)==0, "No puede tener errores de semántica"
-    # builder.visit(ast)
-
-    # print('Errors:', errors)
-    # print("contexto \n ", 'Context:')
-    # print(context)
-
-
-# text = '''
-
-#   function hola (x){ x+a;}
-#   type Point {
-#      x = 0;
-#      y = 0;
-
-#      getX() => self.x;
-#      getY() => self.y;
-#   }
-
-#   type PolarPoint(phi, rho) inherits Point(rho * sin(phi), rho * cos(phi)) {
-#   }
-
-#   protocol Hashable {
-#      hash(): Number;
-#   }
-
-#   protocol Equatable extends Hashable {
-#      equals(other: Object): Boolean;
-#   }
-
-#   let a = 9 in print("La \"Suma\"" @ a * 2);
-
-#  '''
-
-with open('./examples/simple.hulk', 'r') as file:
-    text:str = file.read()
+with open("./examples/simple.hulk", "r") as file:
+    text: str = file.read()
     evaluate(text)
 
 # evaluate(text)
