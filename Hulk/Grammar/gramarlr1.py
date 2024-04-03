@@ -33,9 +33,11 @@ class Gramarlr1:
         dot_, comma_, colon_, semi_colon_, at_, at_at_, arrow_ = G.Terminals('. , : ; @ @@ =>')
         o_par_, c_par_, o_brack_, c_brack_, o_brace_, c_brace_ = G.Terminals('( ) [ ] { }')
 
-        space=G.Terminal("space")
+        space,comments=G.Terminals("space comments")
 
         self_=G.Terminal("self")
+
+
 
         Program %= Declaration_List + Statment, lambda h, s: ProgramNode(s[1], s[2])
         Program %= Declaration_List, lambda h, s: ProgramNode(s[1],[])

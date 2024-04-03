@@ -7,7 +7,7 @@ class HulkLexer(Lexer):
         tokens = super().__call__(text)
 
         for token in tokens:
-            if token.token_type.Name !="space":
+            if token.token_type.Name not in ["space","comments"] :
                 lis.append(token)
 
         assert len(lis) > 0, "La lista no puede ser vacía"

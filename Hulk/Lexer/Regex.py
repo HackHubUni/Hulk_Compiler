@@ -69,6 +69,10 @@ regex_list.append((const_, ru.const))
 # type_id
 type_id_ = s("type_id")
 regex_list.append((type_id_, ru.type_id))
+#comments
+comments=s("comments")
+comments_regex=ru.comments
+regex_list.append((comments,comments_regex))
 
 
 

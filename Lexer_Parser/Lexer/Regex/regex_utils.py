@@ -18,14 +18,22 @@ class Regex_Utils:
         self.natural_aster_numbers_ = f'({self.natural_numbers_})|0'
         self.floating_point_numbers_ = f'({self.natural_aster_numbers_}).(({self.natural_aster_numbers_})({self.natural_aster_numbers_})*)'
         self.escaping= ' |\\"| '
+        #El text_ no tiene para que se pueda hacer saltos \n
+        self.text_=f'({self.letters_}|{self.uppercase_letters_}|0|{self.nonzero_digits_}|{self.valid_string_symbols_}|{self.delim_}|\t| |\|| |\\\\")*'
+        #Es como el text_ pero se puede tener \n
+        self.string_=f'({self.letters_}|{self.uppercase_letters_}|0|{self.nonzero_digits_}|{self.valid_string_symbols_}|{self.delim_}|{self.escaping}|\t| |\|| |\\\\")*'
 
-        self.string=f'"({self.letters_}|{self.uppercase_letters_}|0|{self.nonzero_digits_}|{self.valid_string_symbols_}|{self.delim_}|{self.escaping}|\t| |\|| |\\\\")*"'
+        self.string=f'"{self.string_}"'
+        # Se pueden tener en una sola línea  o en multilínea
+        self.comments=f'//{self.text_}|/\*{self.string_}\*/'
         self.id=f'({self.letters_}|{self.valid_id_symbols_})({self.letters_}|{self.uppercase_letters_}|0|{self.nonzero_digits_}|{self.valid_id_symbols_})*'
         self.numbers=f'({self.natural_aster_numbers_})|({self.floating_point_numbers_})'
         self.space=f'({self.delim_})({self.delim_})*'
         self.bool=f'(true|false)'
         self.const=f"(PI|E)"
         self.type_id=f'({self.uppercase_letters_})({self.letters_}|{self.uppercase_letters_}|0|{self.nonzero_digits_}|{self.valid_id_symbols_})*'
+
+
 #a=Regex_Utils()
 #print(a.string)
 #print(a.id)
