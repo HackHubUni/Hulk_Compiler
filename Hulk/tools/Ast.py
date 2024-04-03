@@ -38,6 +38,12 @@ class UnaryExpressionNode(ExpressionNode):
         self.value: ExpressionNode = value
 
 
+class LiteralExpressionNode(UnaryExpressionNode):
+    """This node groups all the literal nodes"""
+
+    pass
+
+
 class BinaryExpressionNode(ExpressionNode):
     def __init__(self, left: ExpressionNode, right: ExpressionNode):
         self.left: ExpressionNode = left
@@ -45,23 +51,25 @@ class BinaryExpressionNode(ExpressionNode):
 
 
 # region Atomic Units of the Language  ----->   Literals and ¿VarNode?
-class LiteralNumNode(UnaryExpressionNode):
+class LiteralNumNode(LiteralExpressionNode):
     pass
 
 
-class LiteralBoolNode(UnaryExpressionNode):
+class LiteralBoolNode(LiteralExpressionNode):
     pass
 
 
-class LiteralStrNode(UnaryExpressionNode):
+class LiteralStrNode(LiteralExpressionNode):
     pass
 
 
-class ConstantNode(UnaryExpressionNode):
+class ConstantNode(LiteralExpressionNode):
     pass
 
 
 class VarNode(UnaryExpressionNode):
+    """This node have a single element and this is the identifier of the variable to which extract the value"""
+
     pass
 
 
