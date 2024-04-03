@@ -15,19 +15,17 @@ class MethodInfo:
         return_type: str,
         declaration_node_pointer: MethodNode,
     ):
-        self.name = name
+        self.name: str = name
         """This is the name of the method"""
-        self.params = params
+        self.param_names: list[VariableInfo] = params
         """This is a list of VariableInfo and stores the basic information of the parameters of the method"""
-        self.return_type = return_type
+        self.return_type: str = return_type
         """This is the name of the return type"""
         self.declaration_pointer: MethodNode = declaration_node_pointer
         """This is the pointer to the AST node where the Method is declared"""
 
     def __str__(self):
-        params = ", ".join(
-            f"{n}:{t.name}" for n, t in zip(self.param_names, self.param_types)
-        )
+        params = ", ".join(str(var_info) for var_info in self.param_names)
         return f"[method] {self.name}({params}): {self.return_type.name};"
 
     def __eq__(self, other):
@@ -37,9 +35,10 @@ class MethodInfo:
         return (
             other.name == self.name
             and other.return_type == self.return_type
-            and len(other.params) == len(self.params)
+            and len(other.param_names) == len(self.param_names)
             and all(
-                eq(element[0], element[1]) for element in zip(other.params, self.params)
+                eq(element[0], element[1])
+                for element in zip(other.param_names, self.param_names)
             )
         )
 
@@ -55,80 +54,63 @@ class TypeInfo:
         self.parent: str = None
         """The parent type name"""
 
-    def create_instance(self) -> InstanceType:
+    def create_instance(self) -> TypeInstance:
         """Returns a instance of this type. That is nothing more that a clone of the attributes"""
-        return InstanceType(
+        return TypeInstance(
             self.name, [instance[1].clone() for instance in self.attributes.items()]
         )
 
     def set_parent(self, parent: str):
-        if self.parent is not None:
+        """Tries of changing the type of the parent. Raise an SemanticError if the type of the parent was already set"""
+        if self.parent is not None or self.parent != "":
             raise SemanticError(
                 f"Parent type is already set for {self.name}. It's value is {self.parent}"
             )
         self.parent = parent
 
     def get_attribute(self, name: str) -> VariableInfo:
-        try:
-            return next(attr for attr in self.attributes if attr.name == name)
-        except StopIteration:
-            if self.parent is None:
-                raise SemanticError(
-                    f'Attribute "{name}" is not defined in {self.name}.'
-                )
-            try:
-                return self.parent.get_attribute(name)
-            except SemanticError:
-                raise SemanticError(
-                    f'Attribute "{name}" is not defined in {self.name}.'
-                )
+        """Returns the attribute with this name. If not found raise a SemanticError"""
+        if name in self.attributes:
+            return self.attributes[name]
+        raise SemanticError(
+            f"The type ({self.name}) has no attribute with name ({name})"
+        )
 
-    def define_attribute(self, name: str, type: str):
-        try:
-            self.get_attribute(name)
-        except SemanticError:
-            attribute = VariableInfo(name, type)
-            self.attributes.append(attribute)
-            return attribute
-        else:
+    def define_new_attribute(self, attribute: VariableInfo):
+        if attribute.name in self.attributes:
             raise SemanticError(
-                f'Attribute "{name}" is already defined in {self.name}.'
+                f"An attribute with name '{attribute.name}' is already defined in the type '{self.name}'"
             )
+        self.attributes[attribute.name] = attribute.clone()
 
     def get_method(self, name: str):
-        try:
-            return next(method for method in self.methods if method.name == name)
-        except StopIteration:
-            if self.parent is None:
-                raise SemanticError(f'Method "{name}" is not defined in {self.name}.')
-            try:
-                return self.parent.get_method(name)
-            except SemanticError:
-                raise SemanticError(f'Method "{name}" is not defined in {self.name}.')
+        if name in self.methods:
+            return self.methods[name]
+        raise SemanticError(
+            f"There is no method named '{name}' in the type '{self.name}'"
+        )
 
     def define_method(
-        self, name: str, param_names: list, param_types: list, return_type
+        self,
+        name: str,
+        params: list[VariableInfo],
+        return_type: str,
+        method_declaration_pointer: MethodNode,
     ):
-        if name in (method.name for method in self.methods):
-            raise SemanticError(f'Method "{name}" already defined in {self.name}')
+        """Define a new method in the Type. If a method with the same name is already defined then it raise a SemanticError"""
+        if name in self.methods:
+            raise SemanticError(
+                f"I the type '{self.name}' there is already a definition for a method with name"
+            )
+        method = MethodInfo(name, params, return_type, method_declaration_pointer)
+        self.methods[name] = method
 
-        method = MethodInfo(name, param_names, param_types, return_type)
-        self.methods.append(method)
-        return method
+    def all_attributes(self) -> list[VariableInfo]:
+        """Returns a list with all the attributes in the type"""
+        return list(item[1] for item in self.attributes.items())
 
-    def all_attributes(self, clean=True):
-        plain = (
-            OrderedDict() if self.parent is None else self.parent.all_attributes(False)
-        )
-        for attr in self.attributes:
-            plain[attr.name] = (attr, self)
-        return plain.values() if clean else plain
-
-    def all_methods(self, clean=True):
-        plain = OrderedDict() if self.parent is None else self.parent.all_methods(False)
-        for method in self.methods:
-            plain[method.name] = (method, self)
-        return plain.values() if clean else plain
+    def all_methods(self) -> list[MethodInfo]:
+        return list(item[1] for item in self.methods.items())
 
     def conforms_to(self, other):
         return (
