@@ -1,5 +1,5 @@
 from Lexer_Parser.Lexer.lexer import Lexer
-from Hulk.tools.utils import contains_space
+from Hulk.tools.utils import contains_space,contains_token
 class HulkLexer(Lexer):
 
     def __call__(self, text):
@@ -12,6 +12,6 @@ class HulkLexer(Lexer):
 
         assert len(lis) > 0, "La lista no puede ser vacía"
         assert not contains_space(lis), "La lista que sale del Lexer tiene tokens space "
-
+        assert not contains_token(lis,"comments"), "La lista que sale del Lexer tiene tokens comments"
         return lis
 
