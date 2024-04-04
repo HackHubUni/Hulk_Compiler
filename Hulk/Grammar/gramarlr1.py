@@ -26,6 +26,7 @@ class Gramarlr1:
         Protocol_Declaration, Protocol_Methods, Full_Type_Arguments, Fully_Typed_Tail, Type_List = G.NonTerminals(
             'ProtDecl ProtMethods FullyTypedArgs FullyTypedTail TypeList')
 
+        Body_Arrow=G.NonTerminal("BodyArrow")
         number_, string_, bool_, const_, self_, id_, type_id_ = G.Terminals('number string bool const self id type_id')
         let_, in_, if_, elif_, else_, while_, for_, as_, is_, new_ = G.Terminals('let in if elif else while for as is new')
         function_, type_, inherits_, protocol_, extends_ = G.Terminals('function type inherits protocol extends')
@@ -170,11 +171,18 @@ class Gramarlr1:
 
 
         Func_Declaration %= function_ + id_ + o_par_ + Argument_List + c_par_ + Body, lambda h, s: FunctionDeclarationNode(s[2], s[4], s[6])
+       #TODO:new Func_Declaration %= id_ + o_par_ + Argument_List + c_par_ +arrow_+, lambda h, s: FunctionDeclarationNode(s[2], s[4], s[6])
         Func_Declaration %= function_ + id_ + o_par_ + Argument_List + c_par_ + colon_ + type_id_ + Body, lambda h, s: FunctionDeclarationNode(s[2],
                                                                                                                                                s[4],
-                                                                                                                                               s[8],
+                                                                                                                                s[8],
                                                                                                                                                s[7])
 
+        #TODO:NEW
+        #Body_Arrow %= Statment, lambda h, s: s[1]
+        #Body_Arrow %=o_brace_ + StatList + c_brace_, lambda h, s: s[2]
+
+
+        #####
         Body %= arrow_ + Statment, lambda h, s: s[2]
         Body %= o_brace_ + StatList + c_brace_, lambda h, s: s[2]
 

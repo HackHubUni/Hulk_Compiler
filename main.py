@@ -1,12 +1,13 @@
 from Hulk.Lexer.Hulk_Lexer import get_hulk_lexer
 from Hulk.Parser.Hulk_Parser import get_hulk_parser
-from Hulk.Semantic_Check.check_type_semantic import InfoSaverTree,TypeBuilder
+
 from cmp.evaluation import evaluate_reverse_parse
-from Hulk.Semantic_Check.type_inferator import *
-from Hulk.Semantic_Check.type_node import *
-from Hulk.Semantic_Check.type_inferator import *
-from Hulk.Semantic_Check.checker import *
-from Hulk.Semantic_Check.type_node import *
+#from Hulk.Semantic_Check.type_inferator import *
+#from Hulk.Semantic_Check.type_node import *
+#from Hulk.Semantic_Check.type_inferator import *
+#from Hulk.Semantic_Check.checker import *
+#from Hulk.Semantic_Check.type_node import *
+#from Hulk.Semantic_Check.check_type_semantic import InfoSaverTree,TypeBuilder
 
 # import lexer and parser
 lexer = get_hulk_lexer()
@@ -57,17 +58,18 @@ def evaluate(text:str):
 
 text = ''' 
 
-type Point {
-    x = 0;
-    y = 0;
+type Point(x, y) {
+    x = x;
+    y = y;
 
+   
     getX() => self.x;
     getY() => self.y;
 
     setX(x) => self.x := x;
     setY(y) => self.y := y;
 }
-  print(4);
+
 
  '''
 

@@ -1,12 +1,12 @@
 from Hulk.Lexer.Hulk_Lexer import get_hulk_lexer
 from Hulk.Parser.Hulk_Parser import get_hulk_parser
-from Hulk.Semantic_Check.check_type_semantic import InfoSaverTree,TypeBuilder
+#from Hulk.Semantic_Check.check_type_semantic import InfoSaverTree,TypeBuilder
 from cmp.evaluation import evaluate_reverse_parse
-from Hulk.Semantic_Check.type_inferator import *
-from Hulk.Semantic_Check.type_node import *
-from Hulk.Semantic_Check.type_inferator import *
-from Hulk.Semantic_Check.checker import *
-from Hulk.Semantic_Check.type_node import *
+#from Hulk.Semantic_Check.type_inferator import *
+#from Hulk.Semantic_Check.type_node import *
+#from Hulk.Semantic_Check.type_inferator import *
+#from Hulk.Semantic_Check.checker import *
+#from Hulk.Semantic_Check.type_node import *
 
 # import lexer and parser
 lexer = get_hulk_lexer()
@@ -76,27 +76,27 @@ def evaluate(text:str,is_printting:bool=True):
 
         ast = evaluate_reverse_parse(parse, operations, tokens)
 
-        errors = []
-        collector = InfoSaverTree(errors)
-        collector.visit(ast)
-        if is_printting:
-            print(f"El ast es \n {ast}")
-        context = collector.context
-
-        builder = TypeBuilder(context, errors)
-        assert len(errors)==0, "No puede tener errores de semántica"
-        builder.visit(ast)
-        if is_printting:
-            print('Errors:', errors)
-            print("contexto \n ", 'Context:')
-            print(context)
-        checker = TypeChecker(context, errors)
-        if is_printting:
-            print(checker)
-        scope = checker.visit(ast)
-        if is_printting:
-            print(scope)
-
+        #errors = []
+        #collector = InfoSaverTree(errors)
+        #collector.visit(ast)
+        #if is_printting:
+        #    print(f"El ast es \n {ast}")
+        #context = collector.context
+#
+        #builder = TypeBuilder(context, errors)
+        #assert len(errors)==0, "No puede tener errores de semántica"
+        #builder.visit(ast)
+        #if is_printting:
+        #    print('Errors:', errors)
+        #    print("contexto \n ", 'Context:')
+        #    print(context)
+        #checker = TypeChecker(context, errors)
+        #if is_printting:
+        #    print(checker)
+        #scope = checker.visit(ast)
+        #if is_printting:
+        #    print(scope)
+#
 
 #def test():
 #        global folders
@@ -116,6 +116,7 @@ def show():
 
 def show_errors():
     global folders
+    count=0
     for folder in folders:
         for file in get_file_examples(folder):
 
@@ -127,6 +128,7 @@ def show_errors():
                 print("Error en el archivo", file)
                 print("Detalle del error:", str(e))
                 print_line_separator(50)
-
+                count+=1
+    print(count)
 if __name__=="__main__":
     show_errors()
