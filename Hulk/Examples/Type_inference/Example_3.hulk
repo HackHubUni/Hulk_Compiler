@@ -1,0 +1,1 @@
+function fact(x) => let f = 1 in for (i in range(1, x+1)) f := f * i;

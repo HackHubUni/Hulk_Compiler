@@ -1,0 +1,1 @@
+let a = 6, b = a * 7 in print(b);

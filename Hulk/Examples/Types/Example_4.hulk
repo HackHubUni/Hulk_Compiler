@@ -1,0 +1,12 @@
+type Point(x, y) {
+    x = x;
+    y = y;
+
+    // ... Se añadio lo de debajo para que funcione
+
+    getX() => self.x;
+    getY() => self.y;
+
+    setX(x) => self.x := x;
+    setY(y) => self.y := y;
+}

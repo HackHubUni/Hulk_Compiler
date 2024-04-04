@@ -1,0 +1,8 @@
+type Range(min:Number, max:Number) {
+    min = min;
+    max = max;
+    current = min - 1;
+
+    next(): Boolean => (self.current := self.current + 1) < max;
+    current(): Number => self.current;
+}

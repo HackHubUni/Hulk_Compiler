@@ -1,0 +1,12 @@
+protocol Hashable {
+    hash(): Number;
+}
+// Se agrego lo anterior para que funcione
+
+
+protocol Equatable extends Hashable {
+    equals(other: Object): Boolean;
+}
+
+
+

@@ -1,0 +1,5 @@
+
+protocol Iterable {
+    next() : Boolean;
+    current() : Object;
+}

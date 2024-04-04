@@ -1,0 +1,3 @@
+type PolarPoint(phi, rho) inherits Point(rho * sin(phi), rho * cos(phi)) {
+    // ...
+}

@@ -1,0 +1,6 @@
+type A {
+    // ...
+    f() {
+        self := new A(); // <-- Semantic error, `self` is not a valid assignment target
+    }
+}

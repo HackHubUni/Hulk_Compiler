@@ -1,0 +1,20 @@
+protocol Hashable {
+    hash(): Number;
+}
+// Se agrego lo anterior para que funcione
+
+
+protocol Equatable extends Hashable {
+    equals(other: Object): Boolean;
+}
+
+
+type Person {
+    // ...
+
+    hash() : Number {
+        // ...
+    }
+}
+
+let x : Hashable = new Person() in print(x.hash());

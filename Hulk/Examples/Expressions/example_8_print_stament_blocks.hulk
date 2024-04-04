@@ -1,0 +1,5 @@
+{
+    print(42);
+    print(sin(PI/2));
+    print("Hello World");
+}

@@ -1,0 +1,5 @@
+let iterable = range(0, 10) in
+    while (iterable.next())
+        let x = iterable.current() in {
+            // code that uses `x`
+        }

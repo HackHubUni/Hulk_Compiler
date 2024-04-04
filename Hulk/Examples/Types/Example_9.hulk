@@ -1,0 +1,6 @@
+type Person(firstname, lastname) {
+    firstname = firstname;
+    lastname = lastname;
+
+    name() => self.firstname @@ self.lastname;
+}

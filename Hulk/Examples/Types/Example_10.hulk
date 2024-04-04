@@ -1,0 +1,6 @@
+type Knight inherits Person {
+    name() => "Sir" @@ base();
+}
+
+let p = new Knight("Phil", "Collins") in
+    print(p.name()); // prints 'Sir Phil Collins'
