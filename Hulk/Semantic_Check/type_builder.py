@@ -38,6 +38,11 @@ def add_basic_constants(scope: HulkScopeLinkedNode):
     scope.define_variable(VariableInfo("e", "Number"))
     scope.get_variable("E").value = math.e
 
+def fill_scope_with_builtin_data(scope: HulkScopeLinkedNode):
+    """This function adds all the builtin types, functions and constants to the scope."""
+    add_basic_types(scope)
+    add_basic_functions(scope)
+    add_basic_constants(scope)
 
 class CollectDeclarations(object):
     """
