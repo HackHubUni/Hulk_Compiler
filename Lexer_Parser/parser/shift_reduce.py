@@ -110,6 +110,11 @@ class ShiftReduceParser:
                 token = w[cursor]
                 err = f'No se puede parsear la cadena. No se esperaba un token {lookahead} '
                 err += f'en la linea {token.row} y columna {token.col}.\n'
+                err += f'El token actual es {token.lex}\n'
+                err += f'Los tokens restantes son: {w[cursor:]}\n'
+                err += f'El estado actual es {state}\n'
+                err += f'El estado actual de las derivaciones es {output}'
+
                 if len(desire) > 0:
                     err += 'Se esperaba:\n'
                     err +=  desire
