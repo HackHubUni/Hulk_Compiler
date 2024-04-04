@@ -202,7 +202,9 @@ class LiteralBoolNode(AtomicNode):
         AtomicNode.__init__(self, lex)
         self.inferred_type = BoolType()
 class LiteralStrNode(AtomicNode):
-    pass
+    def __init__(self, lex):
+        AtomicNode.__init__(self, lex)
+        self.inferred_type = StringType()
 
 class ConstantNode(AtomicNode):
     def __init__(self, lex):
