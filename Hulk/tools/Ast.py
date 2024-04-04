@@ -10,7 +10,7 @@ class AstNode:
 
 class ProgramNode(AstNode):
     def __init__(self, decl_list, expr):
-        self.decl_list: list[DeclarationNode] = decl_list
+        self.declarations: list[DeclarationNode] = decl_list
         self.expr = expr
 
 
@@ -293,23 +293,31 @@ class MethodCallListNode(ExpressionNode):
 
 
 class VarDefNode(AstNode):
+    """This node represents the definition of a variable in the code. It is used in the AssignNode, and in the arguments of the functions, methods and types"""
+
     def __init__(
         self,
-        id: str,
-        type: str = None,
+        var_name: str,
+        var_type: str = None,
     ):
-        self.id: str = id
-        self.type: str = type
+        self.var_name: str = var_name
+        """This is the name of the variable"""
+        self.var_type: str = var_type
+        """This is a string that represents the name of the type of the variable"""
 
 
 class AssignNode(ExpressionNode):
+    """This node represents the assignation of a value to a variable"""
+
     def __init__(
         self,
-        var: VarDefNode,
+        variable_definition: VarDefNode,
         expr,
     ):
-        self.var: VarDefNode = var
-        self.expr = expr
+        self.var_definition: VarDefNode = variable_definition
+        """This is a node that contains the identifier of the variable and the type of it"""
+        self.expression_to_evaluate = expr
+        """This is the expression that will be evaluated and the result will be stored in the variable"""
 
 
 class DestructionAssignmentBasicExpression(ExpressionNode):
@@ -499,14 +507,14 @@ class LetNode(ExpressionNode):
 class FunctionDeclarationNode(DeclarationNode):
     def __init__(
         self,
-        id: str,
-        args: list[VarDefNode],
+        function_name: str,
+        arguments: list[VarDefNode],
         body: ExpressionNode,
         return_type: str = None,
     ):
-        self.id: str = id
+        self.function_name: str = function_name
         """This is the name of the function"""
-        self.args: list[VarDefNode] = args
+        self.arguments: list[VarDefNode] = arguments
         """This is the List of the Arguments of the Function"""
         self.return_type: str = return_type
         """This is the return Type"""
@@ -519,15 +527,19 @@ class MethodNode(DeclarationNode):  # MethodDeclarationNode
 
     def __init__(
         self,
-        id: str,
-        args: list[VarDefNode],
+        method_name: str,
+        arguments: list[VarDefNode],
         body: ExpressionNode,
         return_type: str = None,
     ):
-        self.id: str = id
-        self.args: list[VarDefNode] = args
+        self.method_name: str = method_name
+        """This is the name of the method"""
+        self.arguments: list[VarDefNode] = arguments
+        """This is the list of the arguments of the method"""
         self.return_type: str = return_type
+        """This is the return type of the method"""
         self.body: ExpressionNode = body
+        """This is the body of the method"""
 
 
 class TypeDeclarationNode(DeclarationNode):
@@ -535,16 +547,19 @@ class TypeDeclarationNode(DeclarationNode):
 
     def __init__(
         self,
-        id: str,
+        type_name: str,
         features: list[AssignNode | MethodNode],
-        args: list[VarDefNode] = [],
-        parent: str = None,
-        parent_constructor_args: list[ExpressionNode] = None,
+        constructor_arguments: list[VarDefNode] = [],
+        parent_type_id: str = None,
+        parent_constructor_args: list[ExpressionNode] = [],
     ):
-        self.id: str = id
+        self.type_name: str = type_name
+        """The name of the type"""
         self.features: list[AssignNode | MethodNode] = features
-        self.args: list[VarDefNode] = args
-        self.parent: str = parent
+        """The list of variables and methods of the Type"""
+        self.constructor_arguments: list[VarDefNode] = constructor_arguments
+        """This are the constructor arguments"""
+        self.parent_type_id: str = parent_type_id
         """This is a string with the name of the parent type"""
         self.parent_constructor_args: list[ExpressionNode] = parent_constructor_args
         """This is a list of Expressions. Could be None"""
@@ -553,12 +568,12 @@ class TypeDeclarationNode(DeclarationNode):
 class ProtocolMethodNode(DeclarationNode):
     def __init__(
         self,
-        id: str,
-        args: list[VarDefNode],
+        protocol_name: str,
+        arguments: list[VarDefNode],
         return_type: str,
     ):
-        self.id: str = id
-        self.args: list[VarDefNode] = args
+        self.protocol_name: str = protocol_name
+        self.arguments: list[VarDefNode] = arguments
         self.return_type: str = return_type
 
 

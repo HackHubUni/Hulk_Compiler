@@ -196,8 +196,7 @@ class Gramarlr1:
         Feature_List %= id_ + o_par_ + Argument_List + c_par_ + colon_ + type_id_ + Body + Feature_List, lambda h, s: [MethodNode(s[1],
                                                                                                                    s[3],
                                                                                                                    s[7],
-                                                                                                                   s[
-                                                                                                                       6])] +  s[8]
+                                                                                                                   s[6])] +  s[8]
 
 
         Feature_List %= G.Epsilon, lambda h, s: []

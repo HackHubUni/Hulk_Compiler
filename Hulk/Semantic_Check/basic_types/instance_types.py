@@ -18,7 +18,7 @@ class VariableInfo:
     def __eq__(self, __value: object) -> bool:
         if not isinstance(__value, VariableInfo):
             return False
-        return __value.name == self.name and __value.type == self.value
+        return __value.name == self.name and __value.type == self.type
 
     def __str__(self):
         return f"{self.name}:{self.type} = {str(self.value)}"
