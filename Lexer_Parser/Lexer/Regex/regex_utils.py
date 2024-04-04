@@ -21,7 +21,7 @@ class Regex_Utils:
         #El text_ no tiene para que se pueda hacer saltos \n
         self.text_=f'({self.letters_}|{self.uppercase_letters_}|0|{self.nonzero_digits_}|{self.valid_string_symbols_}|\t| |\|| |\\\\")*'
         #Es como el text_ pero se puede tener \n
-        self.string_=f'({self.letters_}|{self.uppercase_letters_}|0|{self.nonzero_digits_}|{self.valid_string_symbols_}|{self.delim_}|{self.escaping}|\t| |\|| |\\\\")*'
+        self.string_=f'({self.letters_}|{self.uppercase_letters_}|0|{self.nonzero_digits_}|{self.valid_string_symbols_}|{self.delim_}|\t| |\|| |\\\\")*'
 
         self.string=f'"{self.string_}"'
         # Se pueden tener en una sola línea  o en multilínea
