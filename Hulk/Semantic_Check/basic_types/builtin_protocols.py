@@ -21,3 +21,5 @@ class IterableProtocol(BuiltinProtocols):
                 MethodInfoBase("current", [], "Object"),
             ],
         )
+
+builtin_protocols = [IterableProtocol().name]

@@ -101,12 +101,10 @@ class TypeMethodInfo(MethodInfoBase):
 
 
 class TypeInfo:
-    def __init__(self, name: str, constructor_arguments: list[VariableInfo] = []):
+    def __init__(self, name: str):
         self.name = name
         """The name of the Type"""
-        self.constructor_arguments: dict[str, VariableInfo] = (
-            self.create_constructor_arguments(constructor_arguments)
-        )
+        self.constructor_arguments: dict[str, VariableInfo] = {}
         """The dictionary of the constructor argument variables"""
         self.attributes: dict[str, VariableInfo] = {}
         """The dictionary of the variables"""
@@ -300,15 +298,22 @@ class ProtocolInfo:
     def __init__(
         self,
         name: str,
-        methods: list[MethodInfoBase],
-        parent: Self = None,
     ):
         self.name = name
         """The name of the protocol"""
-        self.methods: list[MethodInfoBase] = methods
+        self.methods: dict[str, MethodInfoBase] = {}
         """The list of method signatures that the protocol defines"""
-        self.parent: Self = parent
+        self.parent: Self = None
         """The protocol parent. Could be None"""
+
+    def define_parent(self, parent: Self):
+        """Define the parent protocol of this protocol"""
+        self.parent = parent
+
+    def define_method(self, method_name: str):
+        """Defines a method signature in this protocol.
+        If a signature was already added it raise a SemanticError"""
+        pass
 
     def __str__(self):
         output = f"protocol {self.name}"

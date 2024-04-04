@@ -566,25 +566,29 @@ class TypeDeclarationNode(DeclarationNode):
 
 
 class ProtocolMethodNode(DeclarationNode):
+    """This node represents the declaration of a method signature inside a protocol"""
+
     def __init__(
         self,
-        protocol_name: str,
+        protocol_method_name: str,
         arguments: list[VarDefNode],
         return_type: str,
     ):
-        self.protocol_name: str = protocol_name
+        self.protocol_method_name: str = protocol_method_name
         self.arguments: list[VarDefNode] = arguments
         self.return_type: str = return_type
 
 
 class ProtocolDeclarationNode(DeclarationNode):
+    """This node represents the declaration of a Protocol"""
+
     def __init__(
         self,
-        id: str,
+        protocol_name: str,
         methods: list[ProtocolMethodNode],
         parents: list[str] = None,
     ):
-        self.id: str = id
+        self.protocol_name: str = protocol_name
         """This is the name of the Protocol"""
         self.methods: list[ProtocolMethodNode] = methods
         """A list with all the protocol methods"""

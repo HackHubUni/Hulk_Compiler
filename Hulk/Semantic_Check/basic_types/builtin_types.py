@@ -11,7 +11,7 @@ class ObjectType(TypeInfo):
         TypeInfo.__init__(self, "Object")
 
     def conforms_to(self, other: TypeInfo):
-        return True  # All builtin objects conform to Object
+        return False  # All builtin objects conform to Object but object does not conform to any other object
 
     def bypass(self):
         return True  # All builtin objects conform to Object, so the object type can bypass the conforms check

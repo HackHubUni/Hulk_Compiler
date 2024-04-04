@@ -61,15 +61,23 @@ class HulkScopeLinkedNode:
 
     def define_type(
         self,
-        type_info: TypeInfo,
-        clone: bool = False,
+        type_name: str,
+    ) -> TypeInfo:
+        """Create a new type in the actual scope"""
+        if type_name in self.scope.types:
+            raise SemanticError(f"The type: {type_name} is already defined")
+        new_type = TypeInfo(type_name)
+        self.scope.types[type_name] = new_type
+        return new_type
+
+    def define_type_by_instance(
+        self, type_info: TypeInfo, clone: bool = False
     ) -> TypeInfo:
         """Create a new type in the actual scope"""
         if type_info.name in self.scope.types:
             raise SemanticError(f"The type: {type_info.name} is already defined")
-        info = type_info.clone() if clone else type_info
-        self.scope.types[info.name] = info
-        return info
+        self.scope.types[type_info.name] = type_info if not clone else type_info.clone()
+        return type_info
 
     def is_type_defined(self, type_name: str) -> bool:
         """Returns True if the type is defined in the context"""
@@ -119,11 +127,35 @@ class HulkScopeLinkedNode:
             return False
         return self.parent.function_defined(function_name)
 
-    def create_protocol(self, name, parents):  # TODO: Revisar esto de los protocolos
-        if name in self.scope.types:
+    def define_protocol(self, name: str):
+        """This method defines a new protocol if it has not been added before to the scope"""
+        if name in self.scope.protocols:
             raise SemanticError(f"Type with the same name ({name}) already in context.")
-        protocol = self.scope.types[name] = ProtocolInfo(name, parents)
+        protocol = self.scope.types[name] = ProtocolInfo(name)
         return protocol
+    
+    def define_protocol_by_instance(self, protocol_info: ProtocolInfo):
+        """This method defines a new protocol if it has not been added before to the scope"""
+        if protocol_info.name in self.scope.protocols:
+            raise SemanticError(f"Type with the same name ({protocol_info.name}) already in context.")
+        self.scope.protocols[protocol_info.name] = protocol_info
+        return protocol_info
+
+    def is_protocol_defined(self, protocol_name: str) -> bool:
+        """Returns True if the protocol is defined in the context"""
+        if protocol_name in self.scope.protocols:
+            return True
+        if not self.parent:
+            return False
+        return self.parent.is_protocol_defined(protocol_name)
+
+    def get_protocol(self, protocol_name: str) -> ProtocolInfo:
+        """Returns the protocol information"""
+        if protocol_name in self.scope.protocols:
+            return self.scope.protocols[protocol_name]
+        if not self.parent:
+            raise SemanticError(f"The protocol ({protocol_name}) is not defined")
+        return self.parent.get_protocol(protocol_name)
 
     def __str__(self):
         types_str = (
