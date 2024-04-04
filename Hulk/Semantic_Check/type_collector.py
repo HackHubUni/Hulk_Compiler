@@ -44,7 +44,7 @@ def fill_scope_with_builtin_data(scope: HulkScopeLinkedNode):
     add_basic_functions(scope)
     add_basic_constants(scope)
 
-class CollectDeclarations(object):
+class TypeCollector(object):
     """
     Recolecta toda la información relevante de los scopes del hulk
     """
