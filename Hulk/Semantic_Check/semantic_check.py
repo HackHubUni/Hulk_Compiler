@@ -4,7 +4,7 @@ from Hulk.Semantic_Check.Scopes.hulk_global_scope import HulkGlobalScope
 
 
 def parents_check(initial_type, parent):
-    this_type = parent.name
+    this_type = parent.id
     if initial_type == this_type:
         return True
     if parent.parent:
@@ -52,15 +52,20 @@ class SemanticChecker(object):
     def visit(self, node, local_scope):
         try:
             context = self.context.create_type(node)
-
-            for features in node.features:
-                if isinstance(features, MethodNode):
-                    self.visit(features, context)
-                else:
-                    self.visit(features, context)
-
         except SemanticError as ex:
             self.errors.append(ex.text)
+        if parents_check(self.current_type.name, self.current_type.parent):
+
+            error = SemanticError("Herencia cíclica no admitida.")
+            self.errors.append(error)
+            raise error
+        for features in node.features:
+            if isinstance(features, MethodNode):
+                self.visit(features, context)
+            else:
+                self.visit(features, context)
+
+
 
 
 
