@@ -80,6 +80,18 @@ class TypeBuilder:
         type_info.set_parent_initialization_expressions(
             node.parent_initialization_expressions
         )
+
+        if not scope.is_type_defined(node.parent_type_id):
+            error = SemanticError(
+                f"In the type '{node.type_name}', there is no type defined with the name '{node.parent_type_id}'"
+            )
+            self.errors.append(error)
+            node.parent_type_id = "Error"  # TODO: Check this out
+
+        parent_type = scope.get_type(node.parent_type_id)
+        if parent_type.name == "None":
+            parent_type.name = "Object"
+        type_info.set_parent(parent_type)
         features = node.features
         # iterate over the features of the type
         for feature in features:

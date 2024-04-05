@@ -4,12 +4,14 @@ function powers (from, to) {
     let squares = [x^2 || x in range(from,to)] in squares;
 }
 
-type Point {
-     x = 0;
-     y = 0;
+type Point(x,y) inherits Object {
+     x = x;
+     y = y;
 
      getX() => self.x;
      getY() => self.y;
+
+     getNorm() => sqrt(self.x ^ 2 + self.getY() ^ 2);
 }
 
 type PolarPoint(phi, rho) inherits Point(rho * sin(phi), rho * cos(phi)) {
@@ -25,5 +27,5 @@ protocol Equatable extends Hashable {
 
 let a = 9, a = 5+2, b = 5 * 5, c = 10 - 1, d = 2^5 in {
     print("La \"Suma\" es:" @ a + b * 2);
-    a + d;
+    let p = new Point(1,1) in print("The norm of the point(2,2) is" @@ p.getNorm());
 }

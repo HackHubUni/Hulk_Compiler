@@ -16,6 +16,14 @@ def fix_var_def_node(var_def: VarDefNode) -> VarDefNode:
     return var_def
 
 
+def fix_parent_type_id(type_declaration: TypeDeclarationNode):
+    """Fix the AST node of the TypeDeclarationNode. If the parent_type is None then it set it to 'None'"""
+    parent_type = type_declaration.parent_type_id
+    if parent_type is None or parent_type.isspace():
+        type_declaration.parent_type_id = "None"
+    return type_declaration
+
+
 def fix_method_return_type(method_def: MethodNode) -> MethodNode:
     """Fix the AST node of the MethodNode. If the return_type is None then it set it to 'None'"""
     return_type = method_def.return_type

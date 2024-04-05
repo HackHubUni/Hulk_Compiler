@@ -91,6 +91,7 @@ class TypeCollector:
                 SemanticError(f"Type {node.type_name} is already defined")
             )
             node.type_name = get_unique_name_with_guid(node.type_name)
+        fix_parent_type_id(node)
         scope.define_type(node.type_name)
 
     @visitor.when(ProtocolDeclarationNode)

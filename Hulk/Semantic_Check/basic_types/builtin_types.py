@@ -56,7 +56,7 @@ class BoolType(TypeInfo):
 class ErrorType(TypeInfo):
     def __init__(self):
         super().__init__("<error>")
-        self.set_parent(ObjectType())
+        self.set_parent(ObjectType())  # TODO: This can be removed?
 
     def bypass(self):
         return True

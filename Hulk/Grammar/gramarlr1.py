@@ -180,15 +180,15 @@ class Gramarlr1:
         Arg_Tail %= comma_ + Var_Declaration + Arg_Tail, lambda h, s: [s[2]] + s[3]
         Arg_Tail %= G.Epsilon, lambda h, s: []
 
-        Type_Declaration %= type_ + type_id_ + o_brace_ + Feature_List + c_brace_, lambda h, s: TypeDeclarationNode(s[2], s[4])
+        Type_Declaration %= type_ + type_id_ + o_brace_ + Feature_List + c_brace_, lambda h, s: TypeDeclarationNode(s[2], s[4])                           # type SomeObject {....}
         Type_Declaration %= type_ + type_id_ + o_par_ + Argument_List + c_par_ + o_brace_ + Feature_List + c_brace_, lambda h, s: TypeDeclarationNode(
-            s[2], s[7], s[4])
-        Type_Declaration %= type_ + type_id_ + inherits_ + type_id_ + o_brace_ + Feature_List + c_brace_, lambda h, s: TypeDeclarationNode(s[2],
+            s[2], s[7], s[4])                                                                                                                             # type SomeObject (x: Int) {....}
+        Type_Declaration %= type_ + type_id_ + inherits_ + type_id_ + o_brace_ + Feature_List + c_brace_, lambda h, s: TypeDeclarationNode(s[2],          # type SomeObject inherits SomeObject {....}
                                                                                                                                            s[6],
                                                                                                                                            [],
                                                                                                                                            s[4])
         Type_Declaration %= type_ + type_id_ + o_par_ + Argument_List + c_par_ + inherits_ + type_id_ + o_par_ + Expression_List + c_par_ + o_brace_ + Feature_List + c_brace_, lambda \
-            h, s: TypeDeclarationNode(s[2], s[12], s[4], s[7], s[9])
+            h, s: TypeDeclarationNode(s[2], s[12], s[4], s[7], s[9])                                                                                      # type SomeObject (x: Int) inherits SomeObject (1) {....}
 
         Feature_List %= Var_Declaration + eq_ + Statment + Feature_List, lambda h, s: [AssignNode(s[1], s[3])] + s[4]
         Feature_List %= id_ + o_par_ + Argument_List + c_par_ + Body + Feature_List, lambda h, s: [MethodNode(s[1], s[3], s[5])] + s[

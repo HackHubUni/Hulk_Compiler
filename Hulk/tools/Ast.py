@@ -38,10 +38,16 @@ class UnaryExpressionNode(ExpressionNode):
         self.value: ExpressionNode = value
 
 
-class LiteralExpressionNode(UnaryExpressionNode):
+class LiteralExpressionNode(ExpressionNode):
     """This node groups all the literal nodes"""
 
-    pass
+    def __init__(
+        self,
+        value: str,
+    ) -> None:
+        self.value: str = value
+        """This is the literal value. Could be a number, string bool or a constant.
+        In the case of a constant, this value is the name of the constant"""
 
 
 class BinaryExpressionNode(ExpressionNode):
@@ -63,6 +69,7 @@ class LiteralStrNode(LiteralExpressionNode):
     pass
 
 
+# TODO: Rename this node to a LiteralConstantNode
 class ConstantNode(LiteralExpressionNode):
     pass
 
