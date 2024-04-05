@@ -3,6 +3,7 @@ from basic_types.scopes import *
 from basic_types.builtin_types import *
 from basic_types.builtin_functions import *
 from basic_types.builtin_protocols import *
+from basic_types.semantic_types import *
 
 
 class TypeBuilder:
@@ -86,6 +87,19 @@ class TypeBuilder:
         inside a type. This type is stored in the variable self.current_type"""
         # This method should add the TypeMethodInfo to the current type
         current_type: TypeInfo = self.current_type
+        method_name = node.method_name
+        if current_type.is_method_defined(method_name):
+            error = SemanticError(
+                f"The method '{method_name}' is already defined in the type '{current_type.type_id}'"
+            )
+            self.errors.append(error)
+            # Give a new name to the method
+            method_name = node.method_name = get_unique_name_with_guid(method_name)
+        arguments: list[VariableInfo] = [
+            get_variable_info_from_var_def(arg) for arg in node.arguments
+        ]
+        fix_method_return_type(node)
+        current_type.add_method(TypeMethodInfo(method_name, arguments, node.return_type, node))
         
 
     @visitor.when(AssignNode)

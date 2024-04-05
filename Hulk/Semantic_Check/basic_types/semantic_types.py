@@ -64,7 +64,9 @@ class MethodInfoBase:
         return f"[method] {self.name}({params}): {self.return_type.name};"
 
     def __eq__(self, other):
-        eq: Callable[[VariableInfo, VariableInfo], bool] = lambda x, y: x.type_name == y.type_name
+        eq: Callable[[VariableInfo, VariableInfo], bool] = (
+            lambda x, y: x.type_name == y.type_name
+        )
         if not isinstance(other, TypeMethodInfo):
             return False
         return (
@@ -180,13 +182,24 @@ class TypeInfo:
         for variable in variables:
             self.define_new_attribute(variable)
 
+    def is_method_defined(self, name: str) -> bool:
+        """Returns True if the method with this name is defined in the type or in an ancestor.
+        False otherwise."""
+        if name in self.methods:
+            return True
+        if self.parent is None:
+            return False
+        return self.parent.is_method_defined(name)
+
     def get_method(self, name: str):
         """Returns the method with this name. If not found raise a SemanticError"""
         if name in self.methods:
             return self.methods[name]
-        raise SemanticError(
-            f"There is no method named '{name}' in the type '{self.name}'"
-        )
+        if self.parent is None:
+            raise SemanticError(
+                f'The type "{self.name}" has no method with name "{name}"'
+            )
+        return self.parent.get_method(name)
 
     def define_method(
         self,
