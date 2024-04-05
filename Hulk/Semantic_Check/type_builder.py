@@ -6,6 +6,9 @@ from basic_types.builtin_protocols import *
 
 
 class TypeBuilder:
+    """This class constructs all the types, protocols and functions of a program.
+    Also constructs all the attributes and methods of the types and protocols"""
+
     def __init__(self, scope: HulkScopeLinkedNode, errors: list) -> None:
         self.global_scope: HulkScopeLinkedNode = scope
         """This is the global scope of the program. Containing all the declarations"""
@@ -27,11 +30,39 @@ class TypeBuilder:
 
     @visitor.when(TypeDeclarationNode)
     def visit(self, node: TypeDeclarationNode, scope: HulkScopeLinkedNode):
-        pass
+        # get the TypeInfo from the scope
+        type_info: TypeInfo = scope.get_type(node.type_name)
+        self.current_type = type_info
+        constructor_arguments: list[VarDefNode] = node.constructor_arguments
+        # iterate over the constructor arguments and add it to the type
+        for argument in constructor_arguments:
+            arg_type = scope.get_type(argument.var_type)
+            # FIXME: Try a more elegant solution
+            while True:
+                # This while is for the tricky case off all variables with the same name
+                try:
+                    var = get_variable_info_from_var_def(argument)
+                    var.type = arg_type
+                    type_info.add_constructor_argument(var)
+                    break
+                except Exception as e:
+                    self.errors.append(e)
+                    argument.var_name = get_name_with_added_error(argument.var_name)
+        
+        type_info.set_parent_initialization_expressions(node.parent_initialization_expressions)
+        features = node.features
+        # iterate over the features of the type
+        for feature in features:
+            self.visit(feature, scope)
 
     @visitor.when(ProtocolDeclarationNode)
     def visit(self, node: ProtocolDeclarationNode, scope: HulkScopeLinkedNode):
-        pass
+        # get the ProtocolInfo from the scope
+        protocol_info: ProtocolInfo = scope.get_protocol(node.protocol_name)
+        self.current_protocol = protocol_info
+        # iterate over the methods of the protocol
+        for method in node.methods:
+            self.visit(method, scope)
 
     @visitor.when(FunctionDeclarationNode)
     def visit(self, node: FunctionDeclarationNode, scope: HulkScopeLinkedNode):

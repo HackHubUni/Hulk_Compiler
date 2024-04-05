@@ -104,8 +104,9 @@ class TypeInfo:
     def __init__(self, name: str):
         self.name = name
         """The name of the Type"""
-        self.constructor_arguments: dict[str, VariableInfo] = {}
+        self.constructor_arguments: OrderedDict[str, VariableInfo] = {}
         """The dictionary of the constructor argument variables"""
+        self.initialization_expression: list[ExpressionNode] = []
         self.attributes: dict[str, VariableInfo] = {}
         """The dictionary of the variables"""
         self.methods: dict[str, TypeMethodInfo] = {}
@@ -138,9 +139,17 @@ class TypeInfo:
         """This method update the type with a new parent."""
         self.parent = parent
 
-    def create_constructor_arguments(self, arguments: list[VariableInfo]):
-        """Creates a dictionary with the constructor arguments"""
-        return {arg.name: arg for arg in arguments}
+    def add_constructor_argument(self, variable: VariableInfo):
+        """Adds a new constructor argument to the type. If the variable is already defined it raise a SemanticError"""
+        if variable.name in self.constructor_arguments:
+            raise SemanticError(
+                f"The variable: {variable.name} is already defined in the constructor"
+            )
+        self.constructor_arguments[variable.name] = variable
+
+    def set_parent_initialization_expressions(self, expressions: list[ExpressionNode]):
+        """Sets the initialization expressions of the parent type"""
+        self.initialization_expression = expressions
 
     def get_attribute(self, name: str) -> VariableInfo:
         """Returns the attribute with this name. If not found raise a SemanticError"""

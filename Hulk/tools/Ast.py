@@ -551,7 +551,7 @@ class TypeDeclarationNode(DeclarationNode):
         features: list[AssignNode | MethodNode],
         constructor_arguments: list[VarDefNode] = [],
         parent_type_id: str = None,
-        parent_constructor_args: list[ExpressionNode] = [],
+        parent_initialization_expressions: list[ExpressionNode] = [],
     ):
         self.type_name: str = type_name
         """The name of the type"""
@@ -561,7 +561,9 @@ class TypeDeclarationNode(DeclarationNode):
         """This are the constructor arguments"""
         self.parent_type_id: str = parent_type_id
         """This is a string with the name of the parent type"""
-        self.parent_constructor_args: list[ExpressionNode] = parent_constructor_args
+        self.parent_initialization_expressions: list[ExpressionNode] = (
+            parent_initialization_expressions
+        )
         """This is a list of Expressions. Could be None"""
 
 

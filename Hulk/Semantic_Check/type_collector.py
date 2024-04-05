@@ -81,12 +81,12 @@ class TypeCollector(object):
                     f"Type {node.type_name} is a builtin type and cannot be redefined"
                 )
             )
-            node.type_name = give_type_name_with_error(node.type_name)
+            node.type_name = get_name_with_added_error(node.type_name)
         elif scope.is_type_defined(node.type_name):
             self.errors.append(
                 SemanticError(f"Type {node.type_name} is already defined")
             )
-            node.type_name = give_type_name_with_error(node.type_name)
+            node.type_name = get_name_with_added_error(node.type_name)
         scope.define_type(node.type_name)
 
     @visitor.when(ProtocolDeclarationNode)
@@ -97,10 +97,10 @@ class TypeCollector(object):
                     f"Protocol {node.protocol_name} is a builtin protocol and cannot be redefined"
                 )
             )
-            node.protocol_name = give_type_name_with_error(node.protocol_name)
+            node.protocol_name = get_name_with_added_error(node.protocol_name)
         elif scope.is_protocol_defined(node.protocol_name):
             self.errors.append(
                 SemanticError(f"Protocol {node.protocol_name} is already defined")
             )
-            node.protocol_name = give_type_name_with_error(node.protocol_name)
+            node.protocol_name = get_name_with_added_error(node.protocol_name)
         scope.define_protocol(node.protocol_name)

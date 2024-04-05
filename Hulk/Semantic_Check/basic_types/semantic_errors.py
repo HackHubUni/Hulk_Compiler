@@ -4,6 +4,6 @@ class SemanticError(Exception):
         return self.args[0]
 
 
-def give_type_name_with_error(type_name: str):
+def get_name_with_added_error(type_name: str):
     """This function returns a new TypeName with the string '<ERROR>' added to the end"""
     return f"{type_name}<ERROR>"
