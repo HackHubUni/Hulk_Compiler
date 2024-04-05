@@ -1,4 +1,4 @@
-from semantic_types import *
+from Hulk.Semantic_Check.basic_types.semantic_types import *
 
 
 class HulkScope:

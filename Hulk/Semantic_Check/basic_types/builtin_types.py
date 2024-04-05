@@ -1,14 +1,17 @@
-from semantic_types import *
+from Hulk.Semantic_Check.basic_types.semantic_types import *
 
 
 class NoneType(TypeInfo):
     def __init__(self):
-        TypeInfo.__init__(self, "None")
+        super().__init__("None")
+
+    def bypass(self):
+        return True
 
 
 class ObjectType(TypeInfo):
     def __init__(self):
-        TypeInfo.__init__(self, "Object")
+        super().__init__("Object")
 
     def conforms_to(self, other: TypeInfo):
         return False  # All builtin objects conform to Object but object does not conform to any other object
@@ -19,7 +22,7 @@ class ObjectType(TypeInfo):
 
 class NumType(TypeInfo):
     def __init__(self):
-        super().__init__(self, "Number")
+        super().__init__("Number")
         self.attributes["value"] = VariableInfo("value", self.name)
         self.attributes["value"].value = 0
         self.set_parent(ObjectType())
@@ -30,7 +33,7 @@ class NumType(TypeInfo):
 
 class StringType(TypeInfo):
     def __init__(self):
-        TypeInfo.__init__(self, "String")
+        super().__init__("String")
         self.attributes["value"] = VariableInfo("value", self.name)
         self.attributes["value"].value = ""
         self.set_parent(ObjectType())
@@ -41,7 +44,7 @@ class StringType(TypeInfo):
 
 class BoolType(TypeInfo):
     def __init__(self):
-        TypeInfo.__init__(self, "Bool")
+        super().__init__("Bool")
         self.attributes["value"] = VariableInfo("value", self.name)
         self.attributes["value"].value = False
         self.set_parent(ObjectType())
@@ -52,11 +55,8 @@ class BoolType(TypeInfo):
 
 class ErrorType(TypeInfo):
     def __init__(self):
-        TypeInfo.__init__(self, "<error>")
+        super().__init__("<error>")
         self.set_parent(ObjectType())
-
-    def conforms_to(self, other: TypeInfo):
-        return True
 
     def bypass(self):
         return True
@@ -67,10 +67,11 @@ class ErrorType(TypeInfo):
 
 class VectorType(TypeInfo):
     def __init__(self):
-        TypeInfo.__init__(self, "Vector", [VariableInfo("vector_type_id", "String")])
+        super().__init__("Vector")
+        self.set_constructor_arguments([VariableInfo("vector_type_id", "None")])
         self.attributes["value"] = VariableInfo("value", self.name)
         self.attributes["value"].value = []
-        self.attributes["vector_type_id"]
+        # self.attributes["vector_type_id"]
         self.set_parent(ObjectType())
 
     def __eq__(self, value: object) -> bool:
@@ -79,7 +80,10 @@ class VectorType(TypeInfo):
 
 class RangeType(TypeInfo):
     def __init__(self):
-        TypeInfo.__init__(self, "Range")
+        super().__init__("Range")
+        self.set_constructor_arguments(
+            [VariableInfo("start", "Number"), VariableInfo("end", "Number")]
+        )
         self.set_parent(ObjectType())
 
 

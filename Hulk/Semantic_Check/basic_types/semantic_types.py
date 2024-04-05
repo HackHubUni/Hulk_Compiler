@@ -1,7 +1,7 @@
 # from cmp.semantic import *
 from typing import Callable
-from semantic_errors import *
-from instance_types import *
+from Hulk.Semantic_Check.basic_types.semantic_errors import *
+from Hulk.Semantic_Check.basic_types.instance_types import *
 from collections import OrderedDict
 from Hulk.tools.Ast import *
 from abc import ABC
@@ -118,7 +118,7 @@ class TypeInfo:
     def __init__(self, name: str):
         self.name = name
         """The name of the Type"""
-        self.constructor_arguments: OrderedDict[str, VariableInfo] = {}
+        self.constructor_arguments: list[VariableInfo] = []
         """The dictionary of the constructor argument variables"""
         self.initialization_expression: list[ExpressionNode] = []
         self.attributes: dict[str, VariableInfo] = {}
@@ -153,19 +153,15 @@ class TypeInfo:
         """This method update the type with a new parent."""
         self.parent = parent
 
-    def add_constructor_argument(self, variable: VariableInfo):
-        """Adds a new constructor argument to the type. If the variable is already defined it raise a SemanticError"""
-        if variable.name in self.constructor_arguments:
-            raise SemanticError(
-                f"The variable: {variable.name} is already defined in the constructor"
-            )
-        self.constructor_arguments[variable.name] = variable
+    def set_constructor_arguments(self, arguments: list[VariableInfo]):
+        """Sets the constructor arguments of the parent type"""
+        self.constructor_arguments = arguments
 
     def set_parent_initialization_expressions(self, expressions: list[ExpressionNode]):
         """Sets the initialization expressions of the parent type"""
         self.initialization_expression = expressions
 
-    def is_attribute_defined(self, attribute_name:str) -> bool:
+    def is_attribute_defined(self, attribute_name: str) -> bool:
         """Returns True if the attribute with this name is defined in the type. False otherwise"""
         return attribute_name in self.attributes
 

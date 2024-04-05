@@ -1,4 +1,4 @@
-from semantic_errors import *
+from Hulk.Semantic_Check.basic_types.semantic_errors import *
 from typing import Self
 
 

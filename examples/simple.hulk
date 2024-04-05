@@ -1,8 +1,8 @@
 type Point {
-     x = 0;
+     x = 3+4;
      y = 0;
 
-     getX() => self.x.get_norm().mul();
+     getX() => self.x.get_norm().mul() + base();
      getY() => self.y;
      getT() => get_default_triangle().get_point().get_norm();
      getZ() => (get_point_a().add(get_point_b())).get_norm();

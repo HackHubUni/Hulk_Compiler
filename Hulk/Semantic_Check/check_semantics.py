@@ -1,7 +1,7 @@
 from Hulk.tools.Ast import *
-from type_collector import TypeCollector
-from type_builder import TypeBuilder
-from basic_types.scopes import *
+from Hulk.Semantic_Check.type_collector import TypeCollector
+from Hulk.Semantic_Check.type_builder import TypeBuilder
+from Hulk.Semantic_Check.basic_types.scopes import *
 
 
 def check_semantics(ast: AstNode, scope: HulkScopeLinkedNode, errors: list) -> bool:

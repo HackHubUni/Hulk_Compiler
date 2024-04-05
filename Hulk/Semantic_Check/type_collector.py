@@ -1,8 +1,8 @@
 from Hulk.tools.Ast import *
-from basic_types.scopes import *
-from basic_types.builtin_types import *
-from basic_types.builtin_functions import *
-from basic_types.builtin_protocols import *
+from Hulk.Semantic_Check.basic_types.scopes import *
+from Hulk.Semantic_Check.basic_types.builtin_types import *
+from Hulk.Semantic_Check.basic_types.builtin_functions import *
+from Hulk.Semantic_Check.basic_types.builtin_protocols import *
 
 
 # region Adding Builtin Data
@@ -35,9 +35,9 @@ def add_basic_constants(scope: HulkScopeLinkedNode):
     """
     Adds the basic constants to the scope
     """
-    scope.define_variable(VariableInfo("pi", "Number"))
+    scope.define_variable(VariableInfo("PI", "Number"))
     scope.get_variable("PI").value = math.pi
-    scope.define_variable(VariableInfo("e", "Number"))
+    scope.define_variable(VariableInfo("E", "Number"))
     scope.get_variable("E").value = math.e
 
 
