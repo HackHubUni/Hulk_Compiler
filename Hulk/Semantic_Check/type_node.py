@@ -68,7 +68,7 @@ class Function:
             #other.param_types == self.param_types
 
 class Protocol:
-    def __init__(self,name:str,parent=None)
+    def __init__(self,name:str,parent=None):
         """
          guarda el nombre del protocolo 
          padre del que hereda este

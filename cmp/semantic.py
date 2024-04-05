@@ -7,6 +7,7 @@ class SemanticError(Exception):
     def text(self):
         return self.args[0]
 
+
 class Attribute:
     def __init__(self, name, typex):
         self.name = name
@@ -18,6 +19,7 @@ class Attribute:
     def __repr__(self):
         return str(self)
 
+
 class Method:
     def __init__(self, name, param_names, params_types, return_type):
         self.name = name
@@ -26,7 +28,7 @@ class Method:
         self.return_type = return_type
 
     def __str__(self):
-        params = ', '.join(f'{n}:{t.name}' for n,t in zip(self.param_names, self.param_types))
+        params = ', '.join(f'{n}:{t.name}' for n, t in zip(self.param_names, self.param_types))
         return f'[method] {self.name}({params}): {self.return_type.name};'
 
     def __eq__(self, other):
@@ -34,8 +36,9 @@ class Method:
             other.return_type == self.return_type and \
             other.param_types == self.param_types
 
+
 class Type:
-    def __init__(self, name:str):
+    def __init__(self, name: str):
         self.name = name
         self.attributes = []
         self.methods = []
@@ -46,7 +49,7 @@ class Type:
             raise SemanticError(f'Parent type is already set for {self.name}.')
         self.parent = parent
 
-    def get_attribute(self, name:str):
+    def get_attribute(self, name: str):
         try:
             return next(attr for attr in self.attributes if attr.name == name)
         except StopIteration:
@@ -57,7 +60,7 @@ class Type:
             except SemanticError:
                 raise SemanticError(f'Attribute "{name}" is not defined in {self.name}.')
 
-    def define_attribute(self, name:str, typex):
+    def define_attribute(self, name: str, typex):
         try:
             self.get_attribute(name)
         except SemanticError:
@@ -67,7 +70,7 @@ class Type:
         else:
             raise SemanticError(f'Attribute "{name}" is already defined in {self.name}.')
 
-    def get_method(self, name:str):
+    def get_method(self, name: str):
         try:
             return next(method for method in self.methods if method.name == name)
         except StopIteration:
@@ -78,7 +81,7 @@ class Type:
             except SemanticError:
                 raise SemanticError(f'Method "{name}" is not defined in {self.name}.')
 
-    def define_method(self, name:str, param_names:list, param_types:list, return_type):
+    def define_method(self, name: str, param_names: list, param_types: list, return_type):
         if name in (method.name for method in self.methods):
             raise SemanticError(f'Method "{name}" already defined in {self.name}')
 
@@ -120,6 +123,7 @@ class Type:
     def __repr__(self):
         return str(self)
 
+
 class ErrorType(Type):
     def __init__(self):
         Type.__init__(self, '<error>')
@@ -132,6 +136,7 @@ class ErrorType(Type):
 
     def __eq__(self, other):
         return isinstance(other, Type)
+
 
 class VoidType(Type):
     def __init__(self):
@@ -146,6 +151,7 @@ class VoidType(Type):
     def __eq__(self, other):
         return isinstance(other, VoidType)
 
+
 class IntType(Type):
     def __init__(self):
         Type.__init__(self, 'int')
@@ -153,11 +159,12 @@ class IntType(Type):
     def __eq__(self, other):
         return other.name == self.name or isinstance(other, IntType)
 
+
 class Context:
     def __init__(self):
-        self.types = {}
+        self.types: dict[str, Type] = {}
 
-    def create_type(self, name:str):
+    def create_type(self, name: str):
         """
         Se pasa el nombre del type
         """
@@ -166,7 +173,7 @@ class Context:
         typex = self.types[name] = Type(name)
         return typex
 
-    def get_type(self, name:str):
+    def get_type(self, name: str):
         try:
             return self.types[name]
         except KeyError:
@@ -178,10 +185,12 @@ class Context:
     def __repr__(self):
         return str(self)
 
+
 class VariableInfo:
     def __init__(self, name, vtype):
         self.name = name
         self.type = vtype
+
 
 class Scope:
     def __init__(self, parent=None):

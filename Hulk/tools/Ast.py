@@ -23,6 +23,7 @@ class ExpressionNode(AstNode):
 
 
 class ExpressionBlockNode(ExpressionNode):
+    """"""
     def __init__(
         self,
         expr_list: list,
