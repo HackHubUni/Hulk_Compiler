@@ -18,7 +18,7 @@ class HulkScope:
 
 
 class HulkScopeLinkedNode:
-    def __init__(self, parent: Self):
+    def __init__(self, parent: Self = None):
         super().__init__()
         self.parent: HulkScopeLinkedNode = parent
         """This is a reference to the parent scope"""

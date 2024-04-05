@@ -577,8 +577,11 @@ class ProtocolMethodNode(DeclarationNode):
         return_type: str,
     ):
         self.protocol_method_name: str = protocol_method_name
+        """The name of the protocol method"""
         self.arguments: list[VarDefNode] = arguments
+        """The list of arguments of the protocol method"""
         self.return_type: str = return_type
+        """The name of the return type"""
 
 
 class ProtocolDeclarationNode(DeclarationNode):

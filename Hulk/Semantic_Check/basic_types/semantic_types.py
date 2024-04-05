@@ -35,7 +35,8 @@ def fix_function_return_type(
 
 
 def get_variable_info_from_var_def(var_def: VarDefNode) -> VariableInfo:
-    """Returns a VariableInfo from a VarDefNode"""
+    """Returns a VariableInfo from a VarDefNode.
+    This function also fix the type of the VarDefNode to a valid type"""
     fix_var_def_node(var_def)
     return VariableInfo(var_def.var_name, var_def.var_type)
 
@@ -58,15 +59,26 @@ class MethodInfoBase:
         """This is a list of VariableInfo and stores the basic information of the parameters of the method"""
         self.return_type: str = return_type
         """This is the name of the return type"""
+        if self.check_unique_names() is False:
+            raise SemanticError(
+                f"Method {name} has repeated parameter names. All parameter names must be unique"
+            )
+
+    def check_unique_names(self) -> bool:
+        """Returns True if all the names of the arguments are unique. False otherwise"""
+        names = [var.name for var in self.arguments]
+        return len(names) == len(set(names))
+
+    def get_arguments(self) -> list[VariableInfo]:
+        """Returns a clone of the argument variables"""
+        return [var.clone() for var in self.arguments]
 
     def __str__(self):
         params = ", ".join(str(var_info) for var_info in self.arguments)
         return f"[method] {self.name}({params}): {self.return_type.name};"
 
     def __eq__(self, other):
-        eq: Callable[[VariableInfo, VariableInfo], bool] = (
-            lambda x, y: x.type_name == y.type_name
-        )
+        eq: Callable[[VariableInfo, VariableInfo], bool] = lambda x, y: x.type == y.type
         if not isinstance(other, TypeMethodInfo):
             return False
         return (
@@ -152,6 +164,10 @@ class TypeInfo:
     def set_parent_initialization_expressions(self, expressions: list[ExpressionNode]):
         """Sets the initialization expressions of the parent type"""
         self.initialization_expression = expressions
+
+    def is_attribute_defined(self, attribute_name:str) -> bool:
+        """Returns True if the attribute with this name is defined in the type. False otherwise"""
+        return attribute_name in self.attributes
 
     def get_attribute(self, name: str) -> VariableInfo:
         """Returns the attribute with this name. If not found raise a SemanticError"""
@@ -303,7 +319,7 @@ class FunctionInfo:
     def __str__(self):
         output = f"function {self.name}"
         output += " ("
-        params = ", ".join(f"{n.id}:{n.type_name.name}" for n in self.arguments)
+        params = ", ".join(f"{n.id}:{n.type.name}" for n in self.arguments)
         output += params
         output += ") :"
         output += self.return_type.name
@@ -332,10 +348,23 @@ class ProtocolInfo:
         """Define the parent protocol of this protocol"""
         self.parent = parent
 
-    def define_method(self, method_name: str):
+    def is_method_defined(self, method_name: str) -> bool:
+        """Returns True if the method with this name is defined in the protocol or in an ancestor.
+        False otherwise."""
+        if method_name in self.methods:
+            return True
+        if self.parent is None:
+            return False
+        return self.parent.is_method_defined(method_name)
+
+    def define_method(self, protocol_method: MethodInfoBase):
         """Defines a method signature in this protocol.
         If a signature was already added it raise a SemanticError"""
-        pass
+        if protocol_method.name in self.methods:
+            raise SemanticError(
+                f"The method with name '{protocol_method.name}' is already defined in the protocol '{self.name}'"
+            )
+        self.methods[protocol_method.name] = protocol_method
 
     def __str__(self):
         output = f"protocol {self.name}"

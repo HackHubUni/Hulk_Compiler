@@ -5,6 +5,7 @@ from basic_types.builtin_functions import *
 from basic_types.builtin_protocols import *
 
 
+# region Adding Builtin Data
 def add_basic_types(scope: HulkScopeLinkedNode):
     """
     Agrega los tipos básicos a la tabla de símbolos
@@ -51,6 +52,9 @@ def fill_scope_with_builtin_data(scope: HulkScopeLinkedNode):
     add_basic_functions(scope)
     add_basic_protocols(scope)
     add_basic_constants(scope)
+
+
+# endregion
 
 
 class TypeCollector(object):
