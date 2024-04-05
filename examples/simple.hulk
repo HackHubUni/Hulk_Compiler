@@ -1,11 +1,11 @@
 type Point {
-     x = 3+4;
+     x:Number = 3+4;
      y = 0;
 
-     getX() => self.x.get_norm().mul() + base();
-     getY() => self.y;
+     getX():Number => self.x.get_norm().mul() + base();
+     getY() => self.y * PI;
      getT() => get_default_triangle().get_point().get_norm();
-     getZ() => (get_point_a().add(get_point_b())).get_norm();
+     getZ(point:Number) => (get_point_a().add(get_point_b())).get_norm();
 }
 
 let x = [x^2 || x in range(1,10)] in print(x[3]);

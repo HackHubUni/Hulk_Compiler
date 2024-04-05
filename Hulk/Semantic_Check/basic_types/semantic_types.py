@@ -173,7 +173,7 @@ class TypeInfo:
             f"The type ({self.name}) has no attribute with name ({name})"
         )
 
-    def define_new_attribute(self, attribute: VariableInfo, clone=False):
+    def define_attribute(self, attribute: VariableInfo, clone=False):
         """Creates a new attribute in the type. If an attribute with the same name is already defined then it raise a SemanticError"""
         if attribute.name in self.attributes:
             raise SemanticError(
@@ -192,7 +192,7 @@ class TypeInfo:
             variable = VariableInfo(var_definition.var_name, var_definition.var_type)
             variables.append(variable)
         for variable in variables:
-            self.define_new_attribute(variable)
+            self.define_attribute(variable)
 
     def is_method_defined(self, name: str) -> bool:
         """Returns True if the method with this name is defined in the type or in an ancestor.

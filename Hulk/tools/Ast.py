@@ -312,11 +312,11 @@ class AssignNode(ExpressionNode):
     def __init__(
         self,
         variable_definition: VarDefNode,
-        expr,
+        expression_to_evaluate: ExpressionNode,
     ):
         self.var_definition: VarDefNode = variable_definition
         """This is a node that contains the identifier of the variable and the type of it"""
-        self.expression_to_evaluate = expr
+        self.expression_to_evaluate: ExpressionNode = expression_to_evaluate
         """This is the expression that will be evaluated and the result will be stored in the variable"""
 
 

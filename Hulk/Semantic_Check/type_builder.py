@@ -144,7 +144,7 @@ class TypeBuilder:
             self.errors.append(error)
             node.return_type = "None"  # TODO: Should this be of Error Type
 
-        current_type.add_method(
+        current_type.define_method(
             TypeMethodInfo(method_name, arguments, node.return_type, node)
         )
 
@@ -168,7 +168,11 @@ class TypeBuilder:
                 f"In the type '{current_type.name}', in the attribute '{var_name}', there is no type defined with the name '{var_definition.var_type}'"
             )
             self.errors.append(error)
-            var_definition.var_type = "None"  # TODO: Should this be of error type?
+            var_info.type = var_definition.var_type = (
+                "None"  # TODO: Should this be of error type?
+            )
+        var_info.initialization_expression = node.expression_to_evaluate
+        current_type.define_attribute(var_info)
 
     @visitor.when(ProtocolMethodNode)
     def visit(self, node: ProtocolMethodNode, scope: HulkScopeLinkedNode):

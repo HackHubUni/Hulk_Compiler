@@ -57,7 +57,7 @@ def fill_scope_with_builtin_data(scope: HulkScopeLinkedNode):
 # endregion
 
 
-class TypeCollector(object):
+class TypeCollector:
     """
     Collects all the types and protocols defined in the program.
     It also adds all the builtin types, protocols, functions and constants
@@ -69,7 +69,7 @@ class TypeCollector(object):
         fill_scope_with_builtin_data(self.global_scope)
 
     @visitor.on("node")
-    def visit(node: AstNode, scope: HulkScopeLinkedNode):
+    def visit(self, node: AstNode, scope: HulkScopeLinkedNode):
         pass
 
     @visitor.when(ProgramNode)
