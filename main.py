@@ -38,8 +38,8 @@ def evaluate(text:str):
 
         ast = evaluate_reverse_parse(parse, operations, tokens)
 
-        formatter = FormatVisitor()
-        print(formatter.visit(ast))
+        #formatter = FormatVisitor()
+        #print(formatter.visit(ast))
 
 
 
@@ -82,6 +82,10 @@ type Point {
     y = 0;
 }
 
+type PolarPoint inherits Point {
+    rho() => sqrt(self.getX() ^ 2 + self.getY() ^ 2);
+    // ...
+}
 
  '''
 
