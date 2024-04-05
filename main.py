@@ -38,6 +38,6 @@ def evaluate(text: str):
         print("No hay errores de semántica")
 
 
-with open("./examples/simple.hulk", "r") as file:
+with open("./examples/basic.hulk", "r") as file:
     text: str = file.read()
     evaluate(text)

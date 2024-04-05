@@ -129,5 +129,5 @@ class TypeCollector:
         ]
         fix_function_return_type(node)
         scope.define_function(
-            FunctionInfo(node.function_name, arguments, node.return_type)
+            FunctionInfo(node.function_name, arguments, node.return_type, node)
         )

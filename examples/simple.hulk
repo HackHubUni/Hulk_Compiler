@@ -2,7 +2,7 @@ type Point {
      x:Number = 3+4;
      y = 0;
 
-     getX():Number => self.x.get_norm().mul() + base();
+     getX():Lol => self.x.get_norm().mul() + base();
      getY() => self.y * PI;
      getT() => get_default_triangle().get_point().get_norm();
      getZ(point:Number) => (get_point_a().add(get_point_b())).get_norm();

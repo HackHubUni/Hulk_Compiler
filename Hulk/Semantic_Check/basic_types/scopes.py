@@ -26,13 +26,15 @@ class HulkScopeLinkedNode:
         self.scope: HulkScope = HulkScope()
         """This is the scope of this node"""
 
-    def define_variable(self, variable_info: VariableInfo) -> VariableInfo:
+    def define_variable(
+        self, variable_info: VariableInfo, clone: bool = False
+    ) -> VariableInfo:
         """Create a new variable in the actual scope"""
         if variable_info.name in self.scope.local_variables:
             raise SemanticError(
                 f"The variable: {variable_info.name} is already defined"
             )
-        info = variable_info.clone()
+        info = variable_info.clone() if clone else variable_info
         self.scope.local_variables[info.name] = info
         return info
 
@@ -76,8 +78,9 @@ class HulkScopeLinkedNode:
         """Create a new type in the actual scope"""
         if type_info.name in self.scope.types:
             raise SemanticError(f"The type: {type_info.name} is already defined")
-        self.scope.types[type_info.name] = type_info if not clone else type_info.clone()
-        return type_info
+        result = type_info if not clone else type_info.clone()
+        self.scope.types[type_info.name] = result
+        return result
 
     def is_type_defined(self, type_name: str) -> bool:
         """Returns True if the type is defined in the context"""
@@ -103,9 +106,8 @@ class HulkScopeLinkedNode:
             raise SemanticError(
                 f"Function with the same name ({function_info.name}) already in the Context."
             )
-        result = self.scope.functions[function_info.name] = (
-            function_info if not clone else function_info.clone()
-        )
+        result = function_info if not clone else function_info.clone()
+        self.scope.functions[result.name] = result
         return result
 
     def get_function(self, function_name: str) -> FunctionInfo:
@@ -130,7 +132,8 @@ class HulkScopeLinkedNode:
         """This method defines a new protocol if it has not been added before to the scope"""
         if name in self.scope.protocols:
             raise SemanticError(f"Type with the same name ({name}) already in context.")
-        protocol = self.scope.types[name] = ProtocolInfo(name)
+        protocol = ProtocolInfo(name)
+        self.scope.protocols[name] = protocol
         return protocol
 
     def define_protocol_by_instance(self, protocol_info: ProtocolInfo):
