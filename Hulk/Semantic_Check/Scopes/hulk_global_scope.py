@@ -43,7 +43,7 @@ class TypeScope:
                         f'Method with the same name ({name}) already in the context in type:{type_decl.id}.')
                 else:
                     self.methods[name] = method
-                    self.sintetizados_methods[name]=method
+                    self.sintetizados_methods[name] = method
 
             elif isinstance(method, AssignNode):
                 assing = method
@@ -81,7 +81,7 @@ class TypeScope:
         """
         Todos los metodos tanto heredados como sintetizados
         """
-        self.sintetizados_methods: dict[str:MethodNode]={}
+        self.sintetizados_methods: dict[str:MethodNode] = {}
         """
         Métodos sintetizados en esta clase
         """
@@ -99,12 +99,12 @@ class TypeScope:
     def contains_method(self, method_name: str) -> bool:
         return method_name in self.methods
 
-    def get_method_base_typeScope(self,method_name:str)->Self:
+    def get_method_base_typeScope(self, method_name: str) -> Self:
         # Diccionario diferencia para saber si es heredado o no
         diff = {key: self.inherence_methods_[key] for key in
                 self.inherence_methods_.keys() - self.override_methods.keys()}
 
-        if (method_name in diff) or (method_name in self.sintetizados_methods ):
+        if (method_name in diff) or (method_name in self.sintetizados_methods):
             return self
         if self.father is None or isinstance(HulkGlobalScope):
             """
@@ -112,26 +112,22 @@ class TypeScope:
             """
             return None
         self.father.get_method_base_typeScope(method_name)
-    def is_attr_hear_or_heredado(self,attri_name:str,method_name:str)->bool:
+
+    def is_attr_hear_or_heredado(self, attri_name: str, method_name: str) -> bool:
         """
         Devuelve True si el atributo esta en este scope o esta definido en un scope padre
         donde se redefine el metodo y se declara estos o donde se define el metodo
         """
         if attri_name in self.assign_attr:
-            True
-        type_herencia=self.get_method_base_typeScope(method_name)
-        return attri_name in type_herencia.contains_attribute(attri_name)
+            return True
+        type_herencia = self.get_method_base_typeScope(method_name)
+        return type_herencia.contains_attribute(attri_name)
 
+    def contains_attribute(self, attri_name: str) -> bool:
+        """Devuelve True o False si
+          el atributo esta en este scope"""
 
-    def contains_attribute(self,attri_name:str)->bool:
-       """Devuelve True o False si
-         el atributo esta en este scope"""
-
-       return attri_name in self.assign_attr
-
-
-
-
+        return attri_name in self.assign_attr
 
     def get_new_child_scope(self, type_decl: TypeDeclarationNode):
         child = TypeScope(type_decl, self, self.global_scope, self.methods, self.inherence_methods_)
@@ -197,14 +193,21 @@ class Type_Father_Control:
         return type_name in self.types_waiting_types_father or type_name in self.types_waiting_protocol_father
 
 
-
 class MethodScope:
-    def __init__(self,type_residence:TypeScope,name):
-        self.type_residence:TypeScope=type_residence
-        self.name:str=name
+    def __init__(self, type_residence: TypeScope, name_method, vars_: list[VarDefNode]):
+        self.vars: dict[str, VarDefNode] = {}
+        self.type_residence: TypeScope = type_residence
+        self.name: str = name_method
+        for var in vars_:
+            name = var.id
+            if name in self.vars:
+                raise SemanticError(
+                    f"No se puede definir un método con dos variables con el mismo nombre nombre variable: {name} en el metodo: {name_method}")
+            self.vars[name] = var
 
-    def is_attr_define(self, attr_name:str):
-        self.type_residence.is_attr_hear_or_heredado(attr_name, self.name)
+    def is_attr_define(self, attr_name: str) -> bool:
+        return self.type_residence.is_attr_hear_or_heredado(attr_name, self.name)
+
 
 class HulkGlobalScope(HulkBase):
     function_decl: dict[str:FunctionDeclarationNode] = {}
@@ -245,7 +248,7 @@ class HulkGlobalScope(HulkBase):
         """Crea un type_scope dado un padre"""
         type_scope: TypeScope = None
         name = type_node.id
-        if father_name is not None and father_name is not "":
+        if father_name is not None and father_name.strip() != "":
 
             # Controlar que tenga  padre
             if father_name not in self.types_decl:

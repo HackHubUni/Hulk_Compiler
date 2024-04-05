@@ -63,23 +63,39 @@ class SemanticChecker(object):
        try:
            # Revisar que coincidan las variables
            name=node.id
-           if local_scope.contains_method(name):
-               raise SemanticError(f'El metodo {name} en el type {local_scope.id} ya está definido')
-           vars=node.args
+           if not  local_scope.contains_method(name):
+               raise SemanticError(f'El metodo {name} en el type {local_scope.id} no está definido')
+           vars = node.args
+           #Redefinir el nuevo scope
+           local_scope=MethodScope(local_scope,name,vars)
+
+
            body=node.body
-           #TODO: Falta agregar que si es un método que no se ha hecho override aca y no tiene los atributos entonces tienes que mirar en tus padres
+           self.visit(body,local_scope)
+
+
+
 
        except SemanticError as ex:
            self.errors.append(ex.text)
 
-
+    @visitor.when(DestructionAssignmentBasicExpression)
+    def visit(self, node: DestructionAssignmentBasicExpression, local_scope: MethodScope):
+        try:
+            pass
+        except SemanticError as ex:
+        self.errors.append(ex.text)
     @visitor.when(AttrCallNode)
     def visit(self, node:AttrCallNode, local_scope:MethodScope):
         try:
-           if not local_scope.is_attr_define(node.variable_id):
-               raise SemanticError(f'La variable {node.variable_id} no esta definida en este scope ni en ningun scope')
+           if not local_scope.is_attr_define(node.variable_id) :
+               raise SemanticError(f'La variable {node.variable_id} no esta definida en este scope ni en ningun scope padre que redefina el método en caso de ser este heredado ')
         except SemanticError as ex:
             self.errors.append(ex.text)
+
+    @visitor.when(VarNode)
+    def visit(self, node: AttrCallNode, local_scope: MethodScope):
+        print()
 
 
 

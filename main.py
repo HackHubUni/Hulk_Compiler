@@ -70,22 +70,15 @@ text = '''
 type Point {
     
 
-    getX() => self.x;
-    getY() => self.y;
+   
 
     setX(x) => self.x := x;
     setY(y) => self.y := y;
     
-    max() => self.getX();
     
-    x = 0;
-    y = 0;
 }
 
-type PolarPoint inherits Point {
-    rho() => sqrt(self.getX() ^ 2 + self.getY() ^ 2);
-    // ...
-}
+
 
  '''
 
