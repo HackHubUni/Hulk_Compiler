@@ -81,12 +81,12 @@ class TypeCollector(object):
                     f"Type {node.type_name} is a builtin type and cannot be redefined"
                 )
             )
-            node.type_name = get_name_with_added_error(node.type_name)
+            node.type_name = get_unique_name_with_guid(node.type_name)
         elif scope.is_type_defined(node.type_name):
             self.errors.append(
                 SemanticError(f"Type {node.type_name} is already defined")
             )
-            node.type_name = get_name_with_added_error(node.type_name)
+            node.type_name = get_unique_name_with_guid(node.type_name)
         scope.define_type(node.type_name)
 
     @visitor.when(ProtocolDeclarationNode)
@@ -97,10 +97,33 @@ class TypeCollector(object):
                     f"Protocol {node.protocol_name} is a builtin protocol and cannot be redefined"
                 )
             )
-            node.protocol_name = get_name_with_added_error(node.protocol_name)
+            node.protocol_name = get_unique_name_with_guid(node.protocol_name)
         elif scope.is_protocol_defined(node.protocol_name):
             self.errors.append(
                 SemanticError(f"Protocol {node.protocol_name} is already defined")
             )
-            node.protocol_name = get_name_with_added_error(node.protocol_name)
+            node.protocol_name = get_unique_name_with_guid(node.protocol_name)
         scope.define_protocol(node.protocol_name)
+
+    @visitor.when(FunctionDeclarationNode)
+    def visit(self, node: FunctionDeclarationNode, scope: HulkScopeLinkedNode):
+        if node.function_name in builtin_functions:
+            self.errors.append(
+                SemanticError(
+                    f"Function {node.function_name} is a builtin function and cannot be redefined"
+                )
+            )
+            node.function_name = get_unique_name_with_guid(node.function_name)
+        elif scope.function_defined(node.function_name):
+            self.errors.append(
+                SemanticError(f"Function {node.function_name} is already defined")
+            )
+            node.function_name = get_unique_name_with_guid(node.function_name)
+
+        arguments: list[VariableInfo] = [
+            get_variable_info_from_var_def(arg) for arg in node.arguments
+        ]
+        fix_function_return_type(node)
+        scope.define_function(
+            FunctionInfo(node.function_name, arguments, node.return_type)
+        )

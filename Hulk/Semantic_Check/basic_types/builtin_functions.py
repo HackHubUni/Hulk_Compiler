@@ -30,7 +30,7 @@ class SinFunction(BuiltinFunction):
 
     def result(self):
         # Calculate the sin of the value
-        argument = self.param_names[0].value
+        argument = self.arguments[0].value
         result = VariableInfo("result", "Number")
         result.value = math.sin(argument.value)
         return result
@@ -44,7 +44,7 @@ class CosFunction(BuiltinFunction):
 
     def result(self):
         # Calculate the cos of the value
-        argument = self.param_names[0].value
+        argument = self.arguments[0].value
         result = VariableInfo("result", "Number")
         result.value = math.cos(argument.value)
         return result
@@ -58,7 +58,7 @@ class SqrtFunction(BuiltinFunction):
 
     def result(self):
         # Calculate the sqrt of the value
-        argument = self.param_names[0].value
+        argument = self.arguments[0].value
         result = VariableInfo("result", "Number")
         result.value = math.sqrt(argument.value)
         return result
@@ -77,8 +77,8 @@ class LogFunction(BuiltinFunction):
 
     def result(self):
         # Calculate the log in a base of a value
-        base = self.param_names[0].value
-        value = self.param_names[1].value
+        base = self.arguments[0].value
+        value = self.arguments[1].value
         result = VariableInfo("result", "Number")
         result.value = math.log(value.value, base.value)
         return result
@@ -92,7 +92,7 @@ class ExponentialFunction(BuiltinFunction):
 
     def result(self):
         # Calculate the exponential of the value
-        argument = self.param_names[0].value
+        argument = self.arguments[0].value
         result = VariableInfo("result", "Number")
         result.value = math.exp(argument.value)
         return result

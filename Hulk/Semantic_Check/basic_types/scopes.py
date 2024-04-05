@@ -108,11 +108,10 @@ class HulkScopeLinkedNode:
         )
         return result
 
-    def get_function(self, function_name: str) -> FunctionDeclarationNode:
-        """Returns a pointer to the FunctionDeclarationNode of the AST.
-        This is useful for interpreting the function"""
-        if function_name in self.function:
-            return self.function[function_name]
+    def get_function(self, function_name: str) -> FunctionInfo:
+        """Returns the FunctionInfo associated with that name"""
+        if function_name in self.scope.functions:
+            return self.scope.functions[function_name]
         if not self.parent:
             raise SemanticError(
                 f"The function with name ({function_name}) is not defined"
@@ -133,11 +132,13 @@ class HulkScopeLinkedNode:
             raise SemanticError(f"Type with the same name ({name}) already in context.")
         protocol = self.scope.types[name] = ProtocolInfo(name)
         return protocol
-    
+
     def define_protocol_by_instance(self, protocol_info: ProtocolInfo):
         """This method defines a new protocol if it has not been added before to the scope"""
         if protocol_info.name in self.scope.protocols:
-            raise SemanticError(f"Type with the same name ({protocol_info.name}) already in context.")
+            raise SemanticError(
+                f"Type with the same name ({protocol_info.name}) already in context."
+            )
         self.scope.protocols[protocol_info.name] = protocol_info
         return protocol_info
 

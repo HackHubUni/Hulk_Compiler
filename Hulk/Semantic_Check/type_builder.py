@@ -37,19 +37,18 @@ class TypeBuilder:
         # iterate over the constructor arguments and add it to the type
         for argument in constructor_arguments:
             arg_type = scope.get_type(argument.var_type)
-            # FIXME: Try a more elegant solution
-            while True:
-                # This while is for the tricky case off all variables with the same name
-                try:
-                    var = get_variable_info_from_var_def(argument)
-                    var.type = arg_type
-                    type_info.add_constructor_argument(var)
-                    break
-                except Exception as e:
-                    self.errors.append(e)
-                    argument.var_name = get_name_with_added_error(argument.var_name)
-        
-        type_info.set_parent_initialization_expressions(node.parent_initialization_expressions)
+            try:
+                var = get_variable_info_from_var_def(argument)
+                var.type_name = arg_type
+                type_info.add_constructor_argument(var)
+                break
+            except Exception as e:
+                self.errors.append(e)
+                argument.var_name = get_unique_name_with_guid(argument.var_name)
+
+        type_info.set_parent_initialization_expressions(
+            node.parent_initialization_expressions
+        )
         features = node.features
         # iterate over the features of the type
         for feature in features:
@@ -66,13 +65,28 @@ class TypeBuilder:
 
     @visitor.when(FunctionDeclarationNode)
     def visit(self, node: FunctionDeclarationNode, scope: HulkScopeLinkedNode):
-        pass
+        # get the FunctionInfo from the scope
+        function_info: FunctionInfo = scope.get_function(node.function_name)
+        # iterate over the arguments of the function
+        for argument in function_info.arguments:
+            if not scope.is_type_defined(argument.type_name):
+                error = SemanticError(
+                    f"In the function '{node.function_name}', in the parameter '{argument.name}', there is no type defined with the name '{argument.type_name}'"
+                )
+                self.errors.append(error)
+        if not scope.is_type_defined(function_info.return_type):
+            error = SemanticError(
+                f"In the return type of the function '{node.function_name}', there is no type defined with the name '{function_info.return_type}'"
+            )
+            self.errors.append(error)
 
     @visitor.when(MethodNode)
     def visit(self, node: MethodNode, scope: HulkScopeLinkedNode):
         """This method is executed for processing the declaration of a method
         inside a type. This type is stored in the variable self.current_type"""
-        pass
+        # This method should add the TypeMethodInfo to the current type
+        current_type: TypeInfo = self.current_type
+        
 
     @visitor.when(AssignNode)
     def visit(self, node: AssignNode, scope: HulkScopeLinkedNode):

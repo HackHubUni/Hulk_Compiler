@@ -11,7 +11,7 @@ from Hulk.tools.Ast import *
 def fix_var_def_node(var_def: VarDefNode) -> VarDefNode:
     """Fix the AST node of the VarDefNode. If the var_type is None then it set it to 'None'"""
     var_type = var_def.var_type
-    if var_type is None:
+    if var_type is None or var_type.isspace():
         var_def.var_type = "None"
     return var_def
 
@@ -19,7 +19,7 @@ def fix_var_def_node(var_def: VarDefNode) -> VarDefNode:
 def fix_method_return_type(method_def: MethodNode) -> MethodNode:
     """Fix the AST node of the MethodNode. If the return_type is None then it set it to 'None'"""
     return_type = method_def.return_type
-    if return_type is None:
+    if return_type is None or return_type.isspace():
         method_def.return_type = "None"
     return method_def
 
@@ -29,7 +29,7 @@ def fix_function_return_type(
 ) -> FunctionDeclarationNode:
     """Fix the AST node of the FunctionDeclarationNode. If the return_type is None then it set it to 'None'"""
     return_type = function_def.return_type
-    if return_type is None:
+    if return_type is None or return_type.isspace():
         function_def.return_type = "None"
     return function_def
 
@@ -64,7 +64,7 @@ class MethodInfoBase:
         return f"[method] {self.name}({params}): {self.return_type.name};"
 
     def __eq__(self, other):
-        eq: Callable[[VariableInfo, VariableInfo], bool] = lambda x, y: x.type == y.type
+        eq: Callable[[VariableInfo, VariableInfo], bool] = lambda x, y: x.type_name == y.type_name
         if not isinstance(other, TypeMethodInfo):
             return False
         return (
@@ -263,13 +263,13 @@ class FunctionInfo:
     def __init__(
         self,
         name: str,
-        param_names: list[VariableInfo],
+        arguments: list[VariableInfo],
         return_type: str,
         function_pointer: FunctionDeclarationNode,
     ):
         self.name: str = name
         """The name of the function"""
-        self.param_names: list[VariableInfo] = param_names
+        self.arguments: list[VariableInfo] = arguments
         """This is the list of Variable Info that represents each parameter of the function.
         The variable info contains information like the name of the variable and the type asociated"""
         self.return_type: str = return_type
@@ -282,7 +282,7 @@ class FunctionInfo:
         """Returns a copy of this FunctionInfo with all of it's properties cloned"""
         return FunctionInfo(
             self.name,
-            [var.clone() for var in self.param_names],
+            [var.clone() for var in self.arguments],
             self.return_type,
             self.function_pointer,
         )
@@ -290,7 +290,7 @@ class FunctionInfo:
     def __str__(self):
         output = f"function {self.name}"
         output += " ("
-        params = ", ".join(f"{n.id}:{n.type.name}" for n in self.param_names)
+        params = ", ".join(f"{n.id}:{n.type_name.name}" for n in self.arguments)
         output += params
         output += ") :"
         output += self.return_type.name
