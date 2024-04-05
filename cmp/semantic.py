@@ -158,6 +158,9 @@ class Context:
         self.types = {}
 
     def create_type(self, name:str):
+        """
+        Se pasa el nombre del type
+        """
         if name in self.types:
             raise SemanticError(f'Type with the same name ({name}) already in context.')
         typex = self.types[name] = Type(name)

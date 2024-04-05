@@ -53,7 +53,7 @@ class InfoSaverTree(object):
         except SemanticError as ex:
             self.errors.append(ex.text)
 
-    @visitor.when(ProtDeclarationNode)
+    @visitor.when(ProtocolDeclarationNode)
     def visit(self, node):
         try:
             self.context.create_protocol(node.id, node.parents)

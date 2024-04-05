@@ -1,6 +1,6 @@
 from Hulk.Lexer.Hulk_Lexer import get_hulk_lexer
 from Hulk.Parser.Hulk_Parser import get_hulk_parser
-
+from Hulk.Draw_Ast.ast_visitor import *
 from cmp.evaluation import evaluate_reverse_parse
 #from Hulk.Semantic_Check.type_inferator import *
 #from Hulk.Semantic_Check.type_node import *
@@ -37,32 +37,35 @@ def evaluate(text:str):
 
         ast = evaluate_reverse_parse(parse, operations, tokens)
 
-        errors = []
-        collector = InfoSaverTree(errors)
-        collector.visit(ast)
-        print(f"El ast es \n {ast}")
-        context = collector.context
+        formatter = FormatVisitor()
+        print(formatter.visit(ast))
 
-        builder = TypeBuilder(context, errors)
-        assert len(errors)==0, "No puede tener errores de semántica"
-        builder.visit(ast)
-
-        print('Errors:', errors)
-        print("contexto \n ", 'Context:')
-        print(context)
-        checker = TypeChecker(context, errors)
-        print(checker)
-        scope = checker.visit(ast)
-        print(scope)
+        #errors = []
+        #collector = InfoSaverTree(errors)
+        #collector.visit(ast)
+        #print(f"El ast es \n {ast}")
+        #context = collector.context
+#
+        #builder = TypeBuilder(context, errors)
+        #assert len(errors)==0, "No puede tener errores de semántica"
+        #builder.visit(ast)
+#
+        #print('Errors:', errors)
+        #print("contexto \n ", 'Context:')
+        #print(context)
+        #checker = TypeChecker(context, errors)
+        #print(checker)
+        #scope = checker.visit(ast)
+        #print(scope)
 
 
 text = ''' 
 
-type Point(x, y) {
-    x = x;
-    y = y;
 
-   
+type Point {
+    x = 0;
+    y = 0;
+
     getX() => self.x;
     getY() => self.y;
 
