@@ -8,6 +8,7 @@ from cmp.evaluation import evaluate_reverse_parse
 #from Hulk.Semantic_Check.checker import *
 #from Hulk.Semantic_Check.type_node import *
 #from Hulk.Semantic_Check.check_type_semantic import InfoSaverTree,TypeBuilder
+from Hulk.Semantic_Check.semantic_check import SemanticChecker
 
 # import lexer and parser
 lexer = get_hulk_lexer()
@@ -40,9 +41,13 @@ def evaluate(text:str):
         formatter = FormatVisitor()
         print(formatter.visit(ast))
 
-        #errors = []
-        #collector = InfoSaverTree(errors)
-        #collector.visit(ast)
+
+
+        errors = []
+
+        collector = SemanticChecker(errors)
+        collector.visit(ast)
+        print(errors)
         #print(f"El ast es \n {ast}")
         #context = collector.context
 #
@@ -63,14 +68,18 @@ text = '''
 
 
 type Point {
-    x = 0;
-    y = 0;
+    
 
     getX() => self.x;
     getY() => self.y;
 
     setX(x) => self.x := x;
     setY(y) => self.y := y;
+    
+    max() => self.getX();
+    
+    x = 0;
+    y = 0;
 }
 
 

@@ -160,12 +160,17 @@ class Gramarlr1:
         Closed_Expression %= o_par_ + Expresion + c_par_, lambda h, s: s[2]
 
         # Atomic %= id_ + dot_ + id_ + o_par_ + Expression_List + c_par_, lambda h, s: MethodCallNode(s[1], s[3], s[5])  # TODO: This was the original
+        #Llamar con el self
         Method_Call %= self_ + dot_ + id_ + o_par_ + Expression_List + c_par_ + Method_Call_List, lambda h, s: [MethodCallWithIdentifierNode(s[1], s[3], s[5])] + s[7]   # self.something()
+        #llamar una funcion de otro tipo en un tipo
         Method_Call %= Attr_Call + dot_ + id_ + o_par_ + Expression_List + c_par_ + Method_Call_List, lambda h, s: [MethodCallWithExpressionNode(s[1], s[3], s[5])] + s[7]  # self.x.something()
+        #llamar un metodo normal
         Method_Call %= id_ + dot_ + id_ + o_par_ + Expression_List + c_par_ + Method_Call_List, lambda h, s: [MethodCallWithIdentifierNode(s[1], s[3], s[5])] + s[7]    # x.something()
+        #llamada desde una fucnion normal
         Method_Call %= Function_Call + dot_ + id_ + o_par_ + Expression_List + c_par_ + Method_Call_List, lambda h, s: [MethodCallWithExpressionNode(s[1], s[3], s[5])] + s[7]   # get_default_triangle().get_point(1).get_norm()
+        #llamada con expresion node
         Method_Call %= Closed_Expression + dot_ + id_ + o_par_ + Expression_List + c_par_ + Method_Call_List, lambda h, s: [MethodCallWithExpressionNode(s[1], s[3], s[5])] + s[7]   # (expression).get_something()
-
+        #TODO: revisar para quitar lo de abajo
         Method_Call_List %= dot_ + id_ + o_par_ + Expression_List + c_par_ + Method_Call_List, lambda h, s: [MethodCallWithIdentifierNode('result', s[2], s[4])] + s[6]
         Method_Call_List %= G.Epsilon, lambda h, s: []
 
