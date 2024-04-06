@@ -11,6 +11,14 @@ import uuid
 
 
 class TagsEnum(Enum):
+    IndexingNode = 28
+    VectorNode = 27
+    WhileNode = 26
+    ElifNodeAtom = 25
+    IfNode = 24
+    ForExpressionNode = 23
+    DownCastNode = 22
+    InstantiateNode = 21
     ProtocolMethod = 20
     LetNode = 19
     DynTestNode = 18
@@ -50,6 +58,7 @@ class HulkScope:
         self.functions_call: dict[str, list[FunctionCallNode]] = {}
         self.attr_: dict[str, AttrCallNode] = {}
         # Types Zone
+        self.type_id_str = ""
         self.types_methods: dict[str, MethodNode] = {}
         self.inherence_methods: dict[str, MethodNode] = {}
         self.override_methods: dict[str, MethodNode] = {}
@@ -59,6 +68,9 @@ class HulkScope:
         self.procotocols_inherence_methods: dict[str, ProtocolMethodNode] = {}
 
         self.args_: dict[str, VarDefNode] = {}
+
+        # Numero para indexar
+        self.index_value_for_indexing: int = -2
 
     def get_scope_child_(self, name: str, tag: TagsEnum) -> Self:
         # new = copy.deepcopy(self)
@@ -148,6 +160,26 @@ class HulkScope:
 
         for assig in assig_list:
             self.set_assign_(assig)
+
+    def set_instantiate(self, instantiate: InstantiateNode):
+        name = instantiate.type_id
+        if self.type_id_str != "":
+            raise SemanticError(f'Error para instanciar {name}')
+        self.type_id_str = name
+
+    def set_downcast(self, downcast: DowncastNode):
+        name = downcast.type
+        if self.type_id_str != "":
+            raise SemanticError(f'Error para castear {name}')
+        self.type_id_str = name
+
+    def set_indexing(self, indexing: IndexingNode):
+        index = indexing.index
+        if index.isdigit():
+            index = int(index)
+            if index < 0:
+                raise SemanticError(f'Error para indexar {index} tiene que ser positivo')
+            self.index_value_for_indexing = index
 
 
 class Collector_Info(HulkScope):
@@ -335,4 +367,69 @@ class Collector_Info(HulkScope):
         new_scope = scope.get_scope_child_("", TagsEnum.LetNode)
 
         new_scope.set_let(let)
+        return new_scope
+
+    def add_instantiate(self, instantiate: InstantiateNode, scope: HulkScope) -> HulkScope:
+        """
+        Desde el contexto global se añade un nuevo Instantiate
+        """
+        type_name = instantiate.type_id
+        new_scope = scope.get_scope_child_(f'instantiate: {type_name}', TagsEnum.InstantiateNode)
+
+        return new_scope
+
+    def add_downcast(self, downcast: DowncastNode, scope: HulkScope) -> HulkScope:
+        """
+        Desde el contexto global se añade un nuevo DownCast
+        """
+
+        new_scope = scope.get_scope_child_(f'downcast: {downcast.type_id}', TagsEnum.DownCastNode)
+
+        new_scope.set_downcast(downcast)
+
+        return new_scope
+
+    def add_if(self, if_: IfNodeExpression, scope: HulkScope) -> HulkScope:
+        """
+        Desde el contexto global se añade un nuevo If
+        """
+
+        new_scope = scope.get_scope_child_("", TagsEnum.IfNode)
+
+        return new_scope
+
+    def add_elif_atom(self, elif_: ElifNodeAtomExpression, scope: HulkScope) -> HulkScope:
+        """
+        Desde el contexto global se añade un nuevo elifAtom
+        """
+
+        new_scope = scope.get_scope_child_("", TagsEnum.ElifNodeAtom)
+
+        return new_scope
+
+    def add_while(self, while_: WhileExpressionNode, scope: HulkScope) -> HulkScope:
+        """
+        Desde el contexto global se añade un nuevo While
+        """
+
+        new_scope = scope.get_scope_child_("", TagsEnum.WhileNode)
+
+        return new_scope
+
+    def add_vector(self, vector: VectorNode, scope: HulkScope) -> HulkScope:
+        """
+        Desde el contexto global se añade un nuevo Vector
+        """
+
+        new_scope = scope.get_scope_child_("", TagsEnum.VectorNode)
+
+        return new_scope
+
+    def add_indexing(self, indexing: IndexingNode, scope: HulkScope) -> HulkScope:
+        """
+        Desde el contexto global se añade un nuevo Indexing
+        """
+
+        new_scope = scope.get_scope_child_("", TagsEnum.IndexingNode)
+        new_scope.set_indexing(indexing)
         return new_scope

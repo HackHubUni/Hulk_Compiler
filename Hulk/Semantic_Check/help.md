@@ -4,16 +4,16 @@
 - [x]   MethodNode(DeclarationNode)
 - [x]  FunctionDeclarationNode(DeclarationNode)
 - [x] LetNode(ExpressionNode)
-- [ ]  InstantiateNode(ExpressionNode) para crear una nueva instancia de un type
-- [ ] DowncastNode(ExpressionNode) Castear
-- [ ]  IndexingNode(ExpressionNode)
+- [x]  InstantiateNode(ExpressionNode) para crear una nueva instancia de un type
+- [x] DowncastNode(ExpressionNode) Castear
+- [x]  IndexingNode(ExpressionNode)
 - [ ] ImplicitVector(ExpressionNode)
-- [ ] VectorNode(ExpressionNode)
+- [x] VectorNode(ExpressionNode)
 - [ ]  ForExpressionNode(ExpressionNode)
-- [ ]   WhileExpressionNode(ExpressionNode)
-- [ ]   IfNodeExpression(ExpressionNode)
-- [ ]   ElifNodeExpressionList(ExpressionNode)
-- [ ]   ElifNodeAtomExpression(ExpressionNode)
+- [x]   WhileExpressionNode(ExpressionNode)
+- [x]   IfNodeExpression(ExpressionNode)
+- [x]   ElifNodeExpressionList(ExpressionNode)
+- [x]   ElifNodeAtomExpression(ExpressionNode)
 - [x]   DestructionAssignmentWithAttributeCallExpression(ExpressionNode)
 - [x]  DestructionAssignmentBasicExpression(ExpressionNode):
 - [x] AssignNode(ExpressionNode)

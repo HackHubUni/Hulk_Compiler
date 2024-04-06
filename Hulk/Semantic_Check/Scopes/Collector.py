@@ -22,7 +22,7 @@ class Collector(object):
     """
 
     def __init__(self, errors=[]):
-        self.context: Collector_Info =None
+        self.context: Collector_Info = None
         self.errors = errors
 
     @visitor.on('node')
@@ -32,10 +32,10 @@ class Collector(object):
     @visitor.when(ProgramNode)
     def visit(self, node, local_scope=None):
         try:
-           self.context = Collector_Info()
-           # LLamar a cada declariacion del metodo
-           for class_declaration in node.decl_list:
-               self.visit(class_declaration, self.context)
+            self.context = Collector_Info()
+            # LLamar a cada declariacion del metodo
+            for class_declaration in node.decl_list:
+                self.visit(class_declaration, self.context)
         except SemanticError as ex:
             self.errors.append(ex.text)
 
@@ -50,34 +50,31 @@ class Collector(object):
         except SemanticError as ex:
             self.errors.append(ex.text)
 
-
     @visitor.when(FunctionCallNode)
     def visit(self, node: FunctionCallNode, local_scope: Collector_Info):
         try:
-            scope = self.context.add_function_call(node,local_scope)
+            scope = self.context.add_function_call(node, local_scope)
 
             for features in node.args:
                 self.visit(features, scope)
         except SemanticError as ex:
             self.errors.append(ex.text)
 
-
     @visitor.when(ProtocolDeclarationNode)
-    def visit(self, node: ProtocolDeclarationNode, local_scope:Collector_Info):
+    def visit(self, node: ProtocolDeclarationNode, local_scope: Collector_Info):
         try:
-            scope=   local_scope.add_protocol(node)
+            scope = local_scope.add_protocol(node)
             for method in node.methods:
                 self.visit(method, scope)
 
         except SemanticError as ex:
             self.errors.append(ex.text)
 
-
     @visitor.when(ProtocolMethodNode)
-    def visit(self, node: ProtocolMethodNode, local_scope:HulkScope):
+    def visit(self, node: ProtocolMethodNode, local_scope: HulkScope):
         # El scope que viene es el del padre hay que crear uno nuevo
         try:
-            scope=  self.context.add_procols_methods(node, local_scope)
+            scope = self.context.add_procols_methods(node, local_scope)
             for features in node.args:
                 self.visit(features, scope)
 
@@ -97,9 +94,9 @@ class Collector(object):
             self.errors.append(ex.text)
 
     @visitor.when(MethodNode)
-    def visit(self, node:MethodNode, local_scope: Collector_Info):
+    def visit(self, node: MethodNode, local_scope: Collector_Info):
         try:
-            scope = self.context.add_type_methods(node,local_scope)
+            scope = self.context.add_type_methods(node, local_scope)
             for features in node.args:
                 self.visit(features, scope)
 
@@ -138,9 +135,9 @@ class Collector(object):
         try:
             scope = self.context.add_assign(node, local_scope)
 
-            #Visitar la variable
+            # Visitar la variable
             self.visit(node.var, scope)
-            #visitar la expression
+            # visitar la expression
             self.visit(node.expr, scope)
 
 
@@ -148,21 +145,20 @@ class Collector(object):
             self.errors.append(ex.text)
 
     @visitor.when(VarDefNode)
-    def visit(self, node:VarDefNode, local_scope: Collector_Info):
+    def visit(self, node: VarDefNode, local_scope: Collector_Info):
         try:
             scope = self.context.add_var_def(node, local_scope)
         except SemanticError as ex:
             self.errors.append(ex.text)
-
 
     @visitor.when(DestructionAssignmentWithAttributeCallExpression)
     def visit(self, node: DestructionAssignmentWithAttributeCallExpression, local_scope: Collector_Info):
         try:
 
             scope = self.context.add_destruction_assignment_with_attribute_call(node, local_scope)
-            #Visitar el attr call
+            # Visitar el attr call
             self.visit(node.attribute_call_expression, scope)
-            #Visitar la expresion
+            # Visitar la expresion
             self.visit(node.expression, scope)
         except SemanticError as ex:
             self.errors.append(ex.text)
@@ -221,20 +217,97 @@ class Collector(object):
         except SemanticError as ex:
             self.errors.append(ex.text)
 
-
     @visitor.when(LetNode)
     def visit(self, node: LetNode, local_scope: Collector_Info):
         try:
             scope = self.context.add_let(node, local_scope)
-            #Visitar las asignaciones
+            # Visitar las asignaciones
             for assing in node.assign_list:
                 self.visit(assing, scope)
-            #visitar la expresion
+            # visitar la expresion
             self.visit(node.expr, scope)
         except SemanticError as ex:
             self.errors.append(ex.text)
 
 
+@visitor.when(InstantiateNode)
+def visit(self, node: InstantiateNode, local_scope: Collector_Info):
+    try:
+        scope = self.context.add_instantiate(node, local_scope)
+        # visitar las expresiones
+        for expr in node.initialization_expressions:
+            self.visit(expr, scope)
+    except SemanticError as ex:
+        self.errors.append(ex.text)
+
+
+@visitor.when(DowncastNode)
+def visit(self, node: DowncastNode, local_scope: Collector_Info):
+    try:
+        scope = self.context.add_downcast(node, local_scope)
+        self.visit(node.obj_expression, scope)
+    except SemanticError as ex:
+        self.errors.append(ex.text)
+
+
+@visitor.when(IfNodeExpression)
+def visit(self, node: IfNodeExpression, local_scope: Collector_Info):
+    try:
+        scope = self.context.add_if(node, local_scope)
+        self.visit(node.conditional_expression, scope)
+        self.visit(node.if_body_expression, scope)
+        self.visit(node.elif_branches, scope)
+        self.visit(node.else_expression, scope)
+    except SemanticError as ex:
+        self.errors.append(ex.text)
+
+
+@visitor.when(ElifNodeAtomExpression)
+def visit(self, node: ElifNodeAtomExpression, local_scope: Collector_Info):
+    try:
+        scope=self.context.add_elif(node, local_scope)
+        self.visit(node.conditional_expression, scope)
+        self.visit(node.body_expression, scope)
+    except SemanticError as ex:
+        self.errors.append(ex.text)
+
+
+@visitor.when(ElifNodeExpressionList)
+def visit(self, node: ElifNodeExpressionList, local_scope: Collector_Info):
+    try:
+        for elif_expressions in node.elif_expressions:
+            self.visit(elif_expressions, local_scope)
+    except SemanticError as ex:
+        self.errors.append(ex.text)
+
+
+@visitor.when(WhileExpressionNode)
+def visit(self, node: WhileExpressionNode, local_scope: Collector_Info):
+    try:
+        scope = self.context.add_while(node, local_scope)
+        self.visit(node.conditional_expression, scope)
+        self.visit(node.body_expression, scope)
+    except SemanticError as ex:
+        self.errors.append(ex.text)
 
 
 
+
+@visitor.when(VectorNode)
+def visit(self, node: VectorNode, local_scope: Collector_Info):
+    try:
+        scope = self.context.add_vector(node, local_scope)
+        for expr in node.expression_list:
+            self.visit(expr, scope)
+    except SemanticError as ex:
+        self.errors.append(ex.text)
+
+
+
+@visitor.when(IndexingNode)
+def visit(self, node: IndexingNode, local_scope: Collector_Info):
+    try:
+        scope = self.context.add_indexing(node, local_scope)
+        self.visit(node.vector_expression, scope)
+    except SemanticError as ex:
+        self.errors.append(ex.text)

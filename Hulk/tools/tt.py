@@ -1,8 +1,8 @@
 
 
-a:str=""
+a:str="9"
 
-if a is not None and a != "":
+if a.isdigit():
     print(1)
 else:
     print(2)
