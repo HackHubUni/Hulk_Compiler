@@ -1,6 +1,7 @@
 from Hulk.Lexer.Hulk_Lexer import get_hulk_lexer
 from Hulk.Parser.Hulk_Parser import get_hulk_parser
 from Hulk.Draw_Ast.ast_visitor import *
+from Hulk.Semantic_Check.Scopes.Collector import Collector
 from cmp.evaluation import evaluate_reverse_parse
 #from Hulk.Semantic_Check.type_inferator import *
 #from Hulk.Semantic_Check.type_node import *
@@ -45,8 +46,12 @@ def evaluate(text:str):
 
         errors = []
 
-        collector = SemanticChecker(errors)
+        #collector = SemanticChecker(errors)
+        #collector.visit(ast)
+        collector=Collector(errors)
         collector.visit(ast)
+        a=collector.context
+        print(a)
         print(errors)
         #print(f"El ast es \n {ast}")
         #context = collector.context

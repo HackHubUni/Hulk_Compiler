@@ -72,6 +72,8 @@ class HulkScope:
         # Numero para indexar
         self.index_value_for_indexing: int = -2
 
+        
+
     def get_scope_child_(self, name: str, tag: TagsEnum) -> Self:
         # new = copy.deepcopy(self)
         # new.father = father
@@ -102,7 +104,10 @@ class HulkScope:
 
     def set_functions_call_(self, func_call: FunctionCallNode):
         name = func_call.id
-        self.functions_call[name].append(func_call)
+        if not name in self.functions_call:
+            self.functions_call[name] = [func_call]
+        else:
+            self.functions_call[name].append(func_call)
 
     def set_inherence_methods_(self, method: MethodNode):
         name = method.id
@@ -124,8 +129,10 @@ class HulkScope:
 
     def set_methods_call_(self, func_call: MethodCallNode):
         name = func_call.method_id
-
-        self.methods_call[name].append(func_call)
+        if not name in self.methods_call:
+            self.methods_call[name] = [func_call]
+        else:
+            self.methods_call[name].append(func_call)
 
     def set_protocol_methods_(self, method: ProtocolMethodNode):
         name = method.id
