@@ -236,11 +236,13 @@ class AttrCallNode(ExpressionNode):
 class FunctionCallNode(ExpressionNode):
     def __init__(
         self,
-        id: str,
-        args: list[ExpressionNode],
+        function_id: str,
+        arguments: list[ExpressionNode],
     ):
-        self.id: str = id
-        self.args: list[ExpressionNode] = args
+        self.function_id: str = function_id
+        """The name of the function to call"""
+        self.arguments: list[ExpressionNode] = arguments
+        """The list of expressions to pass as arguments to the function"""
 
 
 class MethodCallNode(ExpressionNode):
@@ -254,13 +256,13 @@ class MethodCallWithExpressionNode(MethodCallNode):
         self,
         object_expression: ExpressionNode,
         method_id: str,
-        args,
+        arguments: list[ExpressionNode],
     ):
         self.object_expression: ExpressionNode = object_expression
         """This is an expression that when evaluated should return a type to which to ask to execute the method"""
         self.method_id: str = method_id
         """The identifier of the method"""
-        self.args = args
+        self.arguments: list[ExpressionNode] = arguments
         """The arguments of the method"""
 
 
@@ -269,11 +271,14 @@ class MethodCallWithIdentifierNode(MethodCallNode):
         self,
         object_id: str,
         method_id: str,
-        args,
+        arguments: list[ExpressionNode],
     ):
         self.object_id: str = object_id
+        """This is the identifier of the object to which to ask to execute the method"""
         self.method_id: str = method_id
-        self.args = args
+        """The identifier of the method"""
+        self.arguments: list[ExpressionNode] = arguments
+        """This is the list of expressions to pass as arguments to the method call"""
 
 
 class MethodCallListNode(ExpressionNode):
@@ -294,6 +299,7 @@ class MethodCallListNode(ExpressionNode):
         methods: list[MethodCallNode],
     ):
         self.methods: list[MethodCallNode] = methods
+        """The list of method calls to execute. Each method is executed over the object returned by the previous one"""
 
 
 # endregion

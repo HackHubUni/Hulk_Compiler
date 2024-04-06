@@ -7,6 +7,7 @@ from Hulk.tools.Ast import *
 from abc import ABC
 from Hulk.tools.Ast import *
 
+
 class MethodInfoBase:
     def __init__(
         self,
@@ -182,7 +183,7 @@ class TypeInfo:
     def all_methods(self) -> list[TypeMethodInfo]:
         return list(item[1] for item in self.methods.items())
 
-    def conforms_to(self, other):
+    def conforms_to(self, other) -> bool:
         """Returns True if this type conforms to the other type. False otherwise.
         The type conforms to another type if the other type is the same or if the other type is an ancestor of this type.
         """

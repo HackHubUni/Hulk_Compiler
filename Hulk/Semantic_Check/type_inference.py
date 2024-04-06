@@ -18,6 +18,42 @@ class TypeInference:
         self.errors = errors if errors is not None and len(errors) >= 0 else []
         """The list of errors previously found in the program"""
 
+    def expects(
+        self,
+        node: ExpressionNode,
+        scope: HulkScopeLinkedNode,
+        expected_return_value: TypeInfo,
+        from_where: str,
+    ) -> TypeInfo:
+        """This function calls the visit on the node given. But is useful to call this instead of the visit in cases
+        where there exist an expected return type from the visit. This will be used by the operators in the language"""
+        pass
+
+    def check_argument_types(
+        self,
+        argument_types: list[TypeInfo],
+        original_arguments_defs: list[VarDefNode],
+        from_where: str,
+        caller_name: str = "function",
+    ):
+        """Checks if the types of the expressions that will be passed as arguments to a function (or method, type constructor, etc)
+        are valid. It also modifies the AST node to give the correct type according to the inference process
+        """
+        if len(argument_types) != len(original_arguments_defs):
+            error = SemanticError(
+                f"{from_where}the {caller_name} expects {len(original_arguments_defs)} arguments, but {len(argument_types)} where given"
+            )
+            self.errors.append(error)
+        for arg_type, original_arg in zip(argument_types, original_arguments_defs):
+            expected_type = self.global_scope.get_type(original_arg.var_type)
+            if isinstance(expected_type, NoneType):
+                original_arg.var_type = arg_type.name
+            elif not arg_type.conforms_to(expected_type):
+                error = SemanticError(
+                    f"{from_where}the argument with name {original_arg.var_name} expects a type {expected_type.name}, but {arg_type} was received"
+                )
+                self.errors.append(error)
+
     @visitor.on("node")
     def visit(
         self,
@@ -214,6 +250,53 @@ class TypeInference:
             self.errors.append(error)
             return ErrorType()
         return BoolType()
+
+    # endregion
+
+    # region Calling Expressions
+
+    @visitor.when(AttrCallNode)
+    def visit(
+        self, node: AttrCallNode, scope: HulkScopeLinkedNode, from_where: str
+    ) -> TypeInfo:
+        """This node represents the call of an attribute of an object. Only in the 'self' instance"""
+        from_where += f"when calling the attribute with name '{node.variable_id}', "
+        object_reference = scope.get_variable("self")
+        object_type = scope.get_type(object_reference.type)
+        return object_type
+
+    @visitor.when(FunctionCallNode)
+    def visit(
+        self, node: FunctionCallNode, scope: HulkScopeLinkedNode, from_where: str
+    ) -> TypeInfo:
+        """This node represents the call of a function. It will return the return type of the function"""
+        from_where += f"when calling the function '{node.function_id}', "
+        if not scope.is_function_defined(node.function_id):
+            error = SemanticError(
+                f"{from_where}the function {node.function_id} is not defined in the scope"
+            )
+            self.errors.append(error)
+            return ErrorType()
+        function: FunctionInfo = scope.get_function(node.function_id)
+        function_def_node: FunctionDeclarationNode = function.function_pointer
+
+        # Check the argument types
+        expression_args: list[ExpressionNode] = node.arguments
+        argument_types: list[TypeInfo] = []
+        for index, expression in enumerate(expression_args):
+            from_where_index = from_where + f"in the argument number {index}, "
+            exp_type = self.visit(expression, scope, from_where_index)
+            argument_types.append(exp_type)
+
+        # Check the argument types and modify the AST
+        self.check_argument_types(
+            argument_types,
+            function_def_node.arguments,
+            from_where,
+            "function",
+        )
+
+        return function.return_type
 
 
 # endregion
