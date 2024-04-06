@@ -3,6 +3,7 @@ from Hulk.Semantic_Check.basic_types.scopes import *
 from Hulk.Semantic_Check.basic_types.builtin_types import *
 from Hulk.Semantic_Check.basic_types.builtin_functions import *
 from Hulk.Semantic_Check.basic_types.builtin_protocols import *
+from Hulk.Semantic_Check.utils import *
 
 
 # region Adding Builtin Data

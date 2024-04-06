@@ -1,5 +1,6 @@
 from Hulk.tools.Ast import ProtocolDeclarationNode, ProtocolMethodNode
 from Hulk.Semantic_Check.basic_types.semantic_types import *
+from Hulk.Semantic_Check.basic_types.builtin_types import *
 
 
 class BuiltinProtocols(ProtocolInfo):
@@ -20,8 +21,8 @@ class IterableProtocol(BuiltinProtocols):
         super().__init__(
             "Iterable",
             [
-                MethodInfoBase("next", [], "Bool"),
-                MethodInfoBase("current", [], "Object"),
+                MethodInfoBase("next", [], BoolType.static_name()),
+                MethodInfoBase("current", [], ObjectType.static_name()),
             ],
         )
 

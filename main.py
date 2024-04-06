@@ -29,10 +29,11 @@ def evaluate(text: str):
     print("\nComenzando a Chequear la Semántica:\n")
     errors = []
     scope = HulkScopeLinkedNode()
+
     if not check_semantics(ast, scope, errors):
         print("Errores de semántica:")
         for error in errors:
-            print(error)
+            print(f" - {error}")
         return
     else:
         print("No hay errores de semántica")

@@ -4,6 +4,7 @@ from Hulk.Semantic_Check.basic_types.builtin_types import *
 from Hulk.Semantic_Check.basic_types.builtin_functions import *
 from Hulk.Semantic_Check.basic_types.builtin_protocols import *
 from Hulk.Semantic_Check.basic_types.semantic_types import *
+from Hulk.Semantic_Check.utils import *
 
 
 class TypeBuilder:
@@ -48,7 +49,9 @@ class TypeBuilder:
                     f"{from_where}, in the parameter '{var_def.var_name}', there is no type defined with the name '{var_def.var_type}'"
                 )
                 self.errors.append(error)
-                var_def.var_type = "None"  # TODO: Should this be of type 'Error'
+                var_def.var_type = (
+                    ErrorType.static_name()
+                )  # TODO: Should this be of type 'Error'
             return_arguments.append(var_info)
             args_names.add(var_def.var_name)
         return return_arguments
@@ -86,13 +89,30 @@ class TypeBuilder:
                 f"In the type '{node.type_name}', there is no type defined with the name '{node.parent_type_id}'"
             )
             self.errors.append(error)
-            node.parent_type_id = "Error"  # TODO: Check this out
+            node.parent_type_id = ErrorType.static_name()
 
         parent_type = scope.get_type(node.parent_type_id)
-        if parent_type.name == "None":
-            parent_type.name = "Object"
+
+        if is_builtin_type(parent_type):
+            error = SemanticError(
+                f"The type '{node.parent_type_id}' is a builtin type that cannot be used as a parent type"
+            )
+            self.errors.append(error)
+            parent_type = scope.get_type(ErrorType.static_name())
+        if parent_type.name == NoneType.static_name():
+            parent_type = scope.get_type(ObjectType.static_name())
         type_info.set_parent(parent_type)
         features = node.features
+
+        # Check if the length of the parent initialization expression match the length of the parent arguments
+        if len(node.parent_initialization_expressions) != len(
+            parent_type.constructor_arguments
+        ):
+            error = SemanticError(
+                f"In the type '{node.type_name}', the number of arguments in the parent initialization expression does not match the number of arguments in the parent type '{node.parent_type_id} declaration'"
+            )
+            self.errors.append(error)
+
         # iterate over the features of the type
         for feature in features:
             self.visit(feature, scope)
@@ -154,7 +174,7 @@ class TypeBuilder:
                 f"In the method '{method_name}', there is no type defined with the name '{node.return_type}'"
             )
             self.errors.append(error)
-            node.return_type = "None"  # TODO: Should this be of Error Type
+            node.return_type = ErrorType.static_name()
 
         current_type.define_method(
             TypeMethodInfo(method_name, arguments, node.return_type, node)
@@ -180,9 +200,7 @@ class TypeBuilder:
                 f"In the type '{current_type.name}', in the attribute '{var_name}', there is no type defined with the name '{var_definition.var_type}'"
             )
             self.errors.append(error)
-            var_info.type = var_definition.var_type = (
-                "None"  # TODO: Should this be of error type?
-            )
+            var_info.type = var_definition.var_type = ErrorType.static_name()
         var_info.initialization_expression = node.expression_to_evaluate
         current_type.define_attribute(var_info)
 
@@ -212,7 +230,7 @@ class TypeBuilder:
                 f"In the protocol '{current_protocol.name}', in the method '{protocol_method_name}', there is no type defined with the return type name '{node.return_type}'"
             )
             self.errors.append(error)
-            node.return_type = "None"
+            node.return_type = ErrorType.static_name()
 
         current_protocol.define_method(
             MethodInfoBase(protocol_method_name, arguments, node.return_type)

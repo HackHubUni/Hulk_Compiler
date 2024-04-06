@@ -7,53 +7,6 @@ from Hulk.tools.Ast import *
 from abc import ABC
 from Hulk.tools.Ast import *
 
-
-def fix_var_def_node(var_def: VarDefNode) -> VarDefNode:
-    """Fix the AST node of the VarDefNode. If the var_type is None then it set it to 'None'"""
-    var_type = var_def.var_type
-    if var_type is None or var_type.isspace():
-        var_def.var_type = "None"
-    return var_def
-
-
-def fix_parent_type_id(type_declaration: TypeDeclarationNode):
-    """Fix the AST node of the TypeDeclarationNode. If the parent_type is None then it set it to 'None'"""
-    parent_type = type_declaration.parent_type_id
-    if parent_type is None or parent_type.isspace():
-        type_declaration.parent_type_id = "None"
-    return type_declaration
-
-
-def fix_method_return_type(method_def: MethodNode) -> MethodNode:
-    """Fix the AST node of the MethodNode. If the return_type is None then it set it to 'None'"""
-    return_type = method_def.return_type
-    if return_type is None or return_type.isspace():
-        method_def.return_type = "None"
-    return method_def
-
-
-def fix_function_return_type(
-    function_def: FunctionDeclarationNode,
-) -> FunctionDeclarationNode:
-    """Fix the AST node of the FunctionDeclarationNode. If the return_type is None then it set it to 'None'"""
-    return_type = function_def.return_type
-    if return_type is None or return_type.isspace():
-        function_def.return_type = "None"
-    return function_def
-
-
-def get_variable_info_from_var_def(var_def: VarDefNode) -> VariableInfo:
-    """Returns a VariableInfo from a VarDefNode.
-    This function also fix the type of the VarDefNode to a valid type"""
-    fix_var_def_node(var_def)
-    return VariableInfo(var_def.var_name, var_def.var_type)
-
-
-def get_variable_info_from_var_assign(var_assign: AssignNode) -> VariableInfo:
-    """Returns a VariableInfo from a AssignNode"""
-    return get_variable_info_from_var_def(var_assign.var_definition)
-
-
 class MethodInfoBase:
     def __init__(
         self,
@@ -163,11 +116,11 @@ class TypeInfo:
 
     def set_constructor_arguments(self, arguments: list[VariableInfo]):
         """Sets the constructor arguments of the parent type"""
-        self.constructor_arguments = arguments
+        self.constructor_arguments = arguments if arguments is not None else []
 
     def set_parent_initialization_expressions(self, expressions: list[ExpressionNode]):
         """Sets the initialization expressions of the parent type"""
-        self.initialization_expression = expressions
+        self.initialization_expression = expressions if expressions is not None else []
 
     def is_attribute_defined(self, attribute_name: str) -> bool:
         """Returns True if the attribute with this name is defined in the type. False otherwise"""
@@ -188,19 +141,6 @@ class TypeInfo:
                 f"An attribute with name '{attribute.name}' is already defined in the type '{self.name}'"
             )
         self.attributes[attribute.name] = attribute if not clone else attribute.clone()
-
-    def define_attributes(self, attributes: list[AssignNode]):
-        """Creates new attributes from the list of AssignNode.
-        If an attribute with the same name is already defined then it raise a SemanticError
-        """
-        variables: list[VariableInfo] = []
-        for attribute in attributes:
-            var_definition = attribute.var_definition
-            fix_var_def_node(var_def=var_definition)
-            variable = VariableInfo(var_definition.var_name, var_definition.var_type)
-            variables.append(variable)
-        for variable in variables:
-            self.define_attribute(variable)
 
     def is_method_defined(self, name: str) -> bool:
         """Returns True if the method with this name is defined in the type or in an ancestor.
@@ -234,25 +174,6 @@ class TypeInfo:
         self.methods[method_info.name] = (
             method_info if not clone else method_info.clone()
         )
-
-    def define_methods(self, methods: list[MethodNode]):
-        """Creates new methods from the list of MethodNode.
-        If a method with the same name is already defined then it raise a SemanticError
-        """
-        for method in methods:
-            arguments: list[VariableInfo] = []
-            for arg in method.arguments:
-                var_definition = arg.var_definition
-                fix_var_def_node(var_def=var_definition)
-                variable = VariableInfo(
-                    var_definition.var_name, var_definition.var_type
-                )
-                arguments.append(variable)
-            fix_method_return_type(method_def=method)
-            method_info = TypeMethodInfo(
-                method.method_name, arguments, method.return_type, method
-            )
-            self.define_method(method_info)
 
     def all_attributes(self) -> list[VariableInfo]:
         """Returns a list with all the attributes in the type"""
