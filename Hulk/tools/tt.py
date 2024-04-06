@@ -1,6 +1,8 @@
 
 
+a:str=""
 
-di={"h":3}
-
-print('h'in di)
+if a is not None and a != "":
+    print(1)
+else:
+    print(2)

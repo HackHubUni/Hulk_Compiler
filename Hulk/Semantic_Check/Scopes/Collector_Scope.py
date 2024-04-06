@@ -4,101 +4,335 @@ from Hulk.Semantic_Check.Scopes.hulk_global_scope import HulkGlobalScope, TypeSc
 from Hulk.tools.Ast import *
 from Hulk.Semantic_Check.type_node import *
 from typing import Self
+import copy
 from Hulk.Semantic_Check.Scopes.Base_Buildings import HulkBase
+from enum import Enum
+import uuid
+
+
+class TagsEnum(Enum):
+    ProtocolMethod = 20
+    LetNode = 19
+    DynTestNode = 18
+    Global = 0
+    Protocol = 1
+    Type = 2
+    Protocol_Method = 3
+    Type_Method = 4
+    Attr_Call = 5
+    Var_Def = 6
+    MethodCallWithExpressionNode = 7
+    MethodCallWithIdentifierNode = 8
+    DestructionAssignmentWithAttributeCallExpression = 9
+    DestructionAssignmentBasicExpression = 10
+    Function = 11
+    Assign = 12
+    FunctionCall = 13
+    BINARY_EXPRESSION = 14
+    UNARY_EXPRESSION = 15
+    LITERAL_EXPRESSION = 16
+    ExpressionBlockNode = 17
+    # Agrega más tags según sea necesario
+
 
 class HulkScope:
-    def __init__(self,father:Self):
-        self.father:HulkScope=father
-        self.functions_decl:dict[str,FunctionDeclarationNode]
-        self.functions_call:dict[str,FunctionCallNode]
-        self.types_methods:dict[str,MethodNode]
-        self.attr_:dict[str,AttrCallNode]
+    def __init__(self, father: Self, name: str, tag: TagsEnum):
 
-class Protocols_Info(HulkScope):
-    def start(self):
-        for method in self.prot_decl.methods:
-            method_name = method.id
-            if method_name in self.methods:
-                raise SemanticError(
-                    f'El protocolo {self.name} no puede tener dos definiciones del metodo {method_name}')
-            self.methods[method_name] = method
+        self.name: str = name
+        # Chequear que el array no sea nulo o vacio
+        if name is not None and name != "":
+            self.name = f' guid: {str(uuid.uuid4())}'
+        self.tag = tag
+        self.father: HulkScope = father
+        self.decla_parents: ProtocolDeclarationNode | ProtocolMethodNode | TypeDeclarationNode | MethodNode = None
+        self.childs: list[HulkScope] = []
+        self.functions_decl: dict[str, FunctionDeclarationNode] = {}
+        self.functions_call: dict[str, list[FunctionCallNode]] = {}
+        self.attr_: dict[str, AttrCallNode] = {}
+        # Types Zone
+        self.types_methods: dict[str, MethodNode] = {}
+        self.inherence_methods: dict[str, MethodNode] = {}
+        self.override_methods: dict[str, MethodNode] = {}
+        self.methods_call: dict[str, list[MethodCallNode]] = {}
+        # Protocols Zone
+        self.protocols_methods: dict[str, ProtocolMethodNode] = {}
+        self.procotocols_inherence_methods: dict[str, ProtocolMethodNode] = {}
 
-    def __init__(self, prot_decl: ProtocolDeclarationNode):
-        self.name: str = prot_decl.id
-        self.parents: list[str] = prot_decl.parents
-        self.childs: list[str] = []
-        self.prot_decl: ProtocolDeclarationNode = prot_decl
-        self.methods: dict[str, MethodNode] = {}
-        self.start()
+        self.args_: dict[str, VarDefNode] = {}
 
+    def get_scope_child_(self, name: str, tag: TagsEnum) -> Self:
+        # new = copy.deepcopy(self)
+        # new.father = father
+        # new.tag = tag
+        # new.name = name
+        new = HulkScope(self, name, tag)
+        self.childs.append(new)
 
-class Type_Info(HulkScope):
+        return new
 
-    def start_features_(self):
-        for features in self.type_decl_.features:
-            if isinstance(features, MethodNode):
-                method: MethodNode = features
-                method_name = method.id
+    def set_assign_(self, assign: AssignNode):
+        name = assign.var.id
+        if name in self.args_:
+            raise SemanticError(f'No se puede asignar dos veces a la variable  {name}')
+        # La variable a la cual se asigna
+        self.args_[name] = assign.var
 
-                if method_name in self.methods_:
-                    raise SemanticError(
-                        f'El metodo {method_name} en el type: {self.name} no se puede declarar dos veces')
+    def set_decla_father_(self, decla: ProtocolDeclarationNode | ProtocolMethodNode | TypeDeclarationNode | MethodNode):
+        if self.decla_parents is not None:
+            raise SemanticError('No se puede tener dos prototipos o types con el mismo nombre')
+        self.decla_parents = decla
 
-                self.methods_[method_name] = method
-            elif isinstance(features, AssignNode):
-                assing_attr: AssignNode = features
-                assing_attr_name = assing_attr.var.id
+    def set_functions_decl_(self, funct_decl: FunctionDeclarationNode):
+        name = funct_decl.id
+        if name in self.functions_decl:
+            raise SemanticError(f'No se puede tener dos funciones con el mismo nombre {name}')
+        self.functions_decl[name] = funct_decl
 
-                if assing_attr_name in self.assings_attr_:
-                    raise SemanticError(f'El atributo {assing_attr_name} esta definido anteriormente en {self.name}')
+    def set_functions_call_(self, func_call: FunctionCallNode):
+        name = func_call.id
+        self.functions_call[name].append(func_call)
 
-    def start_args_(self):
-        args: list[VarDefNode]=self.type_decl_.args
+    def set_inherence_methods_(self, method: MethodNode):
+        name = method.id
+        if name in self.inherence_methods:
+            raise SemanticError(f'No se puede tener dos metodos con el mismo nombre {name}')
+        self.inherence_methods[name] = method
+
+    def set_override_methods_(self, method: MethodNode):
+        name = method.id
+        if name in self.override_methods:
+            raise SemanticError(f'No se puede tener dos metodos con el mismo nombre {name}')
+        self.override_methods[name] = method
+
+    def set_types_methods_(self, method: MethodNode):
+        name = method.id
+        if name in self.types_methods:
+            raise SemanticError(f'No se puede tener dos metodos con el mismo nombre {name}')
+        self.types_methods[name] = method
+
+    def set_methods_call_(self, func_call: MethodCallNode):
+        name = func_call.method_id
+
+        self.methods_call[name].append(func_call)
+
+    def set_protocol_methods_(self, method: ProtocolMethodNode):
+        name = method.id
+        if name in self.protocols_methods:
+            raise SemanticError(f'No se puede tener dos metodos con el mismo nombre {name}')
+        self.protocols_methods[name] = method
+
+    def set_attr_(self, attr: AttrCallNode):
+        name = attr.variable_id
+        if name in self.attr_:
+            raise SemanticError(f'No se puede tener dos atributos con el mismo nombre {name}')
+        self.attr_[name] = attr
+
+    def set_arg(self, arg: VarDefNode):
+        """
+        Set un argumento en el scope
+        """
+        name = arg.id
+        if name in self.args_:
+            raise SemanticError(f'No se puede tener dos argumentos con el mismo nombre {name}')
+        self.args_[name] = arg
+
+    def set_args_(self, args: list[VarDefNode]):
+        """
+        Set una lista de argumentos en el scope
+        """
         for arg in args:
-            arg_name=arg.id
-            if arg_name in self.args_:
-                raise SemanticError(f'No se puede tener dos argumentos {arg_name} iguales en el type: {self.name}')
+            self.set_arg(arg)
 
+    def set_let(self, let: LetNode):
+        assig_list = let.assign_list
 
-    def start_(self):
-        self.start_features_()
-        self.start_args_()
-
-
-
-    def __init__(self, type_decl: TypeDeclarationNode,father:HulkScope):
-        super().__init__(father)
-        super.self.attr_
-        self.name = type_decl.id
-        self.type_decl_: TypeDeclarationNode = type_decl
-        self.assings_attr_:dict[str,AssignNode]={}
-        self.methods_:dict[str,MethodNode]={}
-        self.inherence_methods:dict[str,MethodNode]={}
-        self.args_:dict[str,VarDefNode]={}
-
-
-
+        for assig in assig_list:
+            self.set_assign_(assig)
 
 
 class Collector_Info(HulkScope):
     def __init__(self):
-        self.protocols_: dict[str, ProtocolDeclarationNode] = {}
-        self.prot_info_: dict[str, Protocols_Info] = {}
-        self.types_: dict[str, TypeDeclarationNode] = {}
-        self.types_info_:dict[str,Type_Info]={}
+        super().__init__(father=None, tag=TagsEnum.Global, name="Base_Scope")
+        self.protocols_: dict[str, HulkScope] = {}
+        self.prot_info_: dict[str, HulkScope] = {}
+        self.types_: dict[str, HulkScope] = {}
+        self.functions_decl_: dict[str, HulkScope] = {}
+        self.protocols_methods: dict[str, ProtocolMethodNode] = {}
 
-    def add_protocol(self, prot_decl: ProtocolDeclarationNode):
+    def __get_new_child_scope(self, name: str, father: HulkScope, tag: TagsEnum) -> HulkScope:
+        new_scope = HulkScope(name=name, father=father, tag=tag)
+        self.childs.append(new_scope)
+        return new_scope
+
+    def add_protocol(self, prot_decl: ProtocolDeclarationNode) -> HulkScope:
         name = prot_decl.id
         if name in self.protocols_:
-            raise SemanticError(f'No pueden existir dos protocols con igual nombre {name}')
-        self.protocols_[name] = prot_decl
-        prot_info = Protocols_Info(prot_decl)
-        self.protocols_[name] = prot_info
+            raise SemanticError(f'No pueden existir dos protocolos con igual nombre {name}')
+        scope = self.__get_new_child_scope(name, self, TagsEnum.Protocol)
+        self.protocols_[name] = scope
+        return scope
+
+    def add_procols_methods(self, prot_method: ProtocolMethodNode, scope: HulkScope):
+        """
+        Desde el contexto global se añade un nuevo metodo de protocolo
+        """
+        name = prot_method.id
+        if name in self.protocols_methods:
+            raise SemanticError(f'No pueden existir dos métodos de procolos con el mismo nombre {name}')
+        self.protocols_methods[name] = prot_method
+
+        new_scope = scope.get_scope_child_(name, TagsEnum.ProtocolMethod)
+        new_scope.set_protocol_methods_(prot_method)
+        return new_scope
+
+    # Type Zone
 
     def add_type(self, type_decl: TypeDeclarationNode):
         name = type_decl.id
         if name in self.types_:
             raise SemanticError(f'No pueden existir dos types con igual nombre {name}')
+        scope = self.__get_new_child_scope(name, self, TagsEnum.Type)
+        scope.set_args_(type_decl.args)
+        self.types_[name] = scope
 
-        self.types_info_[name]=Type_Info()
-        return HulkScope()
+        return scope
+
+    def add_function_declaration(self, func_decl: FunctionDeclarationNode) -> HulkScope:
+        name = func_decl.id
+        if name in self.functions_decl_:
+            raise SemanticError(f'No pueden existir dos funciones con igual nombre {name}')
+        scope = self.__get_new_child_scope(name, self, TagsEnum.Function)
+        self.functions_decl_[name] = scope
+        return scope
+
+    def add_function_call(self, func_call: FunctionCallNode, local_scope: HulkScope) -> HulkScope:
+        name = func_call.id
+        scope = local_scope.get_scope_child_(name, TagsEnum.FunctionCall)
+        scope.set_functions_call_(func_call)
+        return scope
+
+    def add_type_methods(self, type_method: MethodNode, scope: HulkScope) -> HulkScope:
+        """
+        Desde el contexto global se añade un nuevo metodo de type
+        """
+        name = type_method.id
+        new_scope = scope.get_scope_child_(name, TagsEnum.Type_Method)
+        new_scope.set_types_methods_(type_method)
+        return new_scope
+
+    def add_call_attr(self, attr_call: AttrCallNode, scope: HulkScope) -> HulkScope:
+        """
+        Desde el contexto global se añade un nuevo attr call
+        """
+        name = attr_call.variable_id
+        new_scope = scope.get_scope_child_(name, TagsEnum.Attr_Call)
+        new_scope.set_attr_(attr_call)
+        return new_scope
+
+    def add_call_methods(self, func_call: MethodCallNode, scope: HulkScope) -> HulkScope:
+        """
+        Desde el contexto global se añade un nuevo method call
+        """
+        name = func_call.method_id
+        tags = TagsEnum.MethodCallWithExpressionNode if isinstance(func_call,
+                                                                   MethodCallWithExpressionNode) else TagsEnum.MethodCallWithIdentifierNode
+        new_scope = scope.get_scope_child_(name, tags)
+        new_scope.set_methods_call_(func_call)
+        return new_scope
+
+    def add_assign(self, assign: AssignNode, scope: HulkScope) -> HulkScope:
+        """
+        Desde el contexto global se añade un nuevo assign
+        """
+        name = assign.var.id
+        new_scope = scope.get_scope_child_(name, TagsEnum.Assign)
+
+        new_scope.set_assign_(assign)
+        return new_scope
+
+    def add_var_def(self, type_method: VarDefNode, scope: HulkScope) -> HulkScope:
+        """
+        Desde el contexto global se añade un nuevo var def
+        """
+        name = type_method.id
+
+        new_scope = scope.get_scope_child_(name, TagsEnum.Var_Def)
+        new_scope.set_arg(type_method)
+        return new_scope
+
+    # Destrucccion Assignment Zone
+    def add_destruction_assignment_with_attribute_call(self,
+                                                       destruccion_with_attr: DestructionAssignmentWithAttributeCallExpression,
+                                                       scope: HulkScope) -> HulkScope:
+        """
+        Desde el contexto global se añade un nuevo attr call
+        """
+        name = destruccion_with_attr.attribute_call_expression.variable_id
+        new_scope = scope.get_scope_child_(name, TagsEnum.DestructionAssignmentWithAttributeCallExpression)
+
+        return new_scope
+
+    def add_destruction_assignment_basic(self, destruccion_basic: DestructionAssignmentBasicExpression,
+                                         scope: HulkScope) -> HulkScope:
+        """
+        Desde el contexto global se añade un nuevo attr call
+        """
+        name = destruccion_basic.id
+        new_scope = scope.get_scope_child_(name, TagsEnum.DestructionAssignmentBasicExpression)
+
+        return new_scope
+
+    def add_binary_expression(self, binary_expr: BinaryExpressionNode, scope: HulkScope) -> HulkScope:
+        """
+        Desde el contexto global se añade un nuevo BinaryExpression
+        """
+
+        new_scope = scope.get_scope_child_("", TagsEnum.BINARY_EXPRESSION)
+
+        return new_scope
+
+    def add_unary_expression(self, unary_expr: UnaryExpressionNode, scope: HulkScope) -> HulkScope:
+        """
+        Desde el contexto global se añade un nuevo UnaryExpression
+        """
+
+        new_scope = scope.get_scope_child_("", TagsEnum.UNARY_EXPRESSION)
+
+        return new_scope
+
+    def add_literal_expression(self, literal_expr: LiteralExpressionNode, scope: HulkScope) -> HulkScope:
+        """
+        Desde el contexto global se añade un nuevo LiteralExpression
+        """
+
+        new_scope = scope.get_scope_child_("", TagsEnum.LITERAL_EXPRESSION)
+
+        return new_scope
+
+    def add_expression_block(self, expr_block: ExpressionBlockNode, scope: HulkScope) -> HulkScope:
+        """
+        Desde el contexto global se añade un nuevo ExpressionBlock
+        """
+
+        new_scope = scope.get_scope_child_("", TagsEnum.ExpressionBlockNode)
+
+        return new_scope
+
+    def add_dyn_test(self, dyn_test: DynTestNode, scope: HulkScope) -> HulkScope:
+        """
+        Desde el contexto global se añade un nuevo DynTest
+        """
+
+        new_scope = scope.get_scope_child_("", TagsEnum.DynTestNode)
+
+        return new_scope
+
+    def add_let(self, let: LetNode, scope: HulkScope) -> HulkScope:
+        """
+        Desde el contexto global se añade un nuevo Let
+        """
+
+        new_scope = scope.get_scope_child_("", TagsEnum.LetNode)
+
+        new_scope.set_let(let)
+        return new_scope

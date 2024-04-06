@@ -236,7 +236,13 @@ class FunctionCallNode(ExpressionNode):
 
 
 class MethodCallNode(ExpressionNode):
-    pass
+    def __init__(self,
+        method_id: str,
+                 args):
+        self.method_id: str = method_id
+        """The identifier of the method"""
+        self.args = args
+        """The arguments of the method"""
 
 
 class MethodCallWithExpressionNode(MethodCallNode):
@@ -248,12 +254,10 @@ class MethodCallWithExpressionNode(MethodCallNode):
         method_id: str,
         args,
     ):
+        super().__init__(method_id, args)
         self.object_expression: ExpressionNode = object_expression
         """This is an expression that when evaluated should return a type to which to ask to execute the method"""
-        self.method_id: str = method_id
-        """The identifier of the method"""
-        self.args = args
-        """The arguments of the method"""
+
 
 
 class MethodCallWithIdentifierNode(MethodCallNode):
@@ -263,9 +267,9 @@ class MethodCallWithIdentifierNode(MethodCallNode):
         method_id: str,
         args,
     ):
+        super().__init__(method_id, args)
         self.object_id: str = object_id
-        self.method_id: str = method_id
-        self.args = args
+
 
 
 class MethodCallListNode(ExpressionNode):
@@ -326,6 +330,9 @@ class DestructionAssignmentBasicExpression(ExpressionNode):
 
 
 class DestructionAssignmentWithAttributeCallExpression(ExpressionNode):
+    """
+    Destruir el valor del atributo que contengo yo
+    """
     def __init__(
         self,
         attribute_call_expression: AttrCallNode,
