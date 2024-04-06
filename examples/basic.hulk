@@ -4,11 +4,11 @@ function powers (from, to) {
     let squares = [x^2 || x in range(from,to)] in squares;
 }
 
-type Point(x,y) inherits Object {
+type Point(x,y) inherits Vector {
      x = x;
      y = y;
 
-     getX() => self.x;
+     getX():Number => self.x;
      getY() => self.y;
 
      getNorm() => sqrt(self.x ^ 2 + self.getY() ^ 2);

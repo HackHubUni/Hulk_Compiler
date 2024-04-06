@@ -49,9 +49,7 @@ class TypeBuilder:
                     f"{from_where}, in the parameter '{var_def.var_name}', there is no type defined with the name '{var_def.var_type}'"
                 )
                 self.errors.append(error)
-                var_def.var_type = (
-                    ErrorType.static_name()
-                )  # TODO: Should this be of type 'Error'
+                var_def.var_type = ErrorType.static_name()
             return_arguments.append(var_info)
             args_names.add(var_def.var_name)
         return return_arguments
@@ -104,6 +102,7 @@ class TypeBuilder:
         type_info.set_parent(parent_type)
         features = node.features
 
+        # TODO: Check if this could be moved to the next section of the Semantic Checker
         # Check if the length of the parent initialization expression match the length of the parent arguments
         if len(node.parent_initialization_expressions) != len(
             parent_type.constructor_arguments
