@@ -79,12 +79,20 @@ class SemanticChecker(object):
        except SemanticError as ex:
            self.errors.append(ex.text)
 
+    @visitor.when(DestructionAssignmentWithAttributeCallExpression)
+    def visit(self, node: DestructionAssignmentWithAttributeCallExpression, local_scope: MethodScope):
+        try:
+            self.visit(node.attribute_call_expression,local_scope)
+            self.visit(node.expression,local_scope)
+        except SemanticError as ex:
+            self.errors.append(ex.text)
+
     @visitor.when(DestructionAssignmentBasicExpression)
     def visit(self, node: DestructionAssignmentBasicExpression, local_scope: MethodScope):
         try:
-            pass
+            self.visit(node, local_scope)
         except SemanticError as ex:
-        self.errors.append(ex.text)
+            self.errors.append(ex.text)
     @visitor.when(AttrCallNode)
     def visit(self, node:AttrCallNode, local_scope:MethodScope):
         try:
@@ -94,8 +102,30 @@ class SemanticChecker(object):
             self.errors.append(ex.text)
 
     @visitor.when(VarNode)
-    def visit(self, node: AttrCallNode, local_scope: MethodScope):
-        print()
+    def visit(self, node:VarNode, local_scope: MethodScope):
+        try:
+           if not local_scope.is_var_define(str(node.value)) :
+               raise SemanticError(f'La variable {node.variable_id} no esta definida en este scope ni en ningun scope padre que redefina el método en caso de ser este heredado ')
+        except SemanticError as ex:
+            self.errors.append(ex.text)
+
+    @visitor.when(BinaryExpressionNode)
+    def visit(self, node:BinaryExpressionNode, local_scope: MethodScope):
+        try:
+            self.visit(node.left)
+            self.visit(node.right)
+
+        except SemanticError as ex:
+            self.errors.append(ex.text)
+
+    @visitor.when( FunctionDeclarationNode)
+    def visit(self, node:FunctionDeclarationNode,global_scope:HulkGlobalScope):
+        try:
+            global_scope.function_decl
+
+        except SemanticError as ex:
+            self.errors.append(ex.text)
+
 
 
 

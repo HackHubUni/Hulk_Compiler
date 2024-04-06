@@ -67,16 +67,19 @@ def evaluate(text:str):
 text = ''' 
 
 
-type Point {
-    
 
-   
+    
+type Person(firstname, lastname) {
+    firstname = firstname;
+    lastname = lastname;
 
-    setX(x) => self.x := x;
-    setY(y) => self.y := y;
-    
-    
+    name() => self.firstname @@ self.lastname;
 }
+
+
+    
+    
+
 
 
 

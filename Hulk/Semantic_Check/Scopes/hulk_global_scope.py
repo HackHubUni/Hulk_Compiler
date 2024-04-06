@@ -208,6 +208,9 @@ class MethodScope:
     def is_attr_define(self, attr_name: str) -> bool:
         return self.type_residence.is_attr_hear_or_heredado(attr_name, self.name)
 
+    def is_var_define(self,var_name:str)->bool:
+        return var_name in self.vars
+
 
 class HulkGlobalScope(HulkBase):
     function_decl: dict[str:FunctionDeclarationNode] = {}
@@ -244,7 +247,7 @@ class HulkGlobalScope(HulkBase):
         self.function_decl[name] = protocol_node
         return True
 
-    def create_typeScope(self, type_node: TypeDeclarationNode, father_name: str = None) -> TypeScope:
+    def __create_typeScope__(self, type_node: TypeDeclarationNode, father_name: str = None) -> TypeScope:
         """Crea un type_scope dado un padre"""
         type_scope: TypeScope = None
         name = type_node.id
@@ -277,6 +280,6 @@ class HulkGlobalScope(HulkBase):
             raise SemanticError(f'Type with the same name ({name}) already in the context.')
         self.types_decl[name] = type_node
         father_name = type_node.parent
-        type_scope = self.create_typeScope(type_node, father_name)
+        type_scope = self.__create_typeScope__(type_node, father_name)
 
         return type_scope
