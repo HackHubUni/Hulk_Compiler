@@ -77,7 +77,7 @@ class TypeScope:
         self.child: list[TypeScope] = []
         self.inherence_methods_: dict[str:MethodNode] = inherence_methods.copy()
         self.protocols_Methods_: dict[str:ProtocolMethodNode] = interface_methods.copy()
-        self.methods: dict[str:MethodNode] = {}
+        self.methods: dict[str:MethodNode]={}
         """
         Todos los metodos tanto heredados como sintetizados
         """
@@ -266,7 +266,7 @@ class HulkGlobalScope(HulkBase):
         if name in self.function_decl:
             raise SemanticError(f'Function with the same name ({name}) already in the context.')
         self.function_decl[name] = func_node
-        fun_scope=FunctionScope(func_node)
+        fun_scope=FunctionScope(func_node,self)
         self.function_scope[name]=fun_scope
         return fun_scope
 
@@ -275,7 +275,7 @@ class HulkGlobalScope(HulkBase):
         try:
             return self.function_scope[func_name]
         except KeyError:
-            raise SemanticError(f'La función a llamar no ha sido definida')
+            raise SemanticError(f'La función: {func_name} a llamar no ha sido definida')
 
     def create_protocol(self, protocol_node: ProtocolDeclarationNode):
         """
@@ -298,8 +298,11 @@ class HulkGlobalScope(HulkBase):
                 # self.type_fathers_control.set_type_and_father(name, father) TODO: Esto es para permitir que se declare el padre después del hijo
                 if father_name not in self.types_scope:
                     raise SemanticError(f'Type with  name ({name}) have a father {father_name} but is not declare')
+            try:
 
-            father_scope: TypeScope = self.types_scope[father_name]
+                father_scope: TypeScope = self.types_scope[father_name]
+            except KeyError:
+                raise SemanticError(f"El padre type: {father_name} del type: {name} no ha sido definido ")
 
             type_scope = father_scope.get_new_child_scope(type_node)
         else:

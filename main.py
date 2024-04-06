@@ -65,23 +65,16 @@ def evaluate(text:str):
 
 
 text = ''' 
+function tan(x) => x / x;
+function cot(x) => 1 / tan(x);
 
-type Point {
-    x = 0;
-    y = 0;
 
-    getX() => self.x;
-    getY() => self.y;
 
-    setX(x) => self.x := x;
-    setY(y) => self.y := y;
-}
 
-let pt = new Point(3,4) in
-    print("x: " @ pt.getX() @ "; y: " @ pt.getY());
 
     
-    
+
+
 
 
 

@@ -35,10 +35,13 @@ class SemanticChecker(object):
 
     @visitor.when(ProgramNode)
     def visit(self, node,local_scope=None):
+
         self.context = HulkGlobalScope(node)
         # LLamar a cada declariacion del metodo
         for class_declaration in node.decl_list:
-            self.visit(class_declaration,local_scope)
+            self.visit(class_declaration,self.context)
+
+
 
     @visitor.when(TypeDeclarationNode)
 
@@ -146,9 +149,9 @@ class SemanticChecker(object):
         try:
 
 
-            function_scope=  global_scope.create_function(node)
+
             self.set_current_node(node)
-            self.visit(node.body,function_scope)
+            self.visit(node.body,global_scope)
 
         except SemanticError as ex:
             self.errors.append(ex.text)
