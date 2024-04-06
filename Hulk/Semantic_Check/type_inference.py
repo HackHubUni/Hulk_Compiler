@@ -86,10 +86,134 @@ class TypeInference:
         type_info = self.visit(node.value, scope, from_where)
         if not isinstance(type_info, NumType):
             error = SemanticError(
-                f"{from_where}the expression must have type {NumType.static_name()} but it is of type {type_info.name}"
+                f"{from_where}the expression must have type {NumType.static_name()} but it is of them is of another type"
             )
             self.errors.append(error)
             return ErrorType()
+
+        return type_info
+
+    @visitor.when(NotNode)
+    def visit(
+        self,
+        node: NotNode,
+        scope: HulkScopeLinkedNode,
+        from_where: str,
+    ) -> TypeInfo:
+        """This node represents the not operator. It will return a boolean"""
+        from_where += "when calling the not operator, "
+        type_info = self.visit(node.value, scope, from_where)
+        if not isinstance(type_info, BoolType):
+            error = SemanticError(
+                f"{from_where}the expression must have type {BoolType.static_name()} but it is of them is of another type"
+            )
+            self.errors.append(error)
+            return ErrorType()
+
+        return type_info
+
+    @visitor.when(BinaryStringExpressionNode)
+    def visit(
+        self,
+        node: BinaryExpressionNode,
+        scope: HulkScopeLinkedNode,
+        from_where: str,
+    ) -> TypeInfo:
+        """This node represents the concatenation operator. It will return a string if everything is ok"""
+        from_where += "when calling the concatenation operator, "
+        left_type = self.visit(node.left, scope, from_where)
+        right_type = self.visit(node.right, scope, from_where)
+        if not isinstance(left_type, LiteralStrNode) or not isinstance(
+            right_type, LiteralStrNode
+        ):
+            error = SemanticError(
+                f"{from_where}the expressions on each side must have type {LiteralStrNode.static_name()} but one of them is of another type"
+            )
+            self.errors.append(error)
+            return ErrorType()
+        return LiteralStrNode()
+
+    @visitor.when(BinaryNumExpressionNode)
+    def visit(
+        self, node: BinaryNumExpressionNode, scope: HulkScopeLinkedNode, from_where: str
+    ) -> TypeInfo:
+        """This node represents the binary operators for numbers. It will return a number if both of its side expressions are of type Number"""
+        # from_where += "when calling the binary operator, "
+        if isinstance(node, PlusNode):
+            from_where += "when calling the plus operator, "
+        elif isinstance(node, MinusNode):
+            from_where += "when calling the minus operator, "
+        elif isinstance(node, StarNode):
+            from_where += "when calling the multiplication operator, "
+        elif isinstance(node, DivNode):
+            from_where += "when calling the division operator, "
+        elif isinstance(node, ModNode):
+            from_where += "when calling the division rest operator, "
+        elif isinstance(node, PowNode):
+            from_where += "when calling the power operator, "
+        left_type = self.visit(node.left, scope, from_where)
+        right_type = self.visit(node.right, scope, from_where)
+        if not isinstance(left_type, NumType) or not isinstance(right_type, NumType):
+            error = SemanticError(
+                f"{from_where}the expressions on each side must have type {NumType.static_name()} but one of them is of another type"
+            )
+            self.errors.append(error)
+            return ErrorType()
+        return NumType()
+
+    @visitor.when(BinaryBoolExpressionNode)
+    def visit(
+        self,
+        node: BinaryBoolExpressionNode,
+        scope: HulkScopeLinkedNode,
+        from_where: str,
+    ) -> TypeInfo:
+        """This node represents the binary operators for booleans. It will return a boolean if both of its side expressions are of type Boolean"""
+        # from_where += "when calling the binary operator, "
+        if isinstance(node, AndNode):
+            from_where += "when calling the and operator, "
+        elif isinstance(node, OrNode):
+            from_where += "when calling the or operator, "
+        elif isinstance(node, EqualNode):
+            from_where += "when calling the equality operator, "
+        elif isinstance(node, NotEqualNode):
+            from_where += "when calling the inequality operator, "
+        elif isinstance(node, LessNode):
+            from_where += "when calling the less than operator, "
+        elif isinstance(node, GreaterNode):
+            from_where += "when calling the greater than operator, "
+        elif isinstance(node, LeqNode):
+            from_where += "when calling the less equal operator, "
+        elif isinstance(node, GeqNode):
+            from_where += "when calling the greater equal operator, "
+        left_type = self.visit(node.left, scope, from_where)
+        right_type = self.visit(node.right, scope, from_where)
+        if not isinstance(left_type, BoolType) or not isinstance(right_type, BoolType):
+            error = SemanticError(
+                f"{from_where}the expressions on each side must have type {BoolType.static_name()} but one of them is of another type"
+            )
+            self.errors.append(error)
+            return ErrorType()
+        return BoolType()
+
+    @visitor.when(DynTestNode)
+    def visit(
+        self,
+        node: DynTestNode,
+        scope: HulkScopeLinkedNode,
+        from_where: str,
+    ) -> TypeInfo:
+        """This node represents the dynamic test operator. It will return a boolean"""
+        from_where += "when calling the dynamic test operator, "
+        expression_type = self.visit(node.expr, scope, from_where)
+        expected_type = scope.get_type(node.type)
+        if not expression_type.conforms_to(expected_type):
+            error = SemanticError(
+                f"{from_where}the right side type must conform to the left side type"
+            )
+            self.errors.append(error)
+            return ErrorType()
+        return BoolType()
 
 
 # endregion

@@ -207,11 +207,13 @@ class GeqNode(BinaryBoolExpressionNode):
 class DynTestNode(ExpressionNode):  # This is for expression like --> Expression is Type
     def __init__(
         self,
-        expr,
-        type,
+        expr: ExpressionNode,
+        type: str,
     ):
-        self.expr = expr
-        self.type = type
+        self.expr: ExpressionNode = expr
+        """The expression to evaluate"""
+        self.type: str = type
+        """The type that is expected to be"""
 
 
 # endregion
