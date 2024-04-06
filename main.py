@@ -66,16 +66,19 @@ def evaluate(text:str):
 
 text = ''' 
 
+type Point {
+    x = 0;
+    y = 0;
 
+    getX() => self.x;
+    getY() => self.y;
 
-    
-type Person(firstname, lastname) {
-    firstname = firstname;
-    lastname = lastname;
-
-    name() => self.firstname @@ self.lastname;
+    setX(x) => self.x := x;
+    setY(y) => self.y := y;
 }
 
+let pt = new Point(3,4) in
+    print("x: " @ pt.getX() @ "; y: " @ pt.getY());
 
     
     

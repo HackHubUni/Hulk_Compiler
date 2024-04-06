@@ -208,8 +208,32 @@ class MethodScope:
     def is_attr_define(self, attr_name: str) -> bool:
         return self.type_residence.is_attr_hear_or_heredado(attr_name, self.name)
 
-    def is_var_define(self,var_name:str)->bool:
+    def is_var_define(self, var_name: str) -> bool:
         return var_name in self.vars
+
+class FunctionScope:
+    def __init__(self, function_decl: FunctionDeclarationNode, global_scope):
+        self.name = function_decl.id
+        self.func_delc = function_decl
+        self.args_ = function_decl.args
+        self.body = function_decl.body
+        self.global_scope=global_scope
+        self.vars: dict[str, VarDefNode]={}
+        for var in self.args_:
+            name = var.id
+            if name in self.vars:
+                raise SemanticError(
+                    f"No se puede definir  una funcion con dos variables con el mismo nombre nombre variable: {name} en la función: {self.name}")
+            self.vars[name] = var
+
+    def is_var_arg(self, var_name: str):
+        """
+        Devuelve True si el arguamento esta en la definición de la función
+             """
+        return var_name in self.vars
+
+    def __len__(self):
+        return len(self.args_)
 
 
 class HulkGlobalScope(HulkBase):
@@ -217,7 +241,7 @@ class HulkGlobalScope(HulkBase):
     protocol_decl: dict[str:ProtocolDeclarationNode] = {}
     types_decl: dict[str:TypeDeclarationNode] = {}
 
-    def __init__(self):
+    def __init__(self,init_program:ProgramNode):
         super().__init__()
         # self.base_function:list[str]=["cos","sin","sqrt","exp","log","rand","print"]
         # self.base_const=["PI","E"]
@@ -225,9 +249,16 @@ class HulkGlobalScope(HulkBase):
         self.protocol_decl: dict[str:ProtocolDeclarationNode] = {}
         self.types_decl: dict[str:TypeDeclarationNode] = {}
         self.types_scope: dict[str:TypeScope] = {}
+        self.function_scope:dict[str:TypeScope]={}
         self.type_fathers_control: Type_Father_Control = Type_Father_Control()
+        self.current_node=init_program
 
-    def create_function(self, func_node: FunctionDeclarationNode) -> bool:
+
+    def get_current_node(self):
+        return self.current_node
+    def set_current_node(self,new_current):
+        self.current_node=new_current
+    def create_function(self, func_node: FunctionDeclarationNode) -> FunctionScope:
         """
         Crear una función y guardarla en el scope global
         """
@@ -235,7 +266,16 @@ class HulkGlobalScope(HulkBase):
         if name in self.function_decl:
             raise SemanticError(f'Function with the same name ({name}) already in the context.')
         self.function_decl[name] = func_node
-        return True
+        fun_scope=FunctionScope(func_node)
+        self.function_scope[name]=fun_scope
+        return fun_scope
+
+    def get_FunctionScope(self,func_name:str)->FunctionScope:
+        """Trata de devolver un function scope en caso de no existir lanza execpcion semantica"""
+        try:
+            return self.function_scope[func_name]
+        except KeyError:
+            raise SemanticError(f'La función a llamar no ha sido definida')
 
     def create_protocol(self, protocol_node: ProtocolDeclarationNode):
         """
@@ -283,3 +323,7 @@ class HulkGlobalScope(HulkBase):
         type_scope = self.__create_typeScope__(type_node, father_name)
 
         return type_scope
+
+
+
+

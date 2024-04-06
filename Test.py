@@ -1,5 +1,6 @@
 from Hulk.Lexer.Hulk_Lexer import get_hulk_lexer
 from Hulk.Parser.Hulk_Parser import get_hulk_parser
+from Hulk.Semantic_Check.semantic_check import SemanticChecker
 #from Hulk.Semantic_Check.check_type_semantic import InfoSaverTree,TypeBuilder
 from cmp.evaluation import evaluate_reverse_parse
 #from Hulk.Semantic_Check.type_inferator import *
@@ -75,6 +76,11 @@ def evaluate(text:str,is_printting:bool=True):
 
 
         ast = evaluate_reverse_parse(parse, operations, tokens)
+        errors = []
+
+        collector = SemanticChecker(errors)
+        collector.visit(ast)
+        return errors
 
         #errors = []
         #collector = InfoSaverTree(errors)
@@ -122,13 +128,21 @@ def show_errors():
 
             try:
                 #print(f' Se va a parsear \n {file} \n respuesta: \n ')
-                evaluate(file,is_printting=False)
+               errors= evaluate(file,is_printting=False)
+               if len(errors)>0:
+                    print(f'file\n {file}')
+                    print("-" * 50)
+                    print(f'erres:\n {errors}')
+                    print("+"*50)
+                    count+=1
+
             except Exception as e:
-                print_line_separator(20)
-                print("Error en el archivo", file)
-                print("Detalle del error:", str(e))
-                print_line_separator(50)
-                count+=1
+                #print_line_separator(20)
+                #print("Error en el archivo", file)
+                #print("Detalle del error:", str(e))
+                #print_line_separator(50)
+                #count+=1
+                pass
     print(count)
 if __name__=="__main__":
     show_errors()

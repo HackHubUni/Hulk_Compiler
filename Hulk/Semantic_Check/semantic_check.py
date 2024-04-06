@@ -1,6 +1,6 @@
 from Hulk.tools.Ast import *
 from Hulk.Semantic_Check.type_node import *
-from Hulk.Semantic_Check.Scopes.hulk_global_scope import HulkGlobalScope, TypeScope, MethodScope
+from Hulk.Semantic_Check.Scopes.hulk_global_scope import HulkGlobalScope, TypeScope, MethodScope,FunctionScope
 
 
 def parents_check(initial_type, parent):
@@ -21,8 +21,13 @@ class SemanticChecker(object):
     """
 
     def __init__(self, errors=[]):
-        self.context = None
+        self.context:HulkGlobalScope = None
         self.errors = errors
+
+    def get_current_node(self):
+        return self.context.get_current_node()
+    def set_current_node(self,new_current):
+        self.context.set_current_node(new_current)
 
     @visitor.on('node')
     def visit(self, node,local_scope=None):
@@ -30,7 +35,7 @@ class SemanticChecker(object):
 
     @visitor.when(ProgramNode)
     def visit(self, node,local_scope=None):
-        self.context = HulkGlobalScope()
+        self.context = HulkGlobalScope(node)
         # LLamar a cada declariacion del metodo
         for class_declaration in node.decl_list:
             self.visit(class_declaration,local_scope)
@@ -40,6 +45,9 @@ class SemanticChecker(object):
     def visit(self, node:TypeDeclarationNode,local_scope):
         try:
            context= self.context.create_type(node)
+            #cambiar el current
+           self.set_current_node(node)
+
 
            for features in node.features:
                if isinstance(features,MethodNode):
@@ -71,6 +79,7 @@ class SemanticChecker(object):
 
 
            body=node.body
+           self.set_current_node(node)
            self.visit(body,local_scope)
 
 
@@ -82,7 +91,9 @@ class SemanticChecker(object):
     @visitor.when(DestructionAssignmentWithAttributeCallExpression)
     def visit(self, node: DestructionAssignmentWithAttributeCallExpression, local_scope: MethodScope):
         try:
+            self.set_current_node(node)
             self.visit(node.attribute_call_expression,local_scope)
+            self.set_current_node(node)
             self.visit(node.expression,local_scope)
         except SemanticError as ex:
             self.errors.append(ex.text)
@@ -90,6 +101,7 @@ class SemanticChecker(object):
     @visitor.when(DestructionAssignmentBasicExpression)
     def visit(self, node: DestructionAssignmentBasicExpression, local_scope: MethodScope):
         try:
+            self.set_current_node(node)
             self.visit(node, local_scope)
         except SemanticError as ex:
             self.errors.append(ex.text)
@@ -102,18 +114,29 @@ class SemanticChecker(object):
             self.errors.append(ex.text)
 
     @visitor.when(VarNode)
-    def visit(self, node:VarNode, local_scope: MethodScope):
+    def visit(self, node:VarNode, local_scope: MethodScope|HulkGlobalScope):
         try:
-           if not local_scope.is_var_define(str(node.value)) :
-               raise SemanticError(f'La variable {node.variable_id} no esta definida en este scope ni en ningun scope padre que redefina el método en caso de ser este heredado ')
+          name=str(node.value)
+          if isinstance(local_scope,MethodScope):
+              if not local_scope.is_var_define(name):
+                  raise SemanticError(
+                      f'La variable {name} no esta definida en este scope ni en ningun scope padre que redefina el método en caso de ser este heredado ')
+          if isinstance(local_scope,FunctionScope):
+              if not local_scope.is_var_arg(name):
+                  raise (SemanticError
+                         (f'La variable: {name} no esta definida en los argumentos de la función'))
+
+
         except SemanticError as ex:
             self.errors.append(ex.text)
 
     @visitor.when(BinaryExpressionNode)
-    def visit(self, node:BinaryExpressionNode, local_scope: MethodScope):
+    def visit(self, node:BinaryExpressionNode, local_scope: MethodScope|HulkGlobalScope):
         try:
-            self.visit(node.left)
-            self.visit(node.right)
+            self.set_current_node(node)
+            self.visit(node.left,local_scope)
+            self.set_current_node(node)
+            self.visit(node.right,local_scope)
 
         except SemanticError as ex:
             self.errors.append(ex.text)
@@ -121,7 +144,24 @@ class SemanticChecker(object):
     @visitor.when( FunctionDeclarationNode)
     def visit(self, node:FunctionDeclarationNode,global_scope:HulkGlobalScope):
         try:
-            global_scope.function_decl
+
+
+            function_scope=  global_scope.create_function(node)
+            self.set_current_node(node)
+            self.visit(node.body,function_scope)
+
+        except SemanticError as ex:
+            self.errors.append(ex.text)
+
+
+    @visitor.when(FunctionCallNode)
+    def visit(self, node:FunctionCallNode, global_scope: HulkGlobalScope):
+        try:
+            name=node.id
+            args=node.args
+            func_scope:FunctionScope=global_scope.get_FunctionScope(name)
+            if len(args)!=len(func_scope):
+                raise SemanticError(f'La el llamado a la función {name } con {len(args)} es distinto a la cantidad requerida {len(func_scope)}')
 
         except SemanticError as ex:
             self.errors.append(ex.text)
