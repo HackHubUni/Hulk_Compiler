@@ -1,12 +1,9 @@
 
 from Hulk.tools.Ast import *
-from Hulk.Semantic_Check.type_node import *
-from Hulk.Semantic_Check.Scopes.hulk_global_scope import HulkGlobalScope, TypeScope, MethodScope, FunctionScope
 from Hulk.tools.Ast import *
-from Hulk.Semantic_Check.type_node import *
+from Hulk.Semantic_Check.to_replace.type_node import *
 from typing import Self
 import copy
-from Hulk.Semantic_Check.Scopes.Base_Buildings import HulkBase
 from Hulk.Semantic_Check.basic_types.Tags.tags import *
 from enum import Enum
 import uuid

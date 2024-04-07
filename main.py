@@ -73,7 +73,9 @@ text = '''
 
 
 
-print(4);
+function cot(x:Persona) => a=x;
+
+
 
 
 

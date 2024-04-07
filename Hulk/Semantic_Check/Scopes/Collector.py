@@ -1,7 +1,6 @@
 from Hulk.Semantic_Check.Scopes.Collector_Scope import Collector_Info, HulkScope
 from Hulk.tools.Ast import *
-from Hulk.Semantic_Check.type_node import *
-from Hulk.Semantic_Check.Scopes.hulk_global_scope import HulkGlobalScope, TypeScope, MethodScope, FunctionScope
+from Hulk.Semantic_Check.to_replace.type_node import *
 
 
 class Collector(object):
