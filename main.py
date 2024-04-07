@@ -1,3 +1,4 @@
+from Hulk.Interpreter.interpreter import Interpreter
 from Hulk.Lexer.Hulk_Lexer import get_hulk_lexer
 from Hulk.Parser.Hulk_Parser import get_hulk_parser
 from Hulk.Semantic_Check.check_semantics import check_semantics
@@ -38,9 +39,11 @@ def evaluate(text: str):
         print("No hay errores de semántica")
 
 
+    #Interpreter
+    interpreter = Interpreter(scope, errors)
+    interpreter.visit(ast)
 
-
-
+    print("Finish")
 with open("./examples/basic.hulk", "r") as file:
     text: str = file.read()
     evaluate(text)

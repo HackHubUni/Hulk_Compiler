@@ -9,6 +9,9 @@ class NoneType(TypeInfo):
     def static_name() -> str:
         return "<None>"
 
+    def __str__(self):
+        return self.name
+
     def bypass(self):
         return True
 
@@ -22,6 +25,8 @@ class ErrorType(TypeInfo):
     def static_name() -> str:
         return "<Error>"
 
+    def __str__(self):
+        return self.name
     def bypass(self):
         return True
 
@@ -37,12 +42,17 @@ class ObjectType(TypeInfo):
     def static_name() -> str:
         return "Object"
 
+    def __str__(self):
+        return self.name
+
     def conforms_to(self, other: TypeInfo):
         return False  # All builtin objects conform to Object but object does not conform to any other object
 
     def bypass(self):
         return True  # All builtin objects conform to Object, so the object type can bypass the conforms check
 
+    def __str__(self):
+        return self.name
 
 class BuiltinType(TypeInfo):
     """From this types is prohibit to inherit"""
@@ -62,6 +72,8 @@ class NumType(BuiltinType):
     def static_name() -> str:
         return "Number"
 
+    def __str__(self):
+        return self.name
     def __eq__(self, other: TypeInfo):
         return other.name == self.name or isinstance(other, NumType)
 
@@ -77,6 +89,8 @@ class StringType(BuiltinType):
     def static_name() -> str:
         return "String"
 
+    def __str__(self):
+        return self.name
     def __eq__(self, other: TypeInfo):
         return other.name == self.name or isinstance(other, StringType)
 
@@ -90,8 +104,10 @@ class BoolType(BuiltinType):
 
     @staticmethod
     def static_name() -> str:
-        return "Bool"
+        return "Boolean"
 
+    def __str__(self):
+        return self.name
     def __eq__(self, other: TypeInfo):
         return other.name == self.name or isinstance(other, BoolType)
 
@@ -109,6 +125,9 @@ class VectorType(BuiltinType):
     def static_name() -> str:
         return "Vector"
 
+    def __str__(self):
+        return self.name
+
     def __eq__(self, value: object) -> bool:
         return value.name == self.name or isinstance(value, VectorType)
 
@@ -120,6 +139,9 @@ class RangeType(BuiltinType):
             [VariableInfo("start", "Number"), VariableInfo("end", "Number")]
         )
         self.set_parent(ObjectType())
+
+    def __str__(self):
+        return self.name
 
     @staticmethod
     def static_name() -> str:

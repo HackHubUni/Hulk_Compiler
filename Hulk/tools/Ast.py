@@ -105,16 +105,19 @@ class NotNode(UnaryBoolExpressionNode):
 # region BinaryStringExpressions
 class BinaryStringExpressionNode(BinaryExpressionNode):
     """This node groups all binary operations over the String type"""
+    def __init__(self, left: ExpressionNode, right: ExpressionNode):
+        super().__init__(left, right)
 
-    pass
 
 
 class ConcatNode(BinaryStringExpressionNode):
-    pass
+    def __init__(self, left: ExpressionNode, right: ExpressionNode):
+        super().__init__(left, right)
 
 
 class ConcatWithSpaceNode(BinaryStringExpressionNode):
-    pass
+    def __init__(self, left: ExpressionNode, right: ExpressionNode):
+        super().__init__(left, right)
 
 
 # endregion
@@ -124,31 +127,43 @@ class ConcatWithSpaceNode(BinaryStringExpressionNode):
 class BinaryNumExpressionNode(BinaryExpressionNode):
     """This node groups all binary operations over the Num type"""
 
-    pass
+    def __init__(self, left: ExpressionNode, right: ExpressionNode):
+        super().__init__(left, right)
 
 
 class PlusNode(BinaryNumExpressionNode):
-    pass
+    def __init__(self, left: ExpressionNode, right: ExpressionNode):
+        super().__init__(left, right)
 
 
 class MinusNode(BinaryNumExpressionNode):
-    pass
+      def __init__(self, left: ExpressionNode, right: ExpressionNode):
+        super().__init__(left, right)
+
 
 
 class StarNode(BinaryNumExpressionNode):
-    pass
+      def __init__(self, left: ExpressionNode, right: ExpressionNode):
+        super().__init__(left, right)
+
 
 
 class DivNode(BinaryNumExpressionNode):
-    pass
+      def __init__(self, left: ExpressionNode, right: ExpressionNode):
+        super().__init__(left, right)
+
 
 
 class ModNode(BinaryNumExpressionNode):
-    pass
+      def __init__(self, left: ExpressionNode, right: ExpressionNode):
+        super().__init__(left, right)
+
 
 
 class PowNode(BinaryNumExpressionNode):
-    pass
+      def __init__(self, left: ExpressionNode, right: ExpressionNode):
+        super().__init__(left, right)
+
 
 
 # endregion
@@ -158,39 +173,57 @@ class PowNode(BinaryNumExpressionNode):
 class BinaryBoolExpressionNode(BinaryExpressionNode):
     """This node groups all binary operations over the Bool type"""
 
-    pass
+    def __init__(self, left: ExpressionNode, right: ExpressionNode):
+        super().__init__(left, right)
+
 
 
 class OrNode(BinaryBoolExpressionNode):
-    pass
+      def __init__(self, left: ExpressionNode, right: ExpressionNode):
+        super().__init__(left, right)
+
 
 
 class AndNode(BinaryBoolExpressionNode):
-    pass
+      def __init__(self, left: ExpressionNode, right: ExpressionNode):
+        super().__init__(left, right)
+
 
 
 class EqualNode(BinaryBoolExpressionNode):
-    pass
+      def __init__(self, left: ExpressionNode, right: ExpressionNode):
+        super().__init__(left, right)
+
 
 
 class NotEqualNode(BinaryBoolExpressionNode):
-    pass
+      def __init__(self, left: ExpressionNode, right: ExpressionNode):
+        super().__init__(left, right)
+
 
 
 class LessNode(BinaryBoolExpressionNode):
-    pass
+      def __init__(self, left: ExpressionNode, right: ExpressionNode):
+        super().__init__(left, right)
+
 
 
 class GreaterNode(BinaryBoolExpressionNode):
-    pass
+      def __init__(self, left: ExpressionNode, right: ExpressionNode):
+        super().__init__(left, right)
+
 
 
 class LeqNode(BinaryBoolExpressionNode):
-    pass
+      def __init__(self, left: ExpressionNode, right: ExpressionNode):
+        super().__init__(left, right)
+
 
 
 class GeqNode(BinaryBoolExpressionNode):
-    pass
+      def __init__(self, left: ExpressionNode, right: ExpressionNode):
+        super().__init__(left, right)
+
 
 
 # endregion

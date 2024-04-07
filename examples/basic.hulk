@@ -17,5 +17,9 @@ type PolarPoint inherits Point {
 
 
 
+{
+// print(3+3);
 
-print(3);
+// print(3/3);
+print(true);
+}

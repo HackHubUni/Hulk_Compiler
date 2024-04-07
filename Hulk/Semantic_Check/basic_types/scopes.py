@@ -161,6 +161,9 @@ class HulkScopeLinkedNode:
             raise SemanticError(f"The protocol ({protocol_name}) is not defined")
         return self.parent.get_protocol(protocol_name)
 
+
+    def get_all_types_names(self)->list[str]:
+        return list(self.scope.types.keys())
     def __str__(self):
         types_str = (
             "Types: {\n\t"
