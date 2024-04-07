@@ -1,3 +1,4 @@
+
 from Hulk.tools.Ast import *
 from Hulk.Semantic_Check.type_node import *
 from Hulk.Semantic_Check.Scopes.hulk_global_scope import HulkGlobalScope, TypeScope, MethodScope, FunctionScope
@@ -6,40 +7,53 @@ from Hulk.Semantic_Check.type_node import *
 from typing import Self
 import copy
 from Hulk.Semantic_Check.Scopes.Base_Buildings import HulkBase
+from Hulk.Semantic_Check.basic_types.Tags.tags import *
 from enum import Enum
 import uuid
 
 
-class TagsEnum(Enum):
-    IndexingNode = 28
-    VectorNode = 27
-    WhileNode = 26
-    ElifNodeAtom = 25
-    IfNode = 24
-    ForExpressionNode = 23
-    DownCastNode = 22
-    InstantiateNode = 21
-    ProtocolMethod = 20
-    LetNode = 19
-    DynTestNode = 18
-    Global = 0
-    Protocol = 1
-    Type = 2
-    Protocol_Method = 3
-    Type_Method = 4
-    Attr_Call = 5
-    Var_Def = 6
-    MethodCallWithExpressionNode = 7
-    MethodCallWithIdentifierNode = 8
-    DestructionAssignmentWithAttributeCallExpression = 9
-    DestructionAssignmentBasicExpression = 10
-    Function = 11
-    Assign = 12
-    FunctionCall = 13
-    BINARY_EXPRESSION = 14
-    UNARY_EXPRESSION = 15
-    LITERAL_EXPRESSION = 16
-    ExpressionBlockNode = 17
+class Unary_Container:
+
+    def __init__(self, unary: UnaryExpressionNode,):
+        self.unary = unary
+        self.is_literal=self.get_literal_Type_()
+        self.is_var=self.is_var_()
+        self.is_Not=self.is_Not_()
+        self.is_negative=self.is_negative_()
+
+
+
+
+    def is_Not_(self)->bool:
+       if isinstance(self.unary,NotNode):
+           return  True
+       return False
+
+
+    def get_literal_Type_(self)->Basic_Types:
+        """
+        Si es un literal devuelve el tipo basico sino uknown
+        """
+        if isinstance(self.unary, LiteralExpressionNode):
+            if isinstance(self.unary, LiteralBoolNode):
+                return  Basic_Types.Boolean
+            elif isinstance(self.unary, LiteralNumNode):
+                return  Basic_Types.Int
+            elif isinstance(self.unary, LiteralStrNode):
+                return  Basic_Types.String
+        else:
+                return Basic_Types.UNKNOWN
+
+    def is_var_(self)->bool:
+        if isinstance(self.unary, VarNode):
+            return  True
+        return False
+    def is_negative_(self)->bool:
+        if isinstance(self.unary, NegativeNode):
+            return  True
+        return False
+
+
     # Agrega más tags según sea necesario
 
 
@@ -48,7 +62,7 @@ class HulkScope:
 
         self.name: str = name
         # Chequear que el array no sea nulo o vacio
-        if name is not None and name != "":
+        if name is None or name == "":
             self.name = f' guid: {str(uuid.uuid4())}'
         self.tag = tag
         self.father: HulkScope = father
@@ -68,11 +82,21 @@ class HulkScope:
         self.procotocols_inherence_methods: dict[str, ProtocolMethodNode] = {}
 
         self.args_: dict[str, VarDefNode] = {}
+        #Para conocer el valor que tengo
+
 
         # Numero para indexar
         self.index_value_for_indexing: int = -2
+        # Referencia al tipo que pertenece esto si no esta declarado
+        self.Type_Var=TagsEnum.Null
 
-        
+
+        #Unary_Types
+        self.unary_value: Unary_Container = None
+
+        #para el let
+        self.let_: dict[str, LetNode] = {}
+
 
     def get_scope_child_(self, name: str, tag: TagsEnum) -> Self:
         # new = copy.deepcopy(self)
@@ -188,7 +212,16 @@ class HulkScope:
                 raise SemanticError(f'Error para indexar {index} tiene que ser positivo')
             self.index_value_for_indexing = index
 
+    def set_Unary(self, unary:UnaryExpressionNode):
+        self.unary_value = Unary_Container(unary)
 
+
+
+
+
+
+    #def set_literal(self, literal: LiteralExpressionNode):
+    #    self.value = literal
 class Collector_Info(HulkScope):
     def __init__(self):
         super().__init__(father=None, tag=TagsEnum.Global, name="Base_Scope")
@@ -197,6 +230,7 @@ class Collector_Info(HulkScope):
         self.types_: dict[str, HulkScope] = {}
         self.functions_decl_: dict[str, HulkScope] = {}
         self.protocols_methods: dict[str, ProtocolMethodNode] = {}
+
 
     def __get_new_child_scope(self, name: str, father: HulkScope, tag: TagsEnum) -> HulkScope:
         new_scope = HulkScope(name=name, father=father, tag=tag)
@@ -335,18 +369,19 @@ class Collector_Info(HulkScope):
         Desde el contexto global se añade un nuevo UnaryExpression
         """
 
-        new_scope = scope.get_scope_child_("", TagsEnum.UNARY_EXPRESSION)
+        new_scope = scope.get_scope_child_(f"Unary: {unary_expr.value}", TagsEnum.UNARY_EXPRESSION)
+        new_scope.set_Unary(unary_expr)
 
         return new_scope
 
-    def add_literal_expression(self, literal_expr: LiteralExpressionNode, scope: HulkScope) -> HulkScope:
-        """
-        Desde el contexto global se añade un nuevo LiteralExpression
-        """
+   #def add_literal_expression(self, literal_expr: LiteralExpressionNode, scope: HulkScope) -> HulkScope:
+   #    """
+   #    Desde el contexto global se añade un nuevo LiteralExpression
+   #    """
 
-        new_scope = scope.get_scope_child_("", TagsEnum.LITERAL_EXPRESSION)
+   #    new_scope = scope.get_scope_child_("", TagsEnum.LITERAL_EXPRESSION)
 
-        return new_scope
+   #    return new_scope
 
     def add_expression_block(self, expr_block: ExpressionBlockNode, scope: HulkScope) -> HulkScope:
         """
@@ -370,6 +405,12 @@ class Collector_Info(HulkScope):
         """
         Desde el contexto global se añade un nuevo Let
         """
+        for ass in let.assign_list:
+            name= ass.var.id
+            if name in self.let_:
+                raise SemanticError(f'No pueden existir dos let con el mismo nombre {name}')
+            self.let_[name] = let
+
 
         new_scope = scope.get_scope_child_("", TagsEnum.LetNode)
 
@@ -389,8 +430,8 @@ class Collector_Info(HulkScope):
         """
         Desde el contexto global se añade un nuevo DownCast
         """
-
-        new_scope = scope.get_scope_child_(f'downcast: {downcast.type_id}', TagsEnum.DownCastNode)
+        name=downcast.type
+        new_scope = scope.get_scope_child_(f'downcast: {name}', TagsEnum.DownCastNode)
 
         new_scope.set_downcast(downcast)
 

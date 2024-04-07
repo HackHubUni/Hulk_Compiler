@@ -95,7 +95,6 @@ class NegativeNode(UnaryNumExpressionNode):
 class UnaryBoolExpressionNode(UnaryExpressionNode):
     pass
 
-
 class NotNode(UnaryBoolExpressionNode):
     pass
 

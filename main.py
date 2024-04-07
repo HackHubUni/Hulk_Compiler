@@ -49,7 +49,7 @@ def evaluate(text:str):
         #collector = SemanticChecker(errors)
         #collector.visit(ast)
         collector=Collector(errors)
-        collector.visit(ast)
+        print(collector.visit(ast))
         a=collector.context
         print(a)
         print(errors)
@@ -70,8 +70,10 @@ def evaluate(text:str):
 
 
 text = ''' 
-function tan(x) => x / x;
-function cot(x) => 1 / tan(x);
+
+
+
+print(4);
 
 
 
