@@ -71,9 +71,7 @@ def evaluate(text:str):
 
 text = ''' 
 
-
-
-function cot(x:Persona) => a=x;
+print(sin(2 * PI) );
 
 
 

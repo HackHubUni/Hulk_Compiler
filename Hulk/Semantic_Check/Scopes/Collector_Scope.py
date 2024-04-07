@@ -1,11 +1,7 @@
-
-from Hulk.tools.Ast import *
 from Hulk.tools.Ast import *
 from Hulk.Semantic_Check.to_replace.type_node import *
+from Hulk.Semantic_Check.Tags.tags import *
 from typing import Self
-import copy
-from Hulk.Semantic_Check.basic_types.Tags.tags import *
-from enum import Enum
 import uuid
 
 
@@ -438,6 +434,7 @@ class Collector_Info(HulkScope):
         """
         Desde el contexto global se añade un nuevo If
         """
+
 
         new_scope = scope.get_scope_child_("", TagsEnum.IfNode)
 
