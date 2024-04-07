@@ -26,6 +26,7 @@ class Gramarlr1:
         Protocol_Declaration, Protocol_Methods, Full_Type_Arguments, Fully_Typed_Tail, Type_List = G.NonTerminals(
             'ProtDecl ProtMethods FullyTypedArgs FullyTypedTail TypeList')
 
+        Body_Arrow=G.NonTerminal("BodyArrow")
         number_, string_, bool_, const_, self_, id_, type_id_ = G.Terminals('number string bool const self id type_id')
         let_, in_, if_, elif_, else_, while_, for_, as_, is_, new_ = G.Terminals('let in if elif else while for as is new')
         function_, type_, inherits_, protocol_, extends_ = G.Terminals('function type inherits protocol extends')
@@ -39,7 +40,11 @@ class Gramarlr1:
 
         # self_=G.Terminal("self")
 
+        comments=G.Terminal("comments")
+
+
         Program %= Declaration_List + Statment, lambda h, s: ProgramNode(s[1], s[2])
+        Program %= Declaration_List, lambda h, s: ProgramNode(s[1], [])
 
         Declaration_List %= Declaration + Declaration_List, lambda h, s: [s[1]] + s[2]
         Declaration_List %= G.Epsilon, lambda h, s: []
@@ -155,22 +160,34 @@ class Gramarlr1:
         Closed_Expression %= o_par_ + Expresion + c_par_, lambda h, s: s[2]
 
         # Atomic %= id_ + dot_ + id_ + o_par_ + Expression_List + c_par_, lambda h, s: MethodCallNode(s[1], s[3], s[5])  # TODO: This was the original
+        #Llamar con el self
         Method_Call %= self_ + dot_ + id_ + o_par_ + Expression_List + c_par_ + Method_Call_List, lambda h, s: [MethodCallWithIdentifierNode(s[1], s[3], s[5])] + s[7]   # self.something()
+        #llamar una funcion de otro tipo en un tipo
         Method_Call %= Attr_Call + dot_ + id_ + o_par_ + Expression_List + c_par_ + Method_Call_List, lambda h, s: [MethodCallWithExpressionNode(s[1], s[3], s[5])] + s[7]  # self.x.something()
+        #llamar un metodo normal
         Method_Call %= id_ + dot_ + id_ + o_par_ + Expression_List + c_par_ + Method_Call_List, lambda h, s: [MethodCallWithIdentifierNode(s[1], s[3], s[5])] + s[7]    # x.something()
+        #llamada desde una fucnion normal
         Method_Call %= Function_Call + dot_ + id_ + o_par_ + Expression_List + c_par_ + Method_Call_List, lambda h, s: [MethodCallWithExpressionNode(s[1], s[3], s[5])] + s[7]   # get_default_triangle().get_point(1).get_norm()
+        #llamada con expresion node
         Method_Call %= Closed_Expression + dot_ + id_ + o_par_ + Expression_List + c_par_ + Method_Call_List, lambda h, s: [MethodCallWithExpressionNode(s[1], s[3], s[5])] + s[7]   # (expression).get_something()
-
+        #TODO: revisar para quitar lo de abajo
         Method_Call_List %= dot_ + id_ + o_par_ + Expression_List + c_par_ + Method_Call_List, lambda h, s: [MethodCallWithIdentifierNode('result', s[2], s[4])] + s[6]
         Method_Call_List %= G.Epsilon, lambda h, s: []
 
 
         Func_Declaration %= function_ + id_ + o_par_ + Argument_List + c_par_ + Body, lambda h, s: FunctionDeclarationNode(s[2], s[4], s[6])
+       #TODO:new Func_Declaration %= id_ + o_par_ + Argument_List + c_par_ +arrow_+, lambda h, s: FunctionDeclarationNode(s[2], s[4], s[6])
         Func_Declaration %= function_ + id_ + o_par_ + Argument_List + c_par_ + colon_ + type_id_ + Body, lambda h, s: FunctionDeclarationNode(s[2],
                                                                                                                                                s[4],
-                                                                                                                                               s[8],
+                                                                                                                                s[8],
                                                                                                                                                s[7])
 
+        #TODO:NEW
+        #Body_Arrow %= Statment, lambda h, s: s[1]
+        #Body_Arrow %=o_brace_ + StatList + c_brace_, lambda h, s: s[2]
+
+
+        #####
         Body %= arrow_ + Statment, lambda h, s: s[2]
         Body %= o_brace_ + StatList + c_brace_, lambda h, s: s[2]
 
@@ -196,7 +213,8 @@ class Gramarlr1:
         Feature_List %= id_ + o_par_ + Argument_List + c_par_ + colon_ + type_id_ + Body + Feature_List, lambda h, s: [MethodNode(s[1],
                                                                                                                    s[3],
                                                                                                                    s[7],
-                                                                                                                   s[6])] +  s[8]
+                                                                                                                   s[
+                                                                                                                       6])] +  s[8]
 
 
         Feature_List %= G.Epsilon, lambda h, s: []

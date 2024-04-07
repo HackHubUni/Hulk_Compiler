@@ -1,4 +1,4 @@
-from Hulk.Semantic_Check.basic_types.instance_types import VariableInfo
+from Hulk.Semantic_Check.basic_types.instance_types import VariableInfo, TypeInstance
 from Hulk.tools.Ast import FunctionDeclarationNode
 from Hulk.Semantic_Check.basic_types.semantic_types import FunctionInfo
 
@@ -9,11 +9,11 @@ from random import random
 
 class BuiltinFunction(FunctionInfo):
     def __init__(
-        self,
-        name: str,
-        param_names: list[VariableInfo],
-        return_type: str,
-        function_pointer: FunctionDeclarationNode,
+            self,
+            name: str,
+            param_names: list[VariableInfo],
+            return_type: str,
+            function_pointer: FunctionDeclarationNode,
     ):
         super().__init__(name, param_names, return_type, function_pointer)
 
@@ -31,9 +31,10 @@ class SinFunction(BuiltinFunction):
 
     def result(self):
         # Calculate the sin of the value
-        argument = self.arguments[0].value
+        argument: VariableInfo = self.arguments[0]
+        value:TypeInstance=argument.value
         result = VariableInfo("result", "Number")
-        result.value = math.sin(argument.value)
+        result.value = math.sin(value)
         return result
 
 
@@ -112,6 +113,20 @@ class RandomFunction(BuiltinFunction):
         return result
 
 
+
+class PrintFunction(BuiltinFunction):
+    """This Builtin Function prints a value"""
+
+    def __init__(self):
+        super().__init__("print", [VariableInfo("x", "Object")], "String", None)
+
+    def result(self):
+        # Print the value
+        argument = self.arguments[0].value
+        print(argument.value)
+        return None
+
+
 builtin_functions: list[str] = [
     SinFunction().name,
     CosFunction().name,
@@ -119,4 +134,5 @@ builtin_functions: list[str] = [
     LogFunction().name,
     ExponentialFunction().name,
     RandomFunction().name,
+    PrintFunction().name
 ]

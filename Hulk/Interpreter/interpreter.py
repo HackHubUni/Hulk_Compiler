@@ -16,7 +16,7 @@ class Interpreter(object):
     def visit(self, node: ProgramNode):
 
         try:
-            for expression in node.expressions:
+            for expression in node.expr:
                 self.visit(expression)
         except SemanticError as e:
            self.errors.append(e)
@@ -25,7 +25,7 @@ class Interpreter(object):
     @visitor.when(FunctionCallNode)
     def visit(self, node: FunctionCallNode):
         try:
-             pass
+             
         except SemanticError as e:
            self.errors.append(e)
 

@@ -30,6 +30,7 @@ def add_basic_functions(scope: HulkScopeLinkedNode):
     scope.define_function(LogFunction())
     scope.define_function(ExponentialFunction())
     scope.define_function(RandomFunction())
+    scope.define_function(PrintFunction())
 
 
 def add_basic_constants(scope: HulkScopeLinkedNode):
