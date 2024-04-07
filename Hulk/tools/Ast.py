@@ -237,7 +237,7 @@ class DynTestNode(ExpressionNode):  # This is for expression like --> Expression
         type,
     ):
         self.expr = expr
-        self.type = type
+        self.type:str = type
 
 
 # endregion

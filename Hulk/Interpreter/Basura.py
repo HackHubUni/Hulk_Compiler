@@ -22,8 +22,16 @@ DynamicEnum = enum.Enum('DynamicEnum', tags)
 # Obtener un tag dinámicamente
 tag_name = 'TAG1'
 tag = getattr(DynamicEnum, tag_name)
-taf= getattr(DynamicEnum, 'TAG')
+taf= getattr(DynamicEnum, 'TAG1')
+
+
 print(tag==taf)
+
+
+
 print(type(tag))
 print(tag)  # Output: DynamicEnum.TAG1
 
+
+a=4
+print(-a)

@@ -1,6 +1,8 @@
+from Hulk.Interpreter.utils import *
 from Hulk.Semantic_Check.basic_types.semantic_errors import *
 from Hulk.tools.Ast import *
 from typing import Self
+
 
 
 class VariableInfo:
@@ -18,6 +20,10 @@ class VariableInfo:
         """Returns a Clone of this VariableInfo"""
         return VariableInfo(self.name, self.type)
 
+    def set_value(self, value, type: "TypeInstance"):
+        self.value = value
+        self.type = type
+
     def __eq__(self, __value: object) -> bool:
         if not isinstance(__value, VariableInfo):
             return False
@@ -34,10 +40,10 @@ class TypeInstance:
     """This class represents an instance of a Type"""
 
     def __init__(
-        self,
-        type_id: str,
-        variables: list[VariableInfo],
-        parent_instance: Self = None,
+            self,
+            type_id: str | Dynamic_Types,
+            variables: list[VariableInfo],
+            parent_instance: Self = None,
     ):  # TODO: Add the parent instance as an argument when creating the type
         self.type_id: str = type_id
         """The name of the type"""

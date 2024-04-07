@@ -121,7 +121,7 @@ class TypeCollector:
                 )
             )
             node.function_name = get_unique_name_with_guid(node.function_name)
-        elif scope.function_defined(node.function_name):
+        elif scope.is_function_defined(node.function_name):
             self.errors.append(
                 SemanticError(f"Function {node.function_name} is already defined")
             )

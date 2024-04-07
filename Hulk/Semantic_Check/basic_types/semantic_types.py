@@ -240,6 +240,11 @@ class FunctionInfo:
             self.return_type,
             self.function_pointer,
         )
+    def get_arguments_name(self)->list[str]:
+        lis=[]
+        for val in self.arguments:
+            lis.append(val.name)
+        return lis
 
     def __str__(self):
         output = f"function {self.name}"

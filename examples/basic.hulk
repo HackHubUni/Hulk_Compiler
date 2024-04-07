@@ -1,25 +1,22 @@
 
-type Point {
-    x = 0;
-    y = 0;
 
-    getX() => self.x;
-    getY() => self.y;
+function caca(x,y) => x/y;
 
-    setX(x) => self.x := x;
-    setY(y) => self.y := y;
-}
-
-type PolarPoint inherits Point {
-    rho() => sqrt(self.getX() ^ 2 + self.getY() ^ 2);
-   // ..
-}
+print(caca(4,1));
 
 
 
-{
+
+
+
+
 // print(3+3);
 
 // print(3/3);
-print(true);
-}
+// print(true);
+
+//print(3 is Number);
+
+//print( !false);
+
+//print(PI);

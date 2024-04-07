@@ -1,4 +1,5 @@
 from Hulk.Semantic_Check.basic_types.semantic_types import *
+import copy
 
 
 class HulkScope:
@@ -16,6 +17,9 @@ class HulkScope:
         """This is a dictionary with all the function declarations.
         The name of the function as key and the FunctionInfo as value"""
 
+    def clone(self) -> Self:
+        return copy.deepcopy(self)
+
 
 class HulkScopeLinkedNode:
     def __init__(self, parent: Self = None):
@@ -27,7 +31,7 @@ class HulkScopeLinkedNode:
         """This is the scope of this node"""
 
     def define_variable(
-        self, variable_info: VariableInfo, clone: bool = False
+            self, variable_info: VariableInfo, clone: bool = False
     ) -> VariableInfo:
         """Create a new variable in the actual scope"""
         if variable_info.name in self.scope.local_variables:
@@ -62,8 +66,8 @@ class HulkScopeLinkedNode:
         return value_name in self.scope.local_variables
 
     def define_type(
-        self,
-        type_name: str,
+            self,
+            type_name: str,
     ) -> TypeInfo:
         """Create a new type in the actual scope"""
         if type_name in self.scope.types:
@@ -73,7 +77,7 @@ class HulkScopeLinkedNode:
         return new_type
 
     def define_type_by_instance(
-        self, type_info: TypeInfo, clone: bool = False
+            self, type_info: TypeInfo, clone: bool = False
     ) -> TypeInfo:
         """Create a new type in the actual scope"""
         if type_info.name in self.scope.types:
@@ -99,7 +103,7 @@ class HulkScopeLinkedNode:
         return self.parent.get_type(name)
 
     def define_function(
-        self, function_info: FunctionInfo, clone: bool = False
+            self, function_info: FunctionInfo, clone: bool = False
     ) -> FunctionInfo:
         """Creates a new function in the context"""
         if function_info.name in self.scope.functions:
@@ -120,13 +124,13 @@ class HulkScopeLinkedNode:
             )
         return self.parent.get_function(function_name)
 
-    def function_defined(self, function_name: str) -> bool:
+    def is_function_defined(self, function_name: str) -> bool:
         """Returns True if the function is defined in the context"""
         if function_name in self.scope.functions:
             return True
         if not self.parent:
             return False
-        return self.parent.function_defined(function_name)
+        return self.parent.is_function_defined(function_name)
 
     def define_protocol(self, name: str):
         """This method defines a new protocol if it has not been added before to the scope"""
@@ -161,27 +165,27 @@ class HulkScopeLinkedNode:
             raise SemanticError(f"The protocol ({protocol_name}) is not defined")
         return self.parent.get_protocol(protocol_name)
 
-
-    def get_all_types_names(self)->list[str]:
+    def get_all_types_names(self) -> list[str]:
         return list(self.scope.types.keys())
+
     def __str__(self):
         types_str = (
-            "Types: {\n\t"
-            + "\n\t".join(
-                y for x in self.scope.types.values() for y in str(x).split("\n")
-            )
-            + "\n}"
+                "Types: {\n\t"
+                + "\n\t".join(
+            y for x in self.scope.types.values() for y in str(x).split("\n")
+        )
+                + "\n}"
         )
         func_str = (
-            "Functions: {\n\t"
-            + "\n\t".join(y for x in self.function.values() for y in str(x).split("\n"))
-            + "\n}"
+                "Functions: {\n\t"
+                + "\n\t".join(y for x in self.function.values() for y in str(x).split("\n"))
+                + "\n}"
         )
         var_str = (
-            "Variables: {\n\t"
-            + "\n\t".join(
-                y for x in self.scope.local_variables.keys() for y in str(x).split("\n")
-            )
-            + "\n}"
+                "Variables: {\n\t"
+                + "\n\t".join(
+            y for x in self.scope.local_variables.keys() for y in str(x).split("\n")
+        )
+                + "\n}"
         )
         return f"{types_str} \n  {func_str} \n {var_str}"
