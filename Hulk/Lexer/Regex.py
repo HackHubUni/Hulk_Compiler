@@ -19,7 +19,7 @@ def get_normal_regex(normal_regex: str):
         List[Tuple[Terminal, str]]: A list of tuples, where each tuple contains a `Terminal` object and the corresponding regex pattern.
     """
     lis = normal_regex.split()
-    hulk_regex: list[(Terminal, str)] = [(s(val), val) for val in lis]
+    hulk_regex: [(Terminal, str)] = [(s(val), val) for val in lis]
     return hulk_regex
 
 
@@ -38,7 +38,7 @@ normal_regex += "  bool  => "
 normal_regex += " self "
 
 # the result
-regex_list: list[(Terminal, str)] = get_normal_regex(normal_regex)
+regex_list: [(Terminal, str)] = get_normal_regex(normal_regex)
 
 assert not " " in regex_list, "Existes espacios en blanco como regex "
 
@@ -50,10 +50,6 @@ ru = Regex_Utils()
 str_ = s("string")
 str_regex = ru.string
 regex_list.append((str_, str_regex))
-# self token
-# self_ = s("self")
-# regex_list.append((self_, 'self'))
-
 # Id
 id_ = s("id")
 id_regex = ru.id
@@ -73,6 +69,11 @@ regex_list.append((const_, ru.const))
 # type_id
 type_id_ = s("type_id")
 regex_list.append((type_id_, ru.type_id))
+#comments
+comments=s("comments")
+comments_regex=ru.comments
+regex_list.append((comments,comments_regex))
+
 
 
 
