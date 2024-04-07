@@ -18,18 +18,50 @@ class TypeInference:
         self.errors = errors if errors is not None and len(errors) >= 0 else []
         """The list of errors previously found in the program"""
 
-    def expects(
+    def visit_expects(
         self,
         node: ExpressionNode,
         scope: HulkScopeLinkedNode,
         expected_return_value: TypeInfo,
         from_where: str,
     ) -> TypeInfo:
-        """This function calls the visit on the node given. But is useful to call this instead of the visit in cases
-        where there exist an expected return type from the visit. This will be used by the operators in the language"""
-        pass
+        """This function calls the visit on the node given. But is useful to call this instead of the visit function in the cases
+        where there exist an expected return type from the visit. This will be used by the operators in the language
+        and by the function and method arguments
+        """
+        # TODO: Think about the case of expected_return_value been the NoneType
+        expression_type = self.visit(node, scope, from_where)
+        if isinstance(expression_type, ErrorType):
+            return expression_type
+        if isinstance(node, FunctionCallNode):
+            try:
+                function_info = scope.get_function(node.function_id)
+                if isinstance(function_info, BuiltinFunction):
+                    return expression_type
+                func_decl = function_info.function_pointer
+                if scope.get_type(func_decl.return_type):
+                    pass
+            except:
+                pass
+        elif isinstance(node, MethodCallWithIdentifierNode):
+            pass
+        elif isinstance(node, MethodCallWithExpressionNode):
+            pass
+        elif isinstance(node, VarNode):
+            pass
+        elif isinstance(node, VarDefNode):
+            pass
+        # AttrCall is not analyzed here because always have a type when the TypeDeclarationNode is processed.
+        if not expression_type.conforms_to(expected_return_value):
+            error = SemanticError(
+                f"{from_where}expects a type '{expected_return_value.name}', but '{expression_type}' was received, and it's not a subtype"
+            )
+            self.errors.append(error)
+        return expression_type
 
-    def check_argument_types(
+    def check_argument_types[
+        T
+    ](
         self,
         argument_types: list[TypeInfo],
         original_arguments_defs: list[VarDefNode],
@@ -90,7 +122,7 @@ class TypeInference:
         elif isinstance(node, LiteralBoolNode):
             return BoolType()
         # everything else will be taken as a string
-        return LiteralStrNode()
+        return StringType()
 
     @visitor.when(VarNode)
     def visit(
@@ -107,7 +139,10 @@ class TypeInference:
             )
             self.errors.append(error)
             return ErrorType()
-        return scope.get_variable(node.value).type
+        variable: VariableInfo = scope.get_variable(node.value)
+        return scope.get_type(
+            variable.type
+        )  # TODO: Check if there is possible that this returns an error
 
     # endregion
 
@@ -120,14 +155,15 @@ class TypeInference:
         """This node represents the negative prefix operator. It will return a number"""
         from_where += "when calling the negative operator, "
         type_info = self.visit(node.value, scope, from_where)
-        if not isinstance(type_info, NumType):
+        expected_type: TypeInfo = NumType()
+        if not type_info.conforms_to(NumType()):
             error = SemanticError(
-                f"{from_where}the expression must have type {NumType.static_name()} but it is of them is of another type"
+                f"{from_where}the expression must have type {expected_type.name} but it is of type '{type_info.name}'"
             )
             self.errors.append(error)
             return ErrorType()
 
-        return type_info
+        return expected_type
 
     @visitor.when(NotNode)
     def visit(
@@ -139,14 +175,15 @@ class TypeInference:
         """This node represents the not operator. It will return a boolean"""
         from_where += "when calling the not operator, "
         type_info = self.visit(node.value, scope, from_where)
-        if not isinstance(type_info, BoolType):
+        expected_type: TypeInfo = BoolType()
+        if not type_info.conforms_to(expected_type):
             error = SemanticError(
-                f"{from_where}the expression must have type {BoolType.static_name()} but it is of them is of another type"
+                f"{from_where}the expression must have type {expected_type.name} but it is of type '{type_info.name}'"
             )
             self.errors.append(error)
             return ErrorType()
 
-        return type_info
+        return expected_type
 
     @visitor.when(BinaryStringExpressionNode)
     def visit(
@@ -159,15 +196,22 @@ class TypeInference:
         from_where += "when calling the concatenation operator, "
         left_type = self.visit(node.left, scope, from_where)
         right_type = self.visit(node.right, scope, from_where)
-        if not isinstance(left_type, LiteralStrNode) or not isinstance(
-            right_type, LiteralStrNode
-        ):
+        expected_type: TypeInfo = StringType()
+        return_type: TypeInfo = expected_type
+        if not left_type.conforms_to(expected_type):
             error = SemanticError(
-                f"{from_where}the expressions on each side must have type {LiteralStrNode.static_name()} but one of them is of another type"
+                f"{from_where}the expressions on the left side must have type {expected_type.name} but is of type '{left_type.name}'"
             )
             self.errors.append(error)
-            return ErrorType()
-        return LiteralStrNode()
+            return_type = ErrorType()
+        if not right_type.conforms_to(expected_type):
+            error = SemanticError(
+                f"{from_where}the expressions on the right side must have type {expected_type.name} but is of type '{right_type.name}'"
+            )
+            self.errors.append(error)
+            return_type = ErrorType()
+
+        return return_type
 
     @visitor.when(BinaryNumExpressionNode)
     def visit(
@@ -189,13 +233,21 @@ class TypeInference:
             from_where += "when calling the power operator, "
         left_type = self.visit(node.left, scope, from_where)
         right_type = self.visit(node.right, scope, from_where)
-        if not isinstance(left_type, NumType) or not isinstance(right_type, NumType):
+        expected_type: TypeInfo = NumType()
+        return_type = expected_type
+        if not left_type.conforms_to(expected_type):
             error = SemanticError(
-                f"{from_where}the expressions on each side must have type {NumType.static_name()} but one of them is of another type"
+                f"{from_where}the expression on the left side must have type {expected_type.name} but is of type '{left_type.name}'"
             )
             self.errors.append(error)
-            return ErrorType()
-        return NumType()
+            return_type = ErrorType()
+        if not right_type.conforms_to(expected_type):
+            error = SemanticError(
+                f"{from_where}the expression on the right side must have type {expected_type.name} but is of type '{right_type.name}'"
+            )
+            self.errors.append(error)
+            return_type = ErrorType()
+        return return_type
 
     @visitor.when(BinaryBoolExpressionNode)
     def visit(
@@ -224,13 +276,21 @@ class TypeInference:
             from_where += "when calling the greater equal operator, "
         left_type = self.visit(node.left, scope, from_where)
         right_type = self.visit(node.right, scope, from_where)
-        if not isinstance(left_type, BoolType) or not isinstance(right_type, BoolType):
+        expected_type: TypeInfo = BoolType()
+        return_type: TypeInfo = expected_type
+        if not left_type.conforms_to(expected_type):
             error = SemanticError(
-                f"{from_where}the expressions on each side must have type {BoolType.static_name()} but one of them is of another type"
+                f"{from_where}the expression on the left side must be of type '{expected_type.name}' but is of type '{left_type.name}'"
             )
             self.errors.append(error)
-            return ErrorType()
-        return BoolType()
+            return_type = ErrorType()
+        if not right_type.conforms_to(expected_type):
+            error = SemanticError(
+                f"{from_where}the expression on the right side must be of type '{expected_type.name}' but is of type '{right_type.name}'"
+            )
+            self.errors.append(error)
+            return_type = ErrorType()
+        return return_type
 
     @visitor.when(DynTestNode)
     def visit(
@@ -241,8 +301,8 @@ class TypeInference:
     ) -> TypeInfo:
         """This node represents the dynamic test operator. It will return a boolean"""
         from_where += "when calling the dynamic test operator, "
-        expression_type = self.visit(node.expr, scope, from_where)
-        expected_type = scope.get_type(node.type)
+        expression_type: TypeInfo = self.visit(node.expr, scope, from_where)
+        expected_type: TypeInfo = scope.get_type(node.type)
         if not expression_type.conforms_to(expected_type):
             error = SemanticError(
                 f"{from_where}the right side type must conform to the left side type"
@@ -261,9 +321,16 @@ class TypeInference:
     ) -> TypeInfo:
         """This node represents the call of an attribute of an object. Only in the 'self' instance"""
         from_where += f"when calling the attribute with name '{node.variable_id}', "
-        object_reference = scope.get_variable("self")
-        object_type = scope.get_type(object_reference.type)
-        return object_type
+        object_reference: VariableInfo = scope.get_variable("self")
+        object_type: TypeInfo = scope.get_type(object_reference.type)
+        if not object_type.is_attribute_defined(node.variable_id):
+            error = SemanticError(
+                f"{from_where}the attribute {node.variable_id} is not defined in the object of type '{object_type.name}'"
+            )
+            self.errors.append(error)
+            return ErrorType()
+        object_attribute: VariableInfo = object_type.get_attribute(node.variable_id)
+        return scope.get_type(object_attribute.type)
 
     @visitor.when(FunctionCallNode)
     def visit(
@@ -278,8 +345,11 @@ class TypeInference:
             self.errors.append(error)
             return ErrorType()
         function: FunctionInfo = scope.get_function(node.function_id)
-        function_def_node: FunctionDeclarationNode = function.function_pointer
-
+        # FIXME: Handle the case where the function_pointer is None, because is a builtin function
+        # function_def_node: FunctionDeclarationNode = function.function_pointer
+        # arguments = []
+        if isinstance(function, BuiltinFunction):
+            pass
         # Check the argument types
         expression_args: list[ExpressionNode] = node.arguments
         argument_types: list[TypeInfo] = []
@@ -289,13 +359,14 @@ class TypeInference:
             argument_types.append(exp_type)
 
         # Check the argument types and modify the AST
-        self.check_argument_types(
-            argument_types,
-            function_def_node.arguments,
-            from_where,
-            "function",
-        )
+        # self.check_argument_types(
+        #     argument_types,
+        #     function_def_node.arguments,  # FIXME: This could be None because, the function could be a Builtin Function, and this functions have no declaration pointer
+        #     from_where,
+        #     "function",
+        # )
 
+        # TODO: Change this to return a type from the scope NOT A STRING
         return function.return_type
 
 

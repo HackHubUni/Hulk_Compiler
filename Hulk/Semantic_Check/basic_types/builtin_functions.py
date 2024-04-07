@@ -112,6 +112,7 @@ class RandomFunction(BuiltinFunction):
         return result
 
 
+
 builtin_functions: list[str] = [
     SinFunction().name,
     CosFunction().name,

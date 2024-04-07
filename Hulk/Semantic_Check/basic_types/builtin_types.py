@@ -16,7 +16,6 @@ class NoneType(TypeInfo):
 class ErrorType(TypeInfo):
     def __init__(self):
         super().__init__(ErrorType.static_name())
-        self.set_parent(ObjectType())  # TODO: This can be removed?
 
     @staticmethod
     def static_name() -> str:
@@ -40,8 +39,6 @@ class ObjectType(TypeInfo):
     def conforms_to(self, other: TypeInfo):
         return False  # All builtin objects conform to Object but object does not conform to any other object
 
-    def bypass(self):
-        return True  # All builtin objects conform to Object, so the object type can bypass the conforms check
 
 
 class BuiltinType(TypeInfo):

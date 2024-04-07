@@ -4,6 +4,8 @@ function powers (from, to) {
     let squares = [x^2 || x in range(from,to)] in squares;
 }
 
+function empty_function(x) => x;
+
 type Point(x,y) inherits Vector {
      x = x;
      y = y;

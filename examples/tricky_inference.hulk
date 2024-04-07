@@ -1,0 +1,17 @@
+
+function do_nothing(x) => x;
+
+function do_something(a,b,c) {
+    let z = 0 in a + b + z;
+    do_nothing(c);
+}
+
+type Basic {
+    b = do_nothing(3);
+    c = do_something(0,0,0);
+
+    what() => self.b + self.c;
+}
+
+let result = (let a=2,b=3 in
+    do_something(a,b,c)) in print(result);
