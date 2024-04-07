@@ -1,49 +1,11 @@
 # from cmp.semantic import *
 from typing import Callable
-from semantic_errors import *
-from instance_types import *
+from Hulk.Semantic_Check.basic_types.semantic_errors import *
+from Hulk.Semantic_Check.basic_types.instance_types import *
 from collections import OrderedDict
 from Hulk.tools.Ast import *
 from abc import ABC
 from Hulk.tools.Ast import *
-
-
-def fix_var_def_node(var_def: VarDefNode) -> VarDefNode:
-    """Fix the AST node of the VarDefNode. If the var_type is None then it set it to 'None'"""
-    var_type = var_def.var_type
-    if var_type is None or var_type.isspace():
-        var_def.var_type = "None"
-    return var_def
-
-
-def fix_method_return_type(method_def: MethodNode) -> MethodNode:
-    """Fix the AST node of the MethodNode. If the return_type is None then it set it to 'None'"""
-    return_type = method_def.return_type
-    if return_type is None or return_type.isspace():
-        method_def.return_type = "None"
-    return method_def
-
-
-def fix_function_return_type(
-    function_def: FunctionDeclarationNode,
-) -> FunctionDeclarationNode:
-    """Fix the AST node of the FunctionDeclarationNode. If the return_type is None then it set it to 'None'"""
-    return_type = function_def.return_type
-    if return_type is None or return_type.isspace():
-        function_def.return_type = "None"
-    return function_def
-
-
-def get_variable_info_from_var_def(var_def: VarDefNode) -> VariableInfo:
-    """Returns a VariableInfo from a VarDefNode"""
-    fix_var_def_node(var_def)
-    return VariableInfo(var_def.var_name, var_def.var_type)
-
-
-def get_variable_info_from_var_assign(var_assign: AssignNode) -> VariableInfo:
-    """Returns a VariableInfo from a AssignNode"""
-    return get_variable_info_from_var_def(var_assign.var_definition)
-
 
 class MethodInfoBase:
     def __init__(
@@ -58,13 +20,26 @@ class MethodInfoBase:
         """This is a list of VariableInfo and stores the basic information of the parameters of the method"""
         self.return_type: str = return_type
         """This is the name of the return type"""
+        if self.check_unique_names() is False:
+            raise SemanticError(
+                f"Method {name} has repeated parameter names. All parameter names must be unique"
+            )
+
+    def check_unique_names(self) -> bool:
+        """Returns True if all the names of the arguments are unique. False otherwise"""
+        names = [var.name for var in self.arguments]
+        return len(names) == len(set(names))
+
+    def get_arguments(self) -> list[VariableInfo]:
+        """Returns a clone of the argument variables"""
+        return [var.clone() for var in self.arguments]
 
     def __str__(self):
         params = ", ".join(str(var_info) for var_info in self.arguments)
         return f"[method] {self.name}({params}): {self.return_type.name};"
 
     def __eq__(self, other):
-        eq: Callable[[VariableInfo, VariableInfo], bool] = lambda x, y: x.type_name == y.type_name
+        eq: Callable[[VariableInfo, VariableInfo], bool] = lambda x, y: x.type == y.type
         if not isinstance(other, TypeMethodInfo):
             return False
         return (
@@ -104,7 +79,7 @@ class TypeInfo:
     def __init__(self, name: str):
         self.name = name
         """The name of the Type"""
-        self.constructor_arguments: OrderedDict[str, VariableInfo] = {}
+        self.constructor_arguments: list[VariableInfo] = []
         """The dictionary of the constructor argument variables"""
         self.initialization_expression: list[ExpressionNode] = []
         self.attributes: dict[str, VariableInfo] = {}
@@ -139,17 +114,17 @@ class TypeInfo:
         """This method update the type with a new parent."""
         self.parent = parent
 
-    def add_constructor_argument(self, variable: VariableInfo):
-        """Adds a new constructor argument to the type. If the variable is already defined it raise a SemanticError"""
-        if variable.name in self.constructor_arguments:
-            raise SemanticError(
-                f"The variable: {variable.name} is already defined in the constructor"
-            )
-        self.constructor_arguments[variable.name] = variable
+    def set_constructor_arguments(self, arguments: list[VariableInfo]):
+        """Sets the constructor arguments of the parent type"""
+        self.constructor_arguments = arguments if arguments is not None else []
 
     def set_parent_initialization_expressions(self, expressions: list[ExpressionNode]):
         """Sets the initialization expressions of the parent type"""
-        self.initialization_expression = expressions
+        self.initialization_expression = expressions if expressions is not None else []
+
+    def is_attribute_defined(self, attribute_name: str) -> bool:
+        """Returns True if the attribute with this name is defined in the type. False otherwise"""
+        return attribute_name in self.attributes
 
     def get_attribute(self, name: str) -> VariableInfo:
         """Returns the attribute with this name. If not found raise a SemanticError"""
@@ -159,7 +134,7 @@ class TypeInfo:
             f"The type ({self.name}) has no attribute with name ({name})"
         )
 
-    def define_new_attribute(self, attribute: VariableInfo, clone=False):
+    def define_attribute(self, attribute: VariableInfo, clone=False):
         """Creates a new attribute in the type. If an attribute with the same name is already defined then it raise a SemanticError"""
         if attribute.name in self.attributes:
             raise SemanticError(
@@ -167,26 +142,24 @@ class TypeInfo:
             )
         self.attributes[attribute.name] = attribute if not clone else attribute.clone()
 
-    def define_attributes(self, attributes: list[AssignNode]):
-        """Creates new attributes from the list of AssignNode.
-        If an attribute with the same name is already defined then it raise a SemanticError
-        """
-        variables: list[VariableInfo] = []
-        for attribute in attributes:
-            var_definition = attribute.var_definition
-            fix_var_def_node(var_def=var_definition)
-            variable = VariableInfo(var_definition.var_name, var_definition.var_type)
-            variables.append(variable)
-        for variable in variables:
-            self.define_new_attribute(variable)
+    def is_method_defined(self, name: str) -> bool:
+        """Returns True if the method with this name is defined in the type or in an ancestor.
+        False otherwise."""
+        if name in self.methods:
+            return True
+        if self.parent is None:
+            return False
+        return self.parent.is_method_defined(name)
 
     def get_method(self, name: str):
         """Returns the method with this name. If not found raise a SemanticError"""
         if name in self.methods:
             return self.methods[name]
-        raise SemanticError(
-            f"There is no method named '{name}' in the type '{self.name}'"
-        )
+        if self.parent is None:
+            raise SemanticError(
+                f'The type "{self.name}" has no method with name "{name}"'
+            )
+        return self.parent.get_method(name)
 
     def define_method(
         self,
@@ -201,25 +174,6 @@ class TypeInfo:
         self.methods[method_info.name] = (
             method_info if not clone else method_info.clone()
         )
-
-    def define_methods(self, methods: list[MethodNode]):
-        """Creates new methods from the list of MethodNode.
-        If a method with the same name is already defined then it raise a SemanticError
-        """
-        for method in methods:
-            arguments: list[VariableInfo] = []
-            for arg in method.arguments:
-                var_definition = arg.var_definition
-                fix_var_def_node(var_def=var_definition)
-                variable = VariableInfo(
-                    var_definition.var_name, var_definition.var_type
-                )
-                arguments.append(variable)
-            fix_method_return_type(method_def=method)
-            method_info = TypeMethodInfo(
-                method.method_name, arguments, method.return_type, method
-            )
-            self.define_method(method_info)
 
     def all_attributes(self) -> list[VariableInfo]:
         """Returns a list with all the attributes in the type"""
@@ -290,7 +244,7 @@ class FunctionInfo:
     def __str__(self):
         output = f"function {self.name}"
         output += " ("
-        params = ", ".join(f"{n.id}:{n.type_name.name}" for n in self.arguments)
+        params = ", ".join(f"{n.id}:{n.type.name}" for n in self.arguments)
         output += params
         output += ") :"
         output += self.return_type.name
@@ -319,10 +273,23 @@ class ProtocolInfo:
         """Define the parent protocol of this protocol"""
         self.parent = parent
 
-    def define_method(self, method_name: str):
+    def is_method_defined(self, method_name: str) -> bool:
+        """Returns True if the method with this name is defined in the protocol or in an ancestor.
+        False otherwise."""
+        if method_name in self.methods:
+            return True
+        if self.parent is None:
+            return False
+        return self.parent.is_method_defined(method_name)
+
+    def define_method(self, protocol_method: MethodInfoBase):
         """Defines a method signature in this protocol.
         If a signature was already added it raise a SemanticError"""
-        pass
+        if protocol_method.name in self.methods:
+            raise SemanticError(
+                f"The method with name '{protocol_method.name}' is already defined in the protocol '{self.name}'"
+            )
+        self.methods[protocol_method.name] = protocol_method
 
     def __str__(self):
         output = f"protocol {self.name}"

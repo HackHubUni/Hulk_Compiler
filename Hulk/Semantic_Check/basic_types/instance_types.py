@@ -1,4 +1,5 @@
-from semantic_errors import *
+from Hulk.Semantic_Check.basic_types.semantic_errors import *
+from Hulk.tools.Ast import *
 from typing import Self
 
 
@@ -6,22 +7,24 @@ class VariableInfo:
     def __init__(self, name: str, variable_type: str = None):
         self.name: str = name
         """This is the name of the variable"""
-        self.type_name: str = variable_type
+        self.type: str = variable_type
         """This is the name of the type of the variable. Could be None"""
         self.value: TypeInstance = None
         """The value of the variable. Is an instance type. Could be None"""
+        self.initialization_expression: ExpressionNode = None
+        """This is a pointer to the initialization expression of the variable. Could be None"""
 
     def clone(self) -> Self:
         """Returns a Clone of this VariableInfo"""
-        return VariableInfo(self.name, self.type_name)
+        return VariableInfo(self.name, self.type)
 
     def __eq__(self, __value: object) -> bool:
         if not isinstance(__value, VariableInfo):
             return False
-        return __value.name == self.name and __value.type_name == self.type_name
+        return __value.name == self.name and __value.type == self.type
 
     def __str__(self):
-        return f"{self.name}:{self.type_name} = {str(self.value)}"
+        return f"{self.name}:{self.type} = {str(self.value)}"
 
     def __repr__(self):
         return str(self)

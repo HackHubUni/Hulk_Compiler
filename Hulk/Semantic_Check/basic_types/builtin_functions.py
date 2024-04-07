@@ -1,6 +1,7 @@
-from instance_types import VariableInfo
+from Hulk.Semantic_Check.basic_types.instance_types import VariableInfo
 from Hulk.tools.Ast import FunctionDeclarationNode
-from semantic_types import FunctionInfo
+from Hulk.Semantic_Check.basic_types.semantic_types import FunctionInfo
+
 # from builtin_protocols import *
 import math
 from random import random

@@ -1,10 +1,12 @@
 from Hulk.tools.Ast import *
-from basic_types.scopes import *
-from basic_types.builtin_types import *
-from basic_types.builtin_functions import *
-from basic_types.builtin_protocols import *
+from Hulk.Semantic_Check.basic_types.scopes import *
+from Hulk.Semantic_Check.basic_types.builtin_types import *
+from Hulk.Semantic_Check.basic_types.builtin_functions import *
+from Hulk.Semantic_Check.basic_types.builtin_protocols import *
+from Hulk.Semantic_Check.utils import *
 
 
+# region Adding Builtin Data
 def add_basic_types(scope: HulkScopeLinkedNode):
     """
     Agrega los tipos básicos a la tabla de símbolos
@@ -34,9 +36,9 @@ def add_basic_constants(scope: HulkScopeLinkedNode):
     """
     Adds the basic constants to the scope
     """
-    scope.define_variable(VariableInfo("pi", "Number"))
+    scope.define_variable(VariableInfo("PI", "Number"))
     scope.get_variable("PI").value = math.pi
-    scope.define_variable(VariableInfo("e", "Number"))
+    scope.define_variable(VariableInfo("E", "Number"))
     scope.get_variable("E").value = math.e
 
 
@@ -53,7 +55,10 @@ def fill_scope_with_builtin_data(scope: HulkScopeLinkedNode):
     add_basic_constants(scope)
 
 
-class TypeCollector(object):
+# endregion
+
+
+class TypeCollector:
     """
     Collects all the types and protocols defined in the program.
     It also adds all the builtin types, protocols, functions and constants
@@ -65,7 +70,7 @@ class TypeCollector(object):
         fill_scope_with_builtin_data(self.global_scope)
 
     @visitor.on("node")
-    def visit(node: AstNode, scope: HulkScopeLinkedNode):
+    def visit(self, node: AstNode, scope: HulkScopeLinkedNode):
         pass
 
     @visitor.when(ProgramNode)
@@ -87,6 +92,7 @@ class TypeCollector(object):
                 SemanticError(f"Type {node.type_name} is already defined")
             )
             node.type_name = get_unique_name_with_guid(node.type_name)
+        fix_parent_type_id(node)
         scope.define_type(node.type_name)
 
     @visitor.when(ProtocolDeclarationNode)
@@ -125,5 +131,5 @@ class TypeCollector(object):
         ]
         fix_function_return_type(node)
         scope.define_function(
-            FunctionInfo(node.function_name, arguments, node.return_type)
+            FunctionInfo(node.function_name, arguments, node.return_type, node)
         )
