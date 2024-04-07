@@ -46,6 +46,12 @@ assert not " " in regex_list, "Existes espacios en blanco como regex "
 
 
 ru = Regex_Utils()
+# bool
+bool_ = s("bool")
+regex_list.append((bool_, ru.bool))
+# const
+const_ = s("const")
+regex_list.append((const_, ru.const))
 # str
 str_ = s("string")
 str_regex = ru.string
@@ -60,12 +66,8 @@ regex_list.append((number, ru.numbers))
 # space
 space = s("space")
 regex_list.append((space, ru.space))
-# bool
-bool_ = s("bool")
-regex_list.append((bool_, ru.bool))
-# const
-const_ = s("const")
-regex_list.append((const_, ru.const))
+
+
 # type_id
 type_id_ = s("type_id")
 regex_list.append((type_id_, ru.type_id))

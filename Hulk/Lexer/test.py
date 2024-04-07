@@ -39,3 +39,14 @@ def test_strings():
         test(val, tokens[0])
         a = i
     print(f"Se ejecutaron correctamente {a}")
+
+
+def test_bool():
+    strings = [f"true", f"false"]
+    tokens = ["bool"]
+    a = 0
+    for i, val in enumerate(strings, 1):
+        test(val, tokens[0])
+        a = i
+    print(f"Se ejecutaron correctamente {a}")
+
