@@ -16,20 +16,22 @@ class Type_Scope(Enum):
 
 class CallScope:
 
-    def __init__(self, scope: HulkScope, parent: Self = None):
+    def __init__(self, scope: HulkScope, parent: Self = None,iter_count=0):
         self.name:str=""
         self.tag:Type_Scope=Type_Scope.Null
         self.scope = scope.clone()
-        self.parent = None
+        self.parent = parent
         self.childs = []
         self.args:dict[str:TypeContainer]={}
-
+        self.iteration_num=iter_count
+        if self.iteration_num>500:
+            raise SemanticError(f"La StackOverFlow {500} llamados")
 
 
 
 
     def get_scope_child(self):
-        new=CallScope(self.scope, self)
+        new=CallScope(self.scope, self,self.iteration_num+1)
         self.childs.append(new)
         return new
 
@@ -52,8 +54,15 @@ class CallScope:
 
     def get_var_value(self,var_node_name:str):
         try:
-            return self.args[var_node_name]
-        except KeyError:
+            if self.parent is None:
+                raise SemanticError(f'La variable {var_node_name} no existe')
+
+            if  var_node_name in self.args:
+                return self.args[var_node_name]
+
+            return self.parent.get_var_value(var_node_name)
+
+        except :
             raise SemanticError(f'La variable {var_node_name} no existe')
 
 

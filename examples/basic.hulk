@@ -1,8 +1,8 @@
 
 
-function caca(x,y) => x/y;
-
-print(caca(4,1));
+function caca(x,y) => f(x)/y;
+function f(d)=>d+1;
+print(caca(4,5));
 
 
 
