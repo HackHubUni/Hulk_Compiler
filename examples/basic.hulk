@@ -1,8 +1,6 @@
 
 
-
-function idn(x)=> if (false) print("Even") else print("odd");
-idn(3);
+numbers[9];
 
 
 

@@ -362,3 +362,19 @@ class Interpreter(object):
         except SemanticError as e:
             self.errors.append(e)
 
+
+    @visitor.when(VectorNode)
+    def visit(self, node: VectorNode, parent_scope: CallScope):
+        try:
+            lis=[]
+            for expr,i in enumerate(node.expression_list,0):
+                temp=self.visit(expr,parent_scope)
+                lis.append(temp)
+                 #TODO:Falta chequear que sean del mismo tipo
+
+            return self.context.get_Type_Container(lis, "Vector")
+        except SemanticError as e:
+            self.errors.append(e)
+
+
+

@@ -24,6 +24,7 @@ class CallScope:
         self.childs = []
         self.args:dict[str:TypeContainer]={}
         self.iteration_num=iter_count
+        self.vectos:dict[str:list]={}
         if self.iteration_num>500:
             raise SemanticError(f"La StackOverFlow {500} llamados")
 
@@ -64,6 +65,8 @@ class CallScope:
 
         except :
             raise SemanticError(f'La variable {var_node_name} no existe')
+
+
 
 
 
