@@ -43,6 +43,8 @@ def evaluate(text: str):
     interpreter = Interpreter(scope, errors)
     interpreter.visit(ast)
 
+    print(f'Errores de interpretado {errors}')
+
     print("Finish")
 with open("./examples/basic.hulk", "r") as file:
     text: str = file.read()

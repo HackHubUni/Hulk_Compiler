@@ -15,6 +15,20 @@ class NoneType(TypeInfo):
     def bypass(self):
         return True
 
+class UnknownType(TypeInfo):
+    def __init__(self):
+        super().__init__(UnknownType.static_name())
+
+    @staticmethod
+    def static_name() -> str:
+        return "Unknown"
+
+    def __str__(self):
+        return self.name
+
+    def bypass(self):
+        return True
+
 
 class ErrorType(TypeInfo):
     def __init__(self):

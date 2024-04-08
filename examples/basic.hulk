@@ -1,9 +1,8 @@
 
 
-// function cot(x) => 1 / tan(x);
-function tan(x) => sin(x) ;
 
-print(tan(PI) ** 2 );
+function idn(x)=> if (false) print("Even") else print("odd");
+idn(3);
 
 
 

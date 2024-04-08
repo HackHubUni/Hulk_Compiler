@@ -46,18 +46,37 @@ class ScopeInterpreter:
 
         return self.call_functions_in_this_scope[name]
 
+    def get_NullTypeContainer(self,value=None):
+        return NullTypeContainer(value, self.dynamic_types.get_tag("<None>"))
+
+    def get_UnknownTypeContainer(self,value):
+       if value is None:
+           return self.get_NullTypeContainer(None)
+       return UnknownTypeContainer(value, self.dynamic_types.get_tag("Unknown"))
 
     def get_Type_Container(self,value,type_name:str|Dynamic_Types):
         """
         Devuelve el TypeContainer con el valor y el tag el tag puede ser un str o un Dynamic_Type
         """
+        if value is None:
+            return self.get_NullTypeContainer()
+
+
 
         if isinstance(type_name,Dynamic_Types):
             return TypeContainer(value,type_name)
         elif isinstance(type_name,str):
-            return TypeContainer(value,self.dynamic_types.get_tag(type_name))
+            tag=self.dynamic_types.get_tag(type_name)
+            if type_name in ["None","Null","<None>","NONE"]:
+
+                return NullTypeContainer(value,self.dynamic_types.get_tag("<None>"))
+            if type_name in ['Unknown','UKNOWN']:
+                return self.get_UnknownTypeContainer()
+
+            return TypeContainer(value,tag)
         else:
             raise SemanticError("No Se entrego algo que no es un string o un Dynamic_Types")
+
 
 
 
@@ -67,6 +86,10 @@ class ScopeInterpreter:
         if isinstance(type_name,Dynamic_Types):
             return type_container.type == type_name
         elif isinstance(type_name,str):
+            if type_name in ["None", "Null", "<None>", "NONE"]:
+                type_name="<None>"
+            if type_name in ['Unknown', 'UKNOWN']:
+                type_name='Unknown'
             return type_container.type ==self.dynamic_types.get_tag(type_name)
         else:
             raise SemanticError("No Se entrego algo que no es un string o un Dynamic_Types")
