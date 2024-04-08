@@ -50,7 +50,13 @@ class Interpreter(object):
             # Si la funcion es building esta definida
            if self.context.is_call_function_building_define(name):
                 call = self.context.call_function(name)
-                return call(args)
+                type_name="None"
+                if name in ["sin",'cos','exp','log','sqrt',"rand"]:
+                    args=args[0]
+                    type_name="Number"
+
+                return self.context.get_Type_Container(call(args), type_name)
+
            else:
                 body=func_info.function_pointer.body
                 return self.visit(body, new_scope)
@@ -79,7 +85,7 @@ class Interpreter(object):
 
 
     @visitor.when(LiteralBoolNode)
-    def visit(self, node: LiteralBoolNode):
+    def visit(self, node: LiteralBoolNode,parent_scope:CallScope):
         try:
             if not isinstance(node.value, str):
                 raise SemanticError(f"El {node.value} es de tipo {type(node.value)} no es str")
@@ -90,7 +96,7 @@ class Interpreter(object):
             self.errors.append(e)
 
     @visitor.when(LiteralStrNode)
-    def visit(self, node: LiteralStrNode):
+    def visit(self, node: LiteralStrNode,parent_scope=CallScope):
         try:
             return self.context.get_Type_Container(str(node.value), "String")
         except SemanticError as e:
@@ -142,7 +148,7 @@ class Interpreter(object):
             self.errors.append(e)
 
     @visitor.when(ConstantNode)
-    def visit(self, node: ConstantNode):
+    def visit(self, node: ConstantNode,parent_scope:CallScope):
         try:
             var = self.context.get_variable(str(node.value))
             value = var.value
@@ -206,19 +212,19 @@ class Interpreter(object):
             self.errors.append(e)
 
     @visitor.when(BinaryStringExpressionNode)
-    def visit(self, node: BinaryStringExpressionNode):
+    def visit(self, node: BinaryStringExpressionNode,parent_scope:CallScope):
         try:
             value: str = ""
 
-            left = self.visit(node.left)
-            right = self.visit(node.right)
+            left = self.visit(node.left,parent_scope)
+            right = self.visit(node.right,parent_scope)
             # Si se puede concatenar con un numero
             # Si se puede concatenar con un string
             is_type_str: bool = (self.is_this_type(left, "String") and self.is_this_type(right, "String"))
             can_concat_with_number: bool = (self.is_this_type(left, "Number") and self.is_this_type(right, "String"))
             c = (self.is_this_type(left, "String") and self.is_this_type(right, "Number"))
 
-            if not is_type_str or (can_concat_with_number or c):
+            if not is_type_str and not (can_concat_with_number or c):
                 raise SemanticError(f"No se puede {type(node)} un {left.type} o un {right.type}")
             else:
                 l_val = str(left.value)

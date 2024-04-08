@@ -1,8 +1,13 @@
 
 
-function caca(x,y) => f(x)/y;
-function f(d)=>d+1;
-print(caca(4,5));
+// function cot(x) => 1 / tan(x);
+function tan(x) => sin(x) ;
+
+print(tan(PI) ** 2 );
+
+
+
+
 
 
 
