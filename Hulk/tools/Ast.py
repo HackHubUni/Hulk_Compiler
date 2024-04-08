@@ -25,12 +25,13 @@ class ExpressionNode(AstNode):
 class ExpressionBlockNode(ExpressionNode):
     def __init__(
         self,
-        expr_list: list,
+        expression_list: list[ExpressionNode],
     ):
         """
         Recibe una lista de statements
         """
-        self.expr_list: list = expr_list
+        self.expression_list: list[ExpressionNode] = expression_list
+        """The list of expressions in the block"""
 
 
 class UnaryExpressionNode(ExpressionNode):

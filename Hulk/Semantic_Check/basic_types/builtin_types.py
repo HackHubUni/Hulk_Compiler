@@ -24,6 +24,9 @@ class ErrorType(TypeInfo):
     def bypass(self):
         return True
 
+    def conforms_to(self, other: TypeInfo) -> bool:
+        return True
+
     def __eq__(self, other: TypeInfo):
         return isinstance(other, TypeInfo)
 
@@ -38,7 +41,6 @@ class ObjectType(TypeInfo):
 
     def conforms_to(self, other: TypeInfo):
         return False  # All builtin objects conform to Object but object does not conform to any other object
-
 
 
 class BuiltinType(TypeInfo):

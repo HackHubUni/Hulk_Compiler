@@ -36,7 +36,7 @@ class TypeBuilder:
             if var_def.var_name in args_names:
                 self.errors.append(
                     SemanticError(
-                        f"The argument '{var_def.var_name}' is already defined"
+                        f"{from_where}, the argument '{var_def.var_name}' is already defined"
                     )
                 )
                 var_def.var_name = get_unique_name_with_guid(var_def.var_name)
@@ -70,6 +70,7 @@ class TypeBuilder:
         self.current_type = type_info
         constructor_arguments: list[VarDefNode] = node.constructor_arguments
 
+        # Check if the constructor arguments are valid
         arguments = self.check_arguments(
             constructor_arguments,
             scope,
@@ -82,6 +83,7 @@ class TypeBuilder:
             node.parent_initialization_expressions
         )
 
+        # Check if parent is defined
         if not scope.is_type_defined(node.parent_type_id):
             error = SemanticError(
                 f"In the type '{node.type_name}', there is no type defined with the name '{node.parent_type_id}'"
@@ -89,7 +91,7 @@ class TypeBuilder:
             self.errors.append(error)
             node.parent_type_id = ErrorType.static_name()
 
-        parent_type = scope.get_type(node.parent_type_id)
+        parent_type: TypeInfo = scope.get_type(node.parent_type_id)
 
         if is_builtin_type(parent_type):
             error = SemanticError(
@@ -97,8 +99,7 @@ class TypeBuilder:
             )
             self.errors.append(error)
             parent_type = scope.get_type(ErrorType.static_name())
-        if parent_type.name == NoneType.static_name():
-            parent_type = scope.get_type(ObjectType.static_name())
+
         type_info.set_parent(parent_type)
         features = node.features
 
@@ -129,22 +130,20 @@ class TypeBuilder:
     def visit(self, node: FunctionDeclarationNode, scope: HulkScopeLinkedNode):
         # get the FunctionInfo from the scope
         function_info: FunctionInfo = scope.get_function(node.function_name)
-        # iterate over the arguments of the function
-        for argument in function_info.arguments:
-            # Check types of the arguments to see if they exists. The names are unique. This is ensured by the TypeCollector
-            if not scope.is_type_defined(argument.type):
-                error = SemanticError(
-                    f"In the function '{node.function_name}', in the parameter '{argument.name}', there is no type defined with the name '{argument.type}'"
-                )
-                self.errors.append(error)
-                # FIXME: There is an error in here. We should modify the type of this Ast Node but right now is not possible because of the previous semantic pass
+        # Check the arguments of the function
+        func_declaration: FunctionDeclarationNode = function_info.function_pointer
+        arguments: list[VariableInfo] = self.check_arguments(
+            func_declaration.arguments, scope, f"In the function '{node.function_name}'"
+        )
+        function_info.arguments = arguments
+
         # Check if the return type exists
         if not scope.is_type_defined(function_info.return_type):
             error = SemanticError(
                 f"In the return type of the function '{node.function_name}', there is no type defined with the name '{function_info.return_type}'"
             )
             self.errors.append(error)
-            # FIXME: This one should be fixed too
+            function_info.return_type = ErrorType.static_name()
 
     @visitor.when(MethodNode)
     def visit(self, node: MethodNode, scope: HulkScopeLinkedNode):

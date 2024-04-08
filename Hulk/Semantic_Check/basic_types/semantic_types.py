@@ -193,6 +193,17 @@ class TypeInfo:
             or self.parent is not None
             and self.parent.conforms_to(other)
         )
+    
+    @staticmethod
+    def common_ancestor(type_1:Self, type_2: Self):
+        pass
+    
+    @staticmethod
+    def common_ancestor(types:list[Self]):
+        if len(types) == 0:
+            raise Exception(f'There is no element in the type list to check for common ancestors')
+        ancestor:TypeInfo = types[0]
+        pass
 
     def bypass(self):
         return False

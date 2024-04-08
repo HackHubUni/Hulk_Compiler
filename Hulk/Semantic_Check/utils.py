@@ -11,10 +11,10 @@ def fix_var_def_node(var_def: VarDefNode) -> VarDefNode:
 
 
 def fix_parent_type_id(type_declaration: TypeDeclarationNode):
-    """Fix the AST node of the TypeDeclarationNode. If the parent_type is None then it set it to 'None'"""
+    """Fix the AST node of the TypeDeclarationNode. If the parent_type is None then it set it to 'Object'"""
     parent_type = type_declaration.parent_type_id
     if parent_type is None or parent_type.isspace():
-        type_declaration.parent_type_id = NoneType.static_name()
+        type_declaration.parent_type_id = ObjectType.static_name()
     return type_declaration
 
 
