@@ -9,6 +9,7 @@ class Interpreter(object):
         self.context = ScopeInterpreter(context, errors)
         self.errors: list[str] = errors
         self.is_this_type = self.context.is_this_Type
+        self.max_iteration=5000
 
     def get_function(self, name: str) -> FunctionInfo:
         return self.context.global_scope.get_function(name)
@@ -70,6 +71,8 @@ class Interpreter(object):
             temp: list[TypeContainer] = [self.visit(arg, new_scope) for arg in node.args]
 
             for i, val in enumerate(temp, 0):
+                if val is None:
+                    raise SemanticError(f"No pueden ver argumentos en la función {name} None")
                 args.append(val.value)
                 new_scope.set_arg(arg_name[i], val)
             # Si la funcion es building esta definida
@@ -330,6 +333,31 @@ class Interpreter(object):
                 return self.visit(node.body_expression, parent_scope)
             elif not self.is_false_expr(type):
                 raise SemanticError(f'El tipo {type} del value no es Boolean')
+
+        except SemanticError as e:
+            self.errors.append(e)
+
+    def while_condition(self,node:WhileExpressionNode,parent_scope:CallScope):
+        if_exp: TypeContainer = self.visit(node.conditional_expression, parent_scope)
+        bool_value:bool = if_exp.value
+        if not isinstance(bool_value,bool):
+            raise SemanticError(f'La expresión condicional {if_exp} no es Boolean es {if_exp.type}')
+        # Si la expresion del if_ condicional no es Boolean
+        # dar error
+        if not self.is_this_type(if_exp, "Boolean"):
+            raise SemanticError(f'La expresión condicional {if_exp} no es Boolean es {if_exp.type}')
+        return bool_value
+    @visitor.when(WhileExpressionNode)
+    def visit(self,node:WhileExpressionNode,parent_scope:CallScope):
+        try:
+           i=0
+           #Mientras se cumpla la condición visita la body expr
+           while self.while_condition(node,parent_scope):
+               if i>self.max_iteration:
+                   raise SemanticError(f"StackOverFlow")
+               i+=1
+               self.visit(node.body_expression, parent_scope)
+
 
         except SemanticError as e:
             self.errors.append(e)
