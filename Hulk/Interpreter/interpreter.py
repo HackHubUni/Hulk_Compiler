@@ -165,7 +165,7 @@ class Interpreter(object):
                 new_scope.set_attr(name_attr,var)
 
 
-            #Ahora se guardan en el scope las ast para convertir de los metodos
+
 
             #Ahora se devuelve un TypeContainer con el scope donde se trabaja
             return self.get_Type_Container(new_scope,name)
@@ -207,48 +207,78 @@ class Interpreter(object):
             lis.append(type_container)
         return lis[-1]
 
+
+    def method_call_base(self,node: MethodCallWithIdentifierNode, parent_scope: CallScope,type_id:str):
+        """
+        Método base para el llamado de metodos tanto por expresiones como por id normal
+        """
+        name: str = node.method_id
+        instance_type_container = parent_scope.get_the_type_instance_by_type_id(type_id)
+        # en el contenedor es que esta el scope a usar
+        method_instance_scope: CallScope = instance_type_container.value
+        type_ = method_instance_scope.name
+
+        # Ahora se cra un hijo del scope de la instancia para trabajr con la funcion
+        new_scope = method_instance_scope.get_scope_child()
+        # Se setea el nuevo scope
+        method_info: TypeMethodInfo = new_scope.set_method_call(type_, name)
+
+        # Se clona para evitar problemas en las próximas instancias
+        method_info: TypeMethodInfo = copy.deepcopy(method_info)
+
+        # encontrar los argumentos del metodo
+        args_name: list[str] = method_info.get_arguments_name()
+        args = node.args
+        self.devolver_en_type_container_los_argumentos_de_inicialización_y_ponerlos_en_el_scope(args_name, args,
+                                                                                                new_scope, name)
+
+        # Tomar el arbol del Ast que lo inicializa
+        node_declaration_pointer: MethodNode = method_info.declaration_pointer
+        body = node_declaration_pointer.body
+
+        # Valor de retorno del llamado
+        type_container_return: TypeContainer = self.visit(body, new_scope)
+
+        if not self.is_this_type(type_container_return, node_declaration_pointer.return_type, is_checking=True):
+            raise SemanticError(
+                f"El type esperado era {node_declaration_pointer.return_type} y el obtenido es {type_container_return.type}")
+
+        return type_container_return
+
     @visitor.when(MethodCallWithIdentifierNode)
     def visit(self, node: MethodCallWithIdentifierNode, parent_scope: CallScope):
         try:
 
-
-
             type_id:str=node.object_id
-            name:str=node.method_id
-            instance_type_container=parent_scope.get_the_type_instance_by_type_id(type_id)
-            #en el contenedor es que esta el scope a usar
-            method_instance_scope:CallScope = instance_type_container.value
-            type_=method_instance_scope.name
 
-            #Ahora se cra un hijo del scope de la instancia para trabajr con la funcion
-            new_scope=method_instance_scope.get_scope_child()
-            #Se setea el nuevo scope
-            method_info: TypeMethodInfo = new_scope.set_method_call(type_, name)
+            return self.method_call_base(node,parent_scope, type_id)
 
-            #Se clona para evitar problemas en las próximas instancias
-            method_info:TypeMethodInfo=copy.deepcopy(method_info)
-
-            #encontrar los argumentos del metodo
-            args_name: list[str] = method_info.get_arguments_name()
-            args=node.args
-            self.devolver_en_type_container_los_argumentos_de_inicialización_y_ponerlos_en_el_scope(args_name,args,new_scope,name)
-
-            #Tomar el arbol del Ast que lo inicializa
-            node_declaration_pointer:MethodNode=method_info.declaration_pointer
-            body=node_declaration_pointer.body
-
-            #Valor de retorno del llamado
-            type_container_return: TypeContainer = self.visit(body, new_scope)
-
-            if not self.is_this_type(type_container_return,node_declaration_pointer.return_type,is_checking=True):
-                raise SemanticError(f"El type esperado era {node_declaration_pointer.return_type} y el obtenido es {type_container_return.type}")
-
-
-            return type_container_return
+        except SemanticError as e:
+            self.errors.append(e)
 
 
 
+    @visitor.when(MethodCallWithExpressionNode)
+    def visit(self, node: MethodCallWithExpressionNode, parent_scope: CallScope):
+        try:
+            type_id=""
+            if isinstance(node.object_expression,AttrCallNode):
+                c=node.object_expression.variable_id
+                type_id=c
+            else:
 
+                type_id_container=self.visit(node.object_expression,parent_scope)
+                if  self.is_this_type(type_id_container,"String"):
+                    type_id = type_id_container.value
+                elif not( self.is_NullTypeContainer(type_id_container) and self.is_UnknowTypeContainer(type_id_container)):
+                   if isinstance(type_id_container.value,CallScope):
+                       val=type_id_container.value
+                       type_id=val.name
+                else:
+                    raise SemanticError(
+                        f"El type esperado era String y el obtenido es {type_id_container.type} como nombre de la variable del type para llamado de metodos")
+
+            return self.method_call_base(node,parent_scope, type_id)
 
         except SemanticError as e:
             self.errors.append(e)
@@ -570,7 +600,11 @@ class Interpreter(object):
             for expr,i in enumerate(node.expression_list,0):
                 temp=self.visit(expr,parent_scope)
                 lis.append(temp)
-                 #TODO:Falta chequear que sean del mismo tipo
+                if i>0:
+                    type_base=lis[0].type
+                    if not self.is_this_type(temp,type_base,is_checking=True):
+                        raise SemanticError(f"Los vectores deben de tener sus elementos de type: {type_base} pero tiene en el índice{i} uno: {temp.type}.")
+
 
             return self.context.get_Type_Container(lis, "Vector")
         except SemanticError as e:
