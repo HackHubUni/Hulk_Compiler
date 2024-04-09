@@ -7,6 +7,7 @@ from Hulk.tools.Ast import VarNode
 
 
 class Type_Scope(Enum):
+    Program=-1
     Null = 0
     Func_Call = 1
     Type_Instantiate = 2
@@ -14,9 +15,9 @@ class Type_Scope(Enum):
 
 
 class InterpreterScope:
-    def __init__(self, scope: HulkScope, parent: Self = None, iter_count=0):
+    def __init__(self, scope: HulkScope, parent: Self = None, iter_count=0,it_from_program_node:bool=False):
         self.name: str = ""
-        self.tag: Type_Scope = Type_Scope.Null
+        self.tag: Type_Scope = Type_Scope.Program if it_from_program_node else Type_Scope.Null
         self.scope = scope.clone()
         self.parent = parent
         self.childs = []
@@ -62,6 +63,7 @@ class InterpreterScope:
 
     def get_var_value(self, var_node_name: str):
         try:
+            #Como el unico con parent=None es el Program node que no tiene variables
             if self.parent is None:
                 raise SemanticError(f'La variable {var_node_name} no existe')
 
@@ -82,7 +84,7 @@ class TypeInstantiateScope(InterpreterScope):
 
 class CallScope(InterpreterScope):
 
-    def __init__(self, scope: HulkScope, parent: Self = None, iter_count=0):
-        super().__init__(scope, parent, iter_count)
+    def __init__(self, scope: HulkScope, parent: Self = None, iter_count=0,it_from_program_node:bool=False):
+        super().__init__(scope, parent, iter_count,it_from_program_node)
 
         self.types_instantiates: dict[str, TypeInstantiateScope] = {}

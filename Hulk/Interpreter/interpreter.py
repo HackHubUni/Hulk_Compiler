@@ -14,8 +14,12 @@ class Interpreter(object):
     def get_function(self, name: str) -> FunctionInfo:
         return self.context.global_scope.get_function(name)
 
-    def get_new_Call_Scope(self, parent_scope: CallScope):
-        return CallScope(self.context.global_scope.scope, parent_scope)
+    def get_new_Call_Scope(self, parent_scope: CallScope,its_program_node=False):
+        """
+        Retorna un Call Scope nuevo, el cual tendra como parent el parent_scope
+        Ponga True para que el Call Scope sea de tipo Program
+        """
+        return CallScope(self.context.global_scope.scope, parent_scope,it_from_program_node=its_program_node)
 
     def get_Type_Container(self, value, type_name: str | Dynamic_Types):
         return self.context.get_Type_Container(value, type_name)
@@ -32,12 +36,22 @@ class Interpreter(object):
     def is_UnknowTypeContainer(self,type_container:TypeContainer):
         return  isinstance(type_container,UnknownTypeContainer)
 
-    def is_true_expr(self,name:str):
+    def is_true_expr(self,name:str|TypeContainer):
+        if isinstance(name,TypeContainer) :
+            if self.context.is_this_Type(name,"Boolean"):
+                if isinstance(name.value,bool):
+                    return name.value
+
         if isinstance(name,bool):
             return name
         return name in  ["TRUE,True,true"]
 
-    def is_false_expr(self,name:str):
+    def is_false_expr(self,name:str|TypeContainer):
+        if isinstance(name,TypeContainer) :
+            if self.context.is_this_Type(name,"Boolean"):
+                if isinstance(name.value,bool):
+                    return not name.value
+
         if isinstance(name,bool):
             return not name
         return name in  ["FALSE,False,false"]
@@ -61,7 +75,7 @@ class Interpreter(object):
     def visit(self, node: ProgramNode):
 
         try:
-            parent_scope = self.get_new_Call_Scope(None)
+            parent_scope = self.get_new_Call_Scope(None,True)
             self.visit(node.expr, parent_scope)
 
             #for decl in node.declarations:
@@ -81,8 +95,11 @@ class Interpreter(object):
 
     @visitor.when(ExpressionBlockNode)
     def visit(self, node: ExpressionBlockNode, parent_scope: CallScope):
+        lis=[]
         for expr in node.expr_list:
-            self.visit(expr, parent_scope)
+            a=self.visit(expr, parent_scope)
+            lis.append(a)
+        return lis[-1]
 
     @visitor.when(FunctionCallNode)
     def visit(self, node: FunctionCallNode, parent_scope: CallScope):
@@ -102,7 +119,8 @@ class Interpreter(object):
             # Si la funcion es building esta definida
             if self.context.is_call_function_building_define(name):
                 call = self.context.call_function(name)
-                type_name = "Unknown"
+                type_name = "String"
+                #Si son del tipo que devuelven valores Number
                 if name in ["sin", 'cos', 'exp', 'log', 'sqrt', "rand"]:
                     args = args[0]
                     type_name = "Number"
@@ -172,11 +190,6 @@ class Interpreter(object):
                 self.visit(arg, new_scope)
 
             return self.visit(node.expr, new_scope)
-
-
-
-
-
 
         except SemanticError as e:
             self.errors.append(e)
@@ -352,7 +365,7 @@ class Interpreter(object):
             self.errors.append(e)
 
     @visitor.when(BinaryStringExpressionNode)
-    def visit(self, node: BinaryStringExpressionNode, parent_scope: CallScope):
+    def visit(self, node: BinaryStringExpressionNode, parent_scope: CallScope)->TypeContainer:
         try:
             value: str = ""
 
@@ -371,8 +384,8 @@ class Interpreter(object):
                 r_val = str(right.value)
                 if isinstance(node, ConcatNode):
                     value = l_val + r_val
-                elif isinstance(ConcatWithSpaceNode):
-                    return f'{l_val} {r_val}'
+                elif isinstance(node,ConcatWithSpaceNode):
+                     value = f'{l_val} {r_val}'
                 else:
                     raise SemanticError(f"No se puede {type(node)} un {left.type} o un {right.type}")
 
@@ -443,9 +456,9 @@ class Interpreter(object):
             if not self.is_this_type(if_exp, "Boolean"):
                 raise SemanticError(f'La expresión condicional {if_exp} no es Boolean es {if_exp.type}')
             type = if_exp.type
-            if self.is_true_expr(type):
+            if self.is_true_expr(if_exp):
                 return self.visit(node.body_expression, parent_scope)
-            elif not self.is_false_expr(type):
+            elif not self.is_false_expr(if_exp):
                 raise SemanticError(f'El tipo {type} del value no es Boolean')
 
         except SemanticError as e:
