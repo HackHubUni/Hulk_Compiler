@@ -10,33 +10,38 @@ function xxx()=>4;
 //p=xxx();
 //}
 
-type Pescado
-{
-   a= new Person();
+//type Pescado
+//{
+//   a= new Person();
+//
+//    getNombre()=> a.getNombre();
+//}
+//
+//
+//type Person
+//{
+//nombre=;
+//    getNombre()=>self.nombre;
+//}
 
-    getNombre()=> a.getNombre();
+
+//type Point(x,y) {
+
+//    y = new Pescado();
+
+//    getY() => self.y.getNombre();
+
+//}
+//let pt = new Point(2,3) in
+//    print( pt.getY());
+
+//let a = 5,b= in print (a is Number);
+
+let a = 0 in {
+    print(a);
+    a := 1;
+    print(a);
 }
-
-
-type Person
-{
-nombre="Juan";
-    getNombre()=>self.nombre;
-}
-
-
-
-type Point(x,y) {
-
-    y = new Pescado();
-
-
-    getY() => self.y.getNombre();
-
-
-}
-let pt = new Point(2,3) in
-    print( pt.getY());
 
 
 

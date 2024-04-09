@@ -218,7 +218,7 @@ class Interpreter(object):
         method_instance_scope: CallScope = instance_type_container.value
         type_ = method_instance_scope.name
 
-        # Ahora se cra un hijo del scope de la instancia para trabajr con la funcion
+        # Ahora se crea un hijo del scope de la instancia para trabajr con la funcion
         new_scope = method_instance_scope.get_scope_child()
         # Se setea el nuevo scope
         method_info: TypeMethodInfo = new_scope.set_method_call(type_, name)
@@ -314,7 +314,7 @@ class Interpreter(object):
         except SemanticError as e:
             self.errors.append(e)
 
-
+    #Asignaciones en los nodos
     @visitor.when(VarDefNode)
     def visit(self, node: VarDefNode, parent_scope: CallScope):
         try:
@@ -610,5 +610,19 @@ class Interpreter(object):
         except SemanticError as e:
             self.errors.append(e)
 
+
+
+
+    @visitor.when(DestructionAssignmentBasicExpression)
+    def visit(self, node: DestructionAssignmentBasicExpression, parent_scope: CallScope):
+        try:
+            attr_id:str=node.id
+            value=self.visit(node.expr,parent_scope)
+            parent_scope.reset_attr_or_arg(attr_id,value)
+
+
+
+        except SemanticError as e:
+            self.errors.append(e)
 
 

@@ -49,11 +49,11 @@ class InterpreterScope:
         except KeyError:
             raise SemanticError(f'El type {name} no existe')
 
-    def set_arg(self, name: str, typeContainer: TypeContainer):
+    def set_arg(self, name: str, typeContainer: TypeContainer,destruction_assign:bool=False):
         """
         Setea el argumento de la funcion o metodo o Type
         """
-        if name in self.args:
+        if name in self.args and not destruction_assign:
             raise SemanticError(f'El argumento {name} ya existe')
 
         self.args[name] = typeContainer
@@ -64,6 +64,22 @@ class InterpreterScope:
                 f'El atributo ya ha sido declarado: {name} no se puede mediante una asignación redefinir su valor')
 
         self.attrs[name] = typeContainer
+
+    def reset_attr_or_arg(self,name:str, typeContainer: TypeContainer):
+       if self.tag == Type_Scope.Let or self.tag == Type_Scope.Type_Instantiate:
+            if name in self.attrs:
+                   self.attrs[name] = typeContainer
+                   return
+            if name in self.args:
+                     self.args[name] = typeContainer
+                     return
+       if self.parent is None:
+             raise SemanticError(f'No se puede redefinir el valor de {name} en el scope actual')
+
+       self.parent.reset_attr_or_arg(name,typeContainer)
+
+
+
 
     def set_func_call(self, name: str) -> FunctionInfo:
         self.tag = Type_Scope.Func_Call
