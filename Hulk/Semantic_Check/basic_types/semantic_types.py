@@ -100,6 +100,18 @@ class TypeInfo:
         new_type.parent = self.parent
         return new_type
 
+    def get_args(self):
+        """
+        Retorna los argumentos del constructor
+        """
+        return self.constructor_arguments
+    def get_args_name(self):
+        lis:list[str]=[]
+        for i in self.get_args():
+            lis.append(i.name)
+        return lis
+
+
     def create_instance(
         self,
     ) -> TypeInstance:

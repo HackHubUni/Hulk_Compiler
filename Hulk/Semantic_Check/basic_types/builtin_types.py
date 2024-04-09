@@ -179,6 +179,7 @@ def is_type_name_prohibit(type_name: str) -> bool:
         BoolType.static_name(),
         VectorType.static_name(),
         RangeType.static_name(),
+        UnknownType().name
     ]
 
 
@@ -190,4 +191,6 @@ builtin_types: list[str] = [
     BoolType().name,
     ErrorType().name,
     VectorType().name,
+    RangeType().name,
+    UnknownType().name
 ]

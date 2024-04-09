@@ -1,6 +1,27 @@
 
 
-numbers[9];
+//numbers[9];
+
+function xxx()=>4;
+
+
+//type B()
+//{
+//p=xxx();
+//}
+
+
+
+
+let a=5 in let b=7  in print(a+b);
+
+
+//type Pescado(a,b)
+//{
+// a=3;
+// b= new B();
+//
+//}
 
 
 

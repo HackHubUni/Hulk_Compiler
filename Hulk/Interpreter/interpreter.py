@@ -42,18 +42,42 @@ class Interpreter(object):
             return not name
         return name in  ["FALSE,False,false"]
 
+    def assing_var_exp(self,var_assig:TypeContainer,expr_to_assing:TypeContainer):
+        """
+        Chequea  si el var_assing tiene el mismo type de la expression asignada
+        Si el tipo del var_assig es unknown devuelve le asigna a la variable el tipo de la expression
+        """
+        if self.is_UnknowTypeContainer(var_assig):
+            var_assig.type=expr_to_assing.type
+        elif var_assig.type!=expr_to_assing.type:
+            raise SemanticError(f"La variable tiene el type:{var_assig.type} y la expresión tiene el type:{expr_to_assing.type}")
+
+        return True
     @visitor.on('node')
     def visit(self, node):
         pass
-
+  #Los scopes que se pasan siempre se forkea del padre
     @visitor.when(ProgramNode)
     def visit(self, node: ProgramNode):
 
         try:
             parent_scope = self.get_new_Call_Scope(None)
             self.visit(node.expr, parent_scope)
+
+            #for decl in node.declarations:
+            #    if isinstance(decl,TypeDeclarationNode):
+            #        decl:TypeDeclarationNode=decl
+            #        feat=decl.features
+            #        for v in feat:
+            #            if isinstance(v,AssignNode):
+            #                v:AssignNode = v
+            #                if isinstance(v.expression_to_evaluate,InstantiateNode):
+            #                     self.visit(v.expression_to_evaluate, parent_scope)
+
+
         except SemanticError as e:
             self.errors.append(e)
+
 
     @visitor.when(ExpressionBlockNode)
     def visit(self, node: ExpressionBlockNode, parent_scope: CallScope):
@@ -94,6 +118,99 @@ class Interpreter(object):
         except SemanticError as e:
             self.errors.append(e)
 
+    @visitor.when(InstantiateNode)
+    def visit(self, node: InstantiateNode, parent_scope: CallScope):
+        try:
+            name =node.type_id
+            new_scope=parent_scope.get_scope_child()
+            type_info:TypeInfo=new_scope.get_type_info_(name)
+            args_name:list[str]=type_info.get_args_name()
+            args = []
+            temp: list[TypeContainer] = [self.visit(arg, new_scope) for arg in node.initialization_expressions]
+            for i, val in enumerate(temp, 0):
+                if val is None:
+                    raise SemanticError(f"No pueden ver argumentos en la función {name} None")
+                args.append(val.value)
+                new_scope.set_arg(args_name[i], val)
+
+
+
+            #Instanciar los atributos
+            attrs=type_info.attributes
+            attrs_name:list[str]=[]
+            varx=[]
+            #Tomar los nombres de los atributos
+            for attr in attrs.values():
+                name=attr.name
+                varx.append(var)
+                attrs_name.append(name)
+                var:TypeContainer=self.visit(attr.initialization_expression,parent_scope)
+                new_scope.set_arg(name,var)
+
+
+            #Ahora hay que instanciar los métodos
+            methods_info=type_info.methods
+
+            for method_name, method_info in methods_info.items():
+                method = method_info.declaration_pointer
+                self.visit(method, new_scope)
+
+
+        except SemanticError as e:
+            self.errors.append(e)
+
+
+
+
+    @visitor.when(LetNode)
+    def visit(self, node: LetNode, parent_scope: CallScope):
+        try:
+
+            new_scope=parent_scope.get_scope_child()
+            #Por cada asignacion hace visit al varDefNode para agregarla al scope
+            for arg in node.assign_list:
+                self.visit(arg, new_scope)
+
+            return self.visit(node.expr, new_scope)
+
+
+
+
+
+
+        except SemanticError as e:
+            self.errors.append(e)
+
+
+
+    @visitor.when(AssignNode)
+    def visit(self,node:AssignNode,parent_scope: CallScope):
+        """
+        Asigna en el scope padre el valor de la expresión de la variable
+        """
+        try:
+             var_name=self.visit(node.var_definition, parent_scope)
+             expr=self.visit(node.expression_to_evaluate, parent_scope)
+             #Chequear que la expresión sea del mismo tipo que la variable
+             self.assing_var_exp(var_name,expr)
+             name_var:str=var_name.value
+             parent_scope.set_arg(name_var,expr)
+        except SemanticError as e:
+            self.errors.append(e)
+
+
+    @visitor.when(VarDefNode)
+    def visit(self, node: VarDefNode, parent_scope: CallScope):
+        try:
+            var_name=node.var_name
+            type_name = node.var_type
+            if type_name is None:
+                return self.get_UnknowTypeContainer(var_name)
+
+            return self.get_Type_Container(var_name,type_name)
+
+        except SemanticError as e:
+            self.errors.append(e)
     @visitor.when(VarNode)
     def visit(self, node: VarNode, parent_scope: CallScope) -> TypeContainer:
         try:
@@ -160,9 +277,6 @@ class Interpreter(object):
                     raise SemanticError(f"No se puede {type(node)} un {left.type} o un {right.type}")
 
                 return self.context.get_Type_Container(value, "Number")
-
-
-
 
         except SemanticError as e:
             self.errors.append(e)

@@ -52,8 +52,10 @@ class ScopeInterpreter:
     def get_UnknownTypeContainer(self,value):
        if value is None:
            return self.get_NullTypeContainer(None)
-       return UnknownTypeContainer(value, self.dynamic_types.get_tag("Unknown"))
 
+       a= UnknownTypeContainer(value, self.dynamic_types.get_tag("Unknown"))
+
+       return a
     def get_Type_Container(self,value,type_name:str|Dynamic_Types):
         """
         Devuelve el TypeContainer con el valor y el tag el tag puede ser un str o un Dynamic_Type
@@ -71,7 +73,7 @@ class ScopeInterpreter:
 
                 return NullTypeContainer(value,self.dynamic_types.get_tag("<None>"))
             if type_name in ['Unknown','UKNOWN']:
-                return self.get_UnknownTypeContainer()
+                return self.get_UnknownTypeContainer(value)
 
             return TypeContainer(value,tag)
         else:

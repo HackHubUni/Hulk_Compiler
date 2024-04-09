@@ -18,6 +18,8 @@ def add_basic_types(scope: HulkScopeLinkedNode):
     scope.define_type_by_instance(VectorType())
     scope.define_type_by_instance(ObjectType())
     scope.define_type_by_instance(ErrorType())
+    scope.define_type_by_instance(RangeType())
+    scope.define_type_by_instance(UnknownType())
 
 
 def add_basic_functions(scope: HulkScopeLinkedNode):
