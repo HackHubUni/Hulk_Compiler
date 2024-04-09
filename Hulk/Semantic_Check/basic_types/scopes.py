@@ -26,6 +26,15 @@ class HulkScopeLinkedNode:
         self.scope: HulkScope = HulkScope()
         """This is the scope of this node"""
 
+    def is_var_defined(self, variable_name: str, local: bool = True) -> bool:
+        """ "Returns True if the Variable is defined. This method takes into account the argument 'local'.
+        If 'local' is False it will look for variable definition in a parent scope."""
+        if variable_name in self.scope.local_variables:
+            return True
+        if not self.parent or local:
+            return False
+        return self.parent.is_var_defined(variable_name, local)
+
     def define_variable(
         self, variable_info: VariableInfo, clone: bool = False
     ) -> VariableInfo:
@@ -38,49 +47,20 @@ class HulkScopeLinkedNode:
         self.scope.local_variables[info.name] = info
         return info
 
-    def get_variable(self, variable_name: str) -> VariableInfo:
+    def get_variable(self, variable_name: str, local: bool = False) -> VariableInfo:
         """Try to find the variable in the local scope and if it is not in here
-        it tries to find it in the parent scope.
-        And if the variable is not in any of the parent scopes it raise a semantic error
+        it tries to find it in the parent scope IF THE 'local' ARGUMENT IS FALSE.
+        And if the variable is not found it raise a semantic error
         """
         if variable_name in self.scope.local_variables:
             return self.scope.local_variables[variable_name]
-        if not self.parent:
+        if not self.parent or local:
             raise SemanticError(f"The variable ({variable_name}) is not defined")
-        return self.parent.get_variable(variable_name)
+        return self.parent.get_variable(variable_name, local)
 
-    def is_var_defined(self, variable_name: str) -> bool:
-        """ "Returns True if the Variable is defined"""
-        try:
-            self.get_variable(variable_name)
-            return True
-        except:
-            return False
-
-    def is_var_local(self, value_name: str) -> bool:
-        """Returns True if the variable is defined in the local scope"""
-        return value_name in self.scope.local_variables
-
-    def define_type(
-        self,
-        type_name: str,
-    ) -> TypeInfo:
-        """Create a new type in the actual scope"""
-        if type_name in self.scope.types:
-            raise SemanticError(f"The type: {type_name} is already defined")
-        new_type = TypeInfo(type_name)
-        self.scope.types[type_name] = new_type
-        return new_type
-
-    def define_type_by_instance(
-        self, type_info: TypeInfo, clone: bool = False
-    ) -> TypeInfo:
-        """Create a new type in the actual scope"""
-        if type_info.name in self.scope.types:
-            raise SemanticError(f"The type: {type_info.name} is already defined")
-        result = type_info if not clone else type_info.clone()
-        self.scope.types[type_info.name] = result
-        return result
+    def is_type_or_protocol_defined(self, name: str) -> bool:
+        """Returns True if there is a type or protocol defined with this name"""
+        return self.is_type_defined(name) or self.is_protocol_defined(name)
 
     def is_type_defined(self, type_name: str) -> bool:
         """Returns True if the type is defined in the context"""
@@ -90,13 +70,46 @@ class HulkScopeLinkedNode:
             return False
         return self.parent.is_type_defined(type_name)
 
-    def get_type(self, name: str) -> TypeInfo:  # TODO: Check this
+    def define_type(
+        self,
+        type_name: str,
+    ) -> TypeInfo:
+        """Create a new type in the actual scope"""
+        if self.is_type_or_protocol_defined(type_name):
+            raise SemanticError(
+                f"There is a Type or Protocol already defined with the same name '{type_name}'"
+            )
+        new_type = TypeInfo(type_name)
+        self.scope.types[type_name] = new_type
+        return new_type
+
+    def define_type_by_instance(
+        self, type_info: TypeInfo, clone: bool = False
+    ) -> TypeInfo:
+        """Create a new type in the actual scope"""
+        if self.is_type_or_protocol_defined(type_info.name):
+            raise SemanticError(
+                f"There is a Type or Protocol already defined with the same name '{type_info.name}'"
+            )
+        result = type_info if not clone else type_info.clone()
+        self.scope.types[type_info.name] = result
+        return result
+
+    def get_type(self, name: str) -> TypeInfo:
         """Returns the type information"""
         if name in self.scope.types:
             return self.scope.types[name]
         if not self.parent:
             raise SemanticError(f"The type ({name}) is not defined")
         return self.parent.get_type(name)
+
+    def is_function_defined(self, function_name: str) -> bool:
+        """Returns True if the function is defined"""
+        if function_name in self.scope.functions:
+            return True
+        if not self.parent:
+            return False
+        return self.parent.is_function_defined(function_name)
 
     def define_function(
         self, function_info: FunctionInfo, clone: bool = False
@@ -120,31 +133,6 @@ class HulkScopeLinkedNode:
             )
         return self.parent.get_function(function_name)
 
-    def function_defined(self, function_name: str) -> bool:
-        """Returns True if the function is defined in the context"""
-        if function_name in self.scope.functions:
-            return True
-        if not self.parent:
-            return False
-        return self.parent.function_defined(function_name)
-
-    def define_protocol(self, name: str):
-        """This method defines a new protocol if it has not been added before to the scope"""
-        if name in self.scope.protocols:
-            raise SemanticError(f"Type with the same name ({name}) already in context.")
-        protocol = ProtocolInfo(name)
-        self.scope.protocols[name] = protocol
-        return protocol
-
-    def define_protocol_by_instance(self, protocol_info: ProtocolInfo):
-        """This method defines a new protocol if it has not been added before to the scope"""
-        if protocol_info.name in self.scope.protocols:
-            raise SemanticError(
-                f"Type with the same name ({protocol_info.name}) already in context."
-            )
-        self.scope.protocols[protocol_info.name] = protocol_info
-        return protocol_info
-
     def is_protocol_defined(self, protocol_name: str) -> bool:
         """Returns True if the protocol is defined in the context"""
         if protocol_name in self.scope.protocols:
@@ -152,6 +140,25 @@ class HulkScopeLinkedNode:
         if not self.parent:
             return False
         return self.parent.is_protocol_defined(protocol_name)
+
+    def define_protocol(self, name: str):
+        """This method defines a new protocol if it has not been added before to the scope"""
+        if self.is_type_or_protocol_defined(name):
+            raise SemanticError(
+                f"There is a Type or Protocol already defined with the same name '{name}'"
+            )
+        protocol = ProtocolInfo(name)
+        self.scope.protocols[name] = protocol
+        return protocol
+
+    def define_protocol_by_instance(self, protocol_info: ProtocolInfo):
+        """This method defines a new protocol if it has not been added before to the scope"""
+        if self.is_type_or_protocol_defined(protocol_info.name):
+            raise SemanticError(
+                f"There is a Type or Protocol already defined with the same name '{protocol_info.name}'"
+            )
+        self.scope.protocols[protocol_info.name] = protocol_info
+        return protocol_info
 
     def get_protocol(self, protocol_name: str) -> ProtocolInfo:
         """Returns the protocol information"""

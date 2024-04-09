@@ -8,18 +8,36 @@ from abc import ABC
 from Hulk.tools.Ast import *
 
 
+class TypeInfoBase:
+    """Base class for TypeInfo and ProtocolInfo"""
+
+    def __init__(self, name: str) -> None:
+        self.name: str = name
+        """This is the name of the type or protocol"""
+        self.parent: Self = None
+        """This is it's parent. Could be None"""
+
+    def is_ancestor(self, other: Self) -> bool:
+        """Returns True if this type is an ancestor of the other type. False otherwise"""
+        if self.name == other.name:
+            return True
+        if self.parent is None:
+            return False
+        return self.parent.is_ancestor(other)
+
+
 class MethodInfoBase:
     def __init__(
         self,
         name: str,
         arguments: list[VariableInfo],
-        return_type: str,
+        return_type: TypeInfoBase,  # Could be a TypeInfo or a ProtocolInfo
     ):
         self.name: str = name
         """This is the name of the method"""
         self.arguments: list[VariableInfo] = arguments
         """This is a list of VariableInfo and stores the basic information of the parameters of the method"""
-        self.return_type: str = return_type
+        self.return_type: TypeInfoBase = return_type
         """This is the name of the return type"""
         if self.check_unique_names() is False:
             raise SemanticError(
@@ -43,13 +61,17 @@ class MethodInfoBase:
         eq: Callable[[VariableInfo, VariableInfo], bool] = lambda x, y: x.type == y.type
         if not isinstance(other, MethodInfoBase):
             return False
+        my_return_type: TypeInfoBase = self.return_type
+        other_return_type: TypeInfoBase = other.return_type
         return (
-            other.name == self.name
-            and other.return_type == self.return_type
+            other.name == self.name  # Igual Nombre
+            and other.return_type == self.return_type  #
             and len(other.arguments) == len(self.arguments)
             and all(
-                eq(element[0], element[1])
-                for element in zip(other.arguments, self.arguments)
+                eq(my_arguments, other_arguments)
+                for my_arguments, other_arguments in zip(
+                    other.arguments, self.arguments
+                )
             )
         )
 
