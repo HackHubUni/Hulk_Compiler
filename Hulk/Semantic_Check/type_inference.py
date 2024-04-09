@@ -18,47 +18,6 @@ class TypeInference:
         self.errors = errors if errors is not None and len(errors) >= 0 else []
         """The list of errors previously found in the program"""
 
-    def visit_expects(
-        self,
-        node: ExpressionNode,
-        scope: HulkScopeLinkedNode,
-        expected_return_value: TypeInfo,
-        from_where: str,
-    ) -> TypeInfo:
-        """This function calls the visit on the node given. But is useful to call this instead of the visit function in the cases
-        where there exist an expected return type from the visit. This will be used by the operators in the language
-        and by the function and method arguments
-        """
-        # TODO: Think about the case of expected_return_value been the NoneType
-        expression_type = self.visit(node, scope, from_where)
-        if isinstance(expression_type, ErrorType):
-            return expression_type
-        if isinstance(node, FunctionCallNode):
-            try:
-                function_info = scope.get_function(node.function_id)
-                if isinstance(function_info, BuiltinFunction):
-                    return expression_type
-                func_decl = function_info.function_pointer
-                if scope.get_type(func_decl.return_type):
-                    pass
-            except:
-                pass
-        elif isinstance(node, MethodCallWithIdentifierNode):
-            pass
-        elif isinstance(node, MethodCallWithExpressionNode):
-            pass
-        elif isinstance(node, VarNode):
-            pass
-        elif isinstance(node, VarDefNode):
-            pass
-        # AttrCall is not analyzed here because always have a type when the TypeDeclarationNode is processed.
-        if not expression_type.conforms_to(expected_return_value):
-            error = SemanticError(
-                f"{from_where}expects a type '{expected_return_value.name}', but '{expression_type}' was received, and it's not a subtype"
-            )
-            self.errors.append(error)
-        return expression_type
-
     def check_argument_types(
         self,
         argument_types: list[TypeInfo],
@@ -89,6 +48,7 @@ class TypeInference:
         self,
         node: AstNode,
         scope: HulkScopeLinkedNode,
+        expected_type: TypeInfo,
         from_where: str = "",
     ) -> TypeInfo:
         """This is the main method of the class. It will execute the type inference of the node"""
@@ -99,11 +59,12 @@ class TypeInference:
         self,
         node: ProgramNode,
         scope: HulkScopeLinkedNode,
+        expected_type: TypeInfo,
         from_where: str = "In the program file, ",
     ) -> TypeInfo:
         for declaration in node.declarations:
-            self.visit(declaration, self.global_scope, from_where)
-        self.visit(node.expr, self.global_scope, from_where)
+            self.visit(declaration, self.global_scope, expected_type, from_where)
+        self.visit(node.expr, self.global_scope, expected_type, from_where)
 
     # region Basic Types to infer. This are the leafs of the tree
 
@@ -112,21 +73,30 @@ class TypeInference:
         self,
         node: LiteralExpressionNode,
         scope: HulkScopeLinkedNode,
+        expected_type: TypeInfo,
         from_where: str,
     ) -> TypeInfo:
         """This is a leaf node. It has a type that is the same as the literal"""
+        returned_type = StringType()
         if isinstance(node, LiteralNumNode) or isinstance(node, ConstantNode):
-            return NumType()
+            returned_type = NumType()
         elif isinstance(node, LiteralBoolNode):
-            return BoolType()
-        # everything else will be taken as a string
-        return StringType()
+            returned_type = BoolType()
+        # everything else is a string
+        if not returned_type.conforms_to(expected_type):
+            error = SemanticError(
+                f"{from_where}the literal must have type {expected_type.name} but it is of type '{returned_type.name}'"
+            )
+            self.errors.append(error)
+            return expected_type
+        return returned_type
 
     @visitor.when(VarNode)
     def visit(
         self,
         node: VarNode,
         scope: HulkScopeLinkedNode,
+        expected_type: TypeInfo,
         from_where: str,
     ) -> TypeInfo:
         """This node represents the call of a variable in the scope to get it's value"""
@@ -138,15 +108,21 @@ class TypeInference:
             self.errors.append(error)
             return ErrorType()
         variable: VariableInfo = scope.get_variable(node.value)
-        return scope.get_type(
-            variable.type
-        )  # TODO: Check if there is possible that this returns an error
+        received_type: TypeInfo = scope.get_type(variable.type)
+        if not received_type.conforms_to(expected_type):
+            error = SemanticError(
+                f"{from_where}the variable must have type {expected_type.name} but it is of type '{received_type.name}'"
+            )
+            self.errors.append(error)
+            return expected_type
+        return received_type
 
     @visitor.when(VarDefNode)
     def visit(
         self,
         node: VarDefNode,
         scope: HulkScopeLinkedNode,
+        expected_type: TypeInfo,
         from_where: str,
     ) -> TypeInfo:
         """This node represents the declaration of a variable. It will return the type of the variable. Or the ErrorType if the type annotated is not defined"""
@@ -164,7 +140,11 @@ class TypeInference:
 
     @visitor.when(NegativeNode)
     def visit(
-        self, node: NegativeNode, scope: HulkScopeLinkedNode, from_where: str
+        self,
+        node: NegativeNode,
+        scope: HulkScopeLinkedNode,
+        expected_type: TypeInfo,
+        from_where: str,
     ) -> TypeInfo:
         """This node represents the negative prefix operator. It will return a number"""
         from_where += "when calling the negative operator, "
@@ -184,6 +164,7 @@ class TypeInference:
         self,
         node: NotNode,
         scope: HulkScopeLinkedNode,
+        expected_type: TypeInfo,
         from_where: str,
     ) -> TypeInfo:
         """This node represents the not operator. It will return a boolean"""
@@ -204,6 +185,7 @@ class TypeInference:
         self,
         node: BinaryExpressionNode,
         scope: HulkScopeLinkedNode,
+        expected_type: TypeInfo,
         from_where: str,
     ) -> TypeInfo:
         """This node represents the concatenation operator. It will return a string if everything is ok"""
@@ -229,7 +211,11 @@ class TypeInference:
 
     @visitor.when(BinaryNumExpressionNode)
     def visit(
-        self, node: BinaryNumExpressionNode, scope: HulkScopeLinkedNode, from_where: str
+        self,
+        node: BinaryNumExpressionNode,
+        scope: HulkScopeLinkedNode,
+        expected_type: TypeInfo,
+        from_where: str,
     ) -> TypeInfo:
         """This node represents the binary operators for numbers. It will return a number if both of its side expressions are of type Number"""
         # from_where += "when calling the binary operator, "
@@ -268,6 +254,7 @@ class TypeInference:
         self,
         node: BinaryBoolExpressionNode,
         scope: HulkScopeLinkedNode,
+        expected_type: TypeInfo,
         from_where: str,
     ) -> TypeInfo:
         """This node represents the binary operators for booleans. It will return a boolean if both of its side expressions are of type Boolean"""
@@ -311,6 +298,7 @@ class TypeInference:
         self,
         node: DynTestNode,
         scope: HulkScopeLinkedNode,
+        expected_type: TypeInfo,
         from_where: str,
     ) -> TypeInfo:
         """This node represents the dynamic test operator. It will return a boolean"""
@@ -331,7 +319,11 @@ class TypeInference:
 
     @visitor.when(AttrCallNode)
     def visit(
-        self, node: AttrCallNode, scope: HulkScopeLinkedNode, from_where: str
+        self,
+        node: AttrCallNode,
+        scope: HulkScopeLinkedNode,
+        expected_type: TypeInfo,
+        from_where: str,
     ) -> TypeInfo:
         """This node represents the call of an attribute of an object. Only in the 'self' instance"""
         from_where += f"when calling the attribute with name '{node.variable_id}', "
@@ -348,40 +340,15 @@ class TypeInference:
 
     @visitor.when(FunctionCallNode)
     def visit(
-        self, node: FunctionCallNode, scope: HulkScopeLinkedNode, from_where: str
+        self,
+        node: FunctionCallNode,
+        scope: HulkScopeLinkedNode,
+        expected_type: TypeInfo,
+        from_where: str,
     ) -> TypeInfo:
         """This node represents the call of a function. It will return the return type of the function"""
         from_where += f"when calling the function '{node.function_id}', "
-        if not scope.is_function_defined(node.function_id):
-            error = SemanticError(
-                f"{from_where}the function {node.function_id} is not defined in the scope"
-            )
-            self.errors.append(error)
-            return ErrorType()
-        function: FunctionInfo = scope.get_function(node.function_id)
-        # FIXME: Handle the case where the function_pointer is None, because is a builtin function
-        # function_def_node: FunctionDeclarationNode = function.function_pointer
-        # arguments = []
-        if isinstance(function, BuiltinFunction):
-            pass
-        # Check the argument types
-        expression_args: list[ExpressionNode] = node.arguments
-        argument_types: list[TypeInfo] = []
-        for index, expression in enumerate(expression_args):
-            from_where_index = from_where + f"in the argument number {index}, "
-            exp_type = self.visit(expression, scope, from_where_index)
-            argument_types.append(exp_type)
-
-        # Check the argument types and modify the AST
-        # self.check_argument_types(
-        #     argument_types,
-        #     function_def_node.arguments,  # FIXME: This could be None because, the function could be a Builtin Function, and this functions have no declaration pointer
-        #     from_where,
-        #     "function",
-        # )
-
-        # TODO: Change this to return a type from the scope NOT A STRING
-        return function.return_type
+        pass
 
     # endregion
 
@@ -389,7 +356,11 @@ class TypeInference:
 
     @visitor.when(ExpressionBlockNode)
     def visit(
-        self, node: ExpressionBlockNode, scope: HulkScopeLinkedNode, from_where: str
+        self,
+        node: ExpressionBlockNode,
+        scope: HulkScopeLinkedNode,
+        expected_type: TypeInfo,
+        from_where: str,
     ) -> TypeInfo:
         """This node represents a block of expressions. It will return the type of the last expression"""
         from_where += "when calling the block of expressions, "
@@ -407,6 +378,7 @@ class TypeInference:
         self,
         node: FunctionDeclarationNode,
         scope: HulkScopeLinkedNode,
+        expected_type: TypeInfo,
         from_where: str,
     ) -> TypeInfo:
         """This node represents the declaration of a function. It will return the return type of the function"""
@@ -437,6 +409,7 @@ class TypeInference:
         self,
         node: ProtocolDeclarationNode,
         scope: HulkScopeLinkedNode,
+        expected_type: TypeInfo,
         from_where: str,
     ) -> TypeInfo:
         """This node represents the declaration of a protocol. It will return the protocol type"""
