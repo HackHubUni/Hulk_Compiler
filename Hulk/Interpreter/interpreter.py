@@ -61,6 +61,8 @@ class Interpreter(object):
         Chequea  si el var_assing tiene el mismo type de la expression asignada
         Si el tipo del var_assig es unknown devuelve le asigna a la variable el tipo de la expression
         """
+        if var_assig is None or expr_to_assing is None:
+            raise SemanticError(f"{var_assig if None else expr_to_assing} no aceptado")
         if self.is_UnknowTypeContainer(var_assig):
             var_assig.type=expr_to_assing.type
         elif var_assig.type!=expr_to_assing.type:
