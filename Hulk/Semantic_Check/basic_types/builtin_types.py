@@ -89,7 +89,7 @@ class BoolType(BuiltinType):
 
     @staticmethod
     def static_name() -> str:
-        return "Bool"
+        return "Boolean"
 
     def __eq__(self, other: TypeInfo):
         return other.name == self.name or isinstance(other, BoolType)

@@ -309,12 +309,13 @@ class ProtocolInfo:
     def is_method_defined(
         self,
         method_name: str,
+        local: bool = False,
     ) -> bool:
         """Returns True if the method with this name is defined in the protocol or in an ancestor.
         False otherwise."""
         if method_name in self.methods:
             return True
-        if self.parent is None:
+        if self.parent is None or local:
             return False
         return self.parent.is_method_defined(method_name)
 

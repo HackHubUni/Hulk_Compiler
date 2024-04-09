@@ -62,6 +62,16 @@ class HulkScopeLinkedNode:
         """Returns True if there is a type or protocol defined with this name"""
         return self.is_type_defined(name) or self.is_protocol_defined(name)
 
+    def get_type_or_protocol_by_name(self, name: str) -> TypeInfo | ProtocolInfo:
+        """Returns the type or protocol information given a name"""
+        if self.is_type_defined(name):
+            return self.get_type(name)
+        if self.is_protocol_defined(name):
+            return self.get_protocol(name)
+        raise SemanticError(
+            f"There is no type or protocol defined with the name ({name})"
+        )
+
     def is_type_defined(self, type_name: str) -> bool:
         """Returns True if the type is defined in the context"""
         if type_name in self.scope.types:

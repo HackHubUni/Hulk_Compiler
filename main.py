@@ -39,6 +39,6 @@ def evaluate(text: str):
         print("No hay errores de semántica")
 
 
-with open("./examples/vector_example.hulk", "r") as file:
+with open("./examples/tricky_inference.hulk", "r") as file:
     text: str = file.read()
     evaluate(text)

@@ -6,6 +6,14 @@ function do_something(a,b,c) {
     do_nothing(c);
 }
 
+protocol Hashable {
+    hash():Number;
+}
+
+protocol Equatable extends Hashable {
+    equals(other: Object): Boolean;
+}
+
 type Basic {
     b = do_nothing(3);
     c = do_something(0,0,0);
