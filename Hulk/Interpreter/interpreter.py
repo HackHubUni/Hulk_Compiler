@@ -101,7 +101,7 @@ class Interpreter(object):
 
             for i, val in enumerate(temp, 0):
                 if val is None:
-                    raise SemanticError(f"No pueden ver argumentos en la función {name} None")
+                    raise SemanticError(f"No pueden ver argumentos en la instancia del type:{name} None")
                 args.append(val.value)
                 new_scope.set_arg(arg_name[i], val)
             # Si la funcion es building esta definida
@@ -142,7 +142,7 @@ class Interpreter(object):
                 raise SemanticError(f"La función {name} requiere {len(args_name)} argumentos y tiene {len(temp)}")
             for i, val in enumerate(temp, 0):
                 if val is None:
-                    raise SemanticError(f"No pueden ver argumentos en la función {name} None")
+                    raise SemanticError(f"No pueden ver argumentos en el constructor del type:{name} con nombre: {name}  no pueden ser None")
                 args.append(val.value)
                 new_scope.set_arg(args_name[i], val)
 
@@ -162,6 +162,9 @@ class Interpreter(object):
                 varx.append(var)
                 new_scope.set_attr(name,var)
 
+
+
+
             #Ahora se devuelve un TypeContainer con el scope donde se trabaja
             return self.get_Type_Container(new_scope,name)
 
@@ -180,6 +183,19 @@ class Interpreter(object):
         except SemanticError as e:
             self.errors.append(e)
 
+    def devolver_en_type_container_los_argumentos_de_inicialización_y_ponerlos_en_el_scope(self,args_name: list[str],arguments: list,new_scope:CallScope,name:str):
+        args = []
+        temp: list[TypeContainer] = [self.visit(arg, new_scope) for arg in arguments]
+
+        if len(temp) != len(args_name):
+            # Por si la instancia de llamado difiere con la definida
+            raise SemanticError(f"La función {name} requiere {len(args_name)} argumentos y tiene {len(temp)}")
+        for i, val in enumerate(temp, 0):
+            if val is None:
+                raise SemanticError(f"No pueden ver argumentos en el método {name} None")
+            args.append(val.value)
+            new_scope.set_arg(args_name[i], val)
+
     # TODO:Terminar Este
     @visitor.when(MethodCallWithIdentifierNode)
     def visit(self, node: MethodCallWithIdentifierNode, parent_scope: CallScope):
@@ -187,7 +203,23 @@ class Interpreter(object):
             type_id:str=node.object_id
             name:str=node.method_id
             new_scope = parent_scope.get_scope_child()
-            new_scope.set_method_call(type_id,name)
+            method_info:TypeMethodInfo=new_scope.set_method_call(type_id,name)
+            node.args
+            #Se clona para evitar problemas en las próximas instancias
+            method_info:TypeMethodInfo=copy.deepcopy(method_info)
+            #encontrar los argumentos del metodo
+            args_name: list[str] = method_info.get_arguments_name()
+            args=node.args
+            self.devolver_en_type_container_los_argumentos_de_inicialización_y_ponerlos_en_el_scope(args_name,args,new_scope,name)
+
+            #Tomar el arbol del Ast que lo inicializa
+            new_scope.get_method_info_(name)
+            node_declaration_pointer:MethodNode=method_info.declaration_pointer
+            body=node_declaration_pointer.body
+            type_container_return:TypeContainer=self.visit(body,new_scope)
+
+            return self.is_this_type(type_container_return,node_declaration_pointer.return_type)
+
 
 
             self.visit(method, new_scope)

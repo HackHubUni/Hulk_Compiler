@@ -34,6 +34,12 @@ class MethodInfoBase:
         """Returns a clone of the argument variables"""
         return [var.clone() for var in self.arguments]
 
+    def get_arguments_name(self)->list[str]:
+        lis=[]
+        for val in self.get_arguments():
+            lis.append(val.name)
+        return lis
+
     def __str__(self):
         params = ", ".join(str(var_info) for var_info in self.arguments)
         return f"[method] {self.name}({params}): {self.return_type.name};"

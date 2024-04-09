@@ -93,6 +93,8 @@ class InterpreterScope:
         except KeyError:
             raise SemanticError(f'El método {method_name} no existe en el type {type_name}')
 
+
+
     def get_var_value(self, var_node_name: str)->TypeContainer:
         try:
             #Como el unico con parent=None es el Program node que no tiene variables
