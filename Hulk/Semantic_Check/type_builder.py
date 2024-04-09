@@ -40,16 +40,14 @@ class TypeBuilder:
                     )
                 )
                 var_def.var_name = get_unique_name_with_guid(var_def.var_name)
-            var_info = get_variable_info_from_var_def(
-                var_def
-            )  # This line fix the empty or None return type
             # Check if the type of the argument exists
             if not scope.is_type_defined(var_def.var_type):
                 error = SemanticError(
                     f"{from_where}, in the parameter '{var_def.var_name}', there is no type defined with the name '{var_def.var_type}'"
                 )
                 self.errors.append(error)
-                var_def.var_type = ErrorType.static_name()
+                var_def.var_type = NoneType.static_name()
+            var_info = get_variable_info_from_var_def(var_def)
             return_arguments.append(var_info)
             args_names.add(var_def.var_name)
         return return_arguments
@@ -89,7 +87,7 @@ class TypeBuilder:
                 f"In the type '{node.type_name}', there is no type defined with the name '{node.parent_type_id}'"
             )
             self.errors.append(error)
-            node.parent_type_id = ErrorType.static_name()
+            node.parent_type_id = ObjectType.static_name()
 
         parent_type: TypeInfo = scope.get_type(node.parent_type_id)
 
@@ -98,21 +96,12 @@ class TypeBuilder:
                 f"The type '{node.parent_type_id}' is a builtin type that cannot be used as a parent type"
             )
             self.errors.append(error)
-            parent_type = scope.get_type(ErrorType.static_name())
+            node.parent_type_id = ObjectType.static_name()
+            parent_type = scope.get_type(node.parent_type_id)
 
         type_info.set_parent(parent_type)
+
         features = node.features
-
-        # TODO: Check if this could be moved to the next section of the Semantic Checker
-        # Check if the length of the parent initialization expression match the length of the parent arguments
-        if len(node.parent_initialization_expressions) != len(
-            parent_type.constructor_arguments
-        ):
-            error = SemanticError(
-                f"In the type '{node.type_name}', the number of arguments in the parent initialization expression does not match the number of arguments in the parent type '{node.parent_type_id} declaration'"
-            )
-            self.errors.append(error)
-
         # iterate over the features of the type
         for feature in features:
             self.visit(feature, scope)
@@ -121,6 +110,16 @@ class TypeBuilder:
     def visit(self, node: ProtocolDeclarationNode, scope: HulkScopeLinkedNode):
         # get the ProtocolInfo from the scope
         protocol_info: ProtocolInfo = scope.get_protocol(node.protocol_name)
+        # In this pass is not possible to check for cyclic inheritance of protocols because is in this pass where we assign the immediate parent
+        if not scope.is_protocol_defined(node.parent):
+            error = SemanticError(
+                f"In the declaration of the parent of the protocol '{node.protocol_name}', there is no protocol defined with the name '{node.parent}'"
+            )
+            self.errors.append(error)
+            node.parent = None
+            protocol_info.parent = node.parent
+        else:
+            protocol_info.parent = scope.get_protocol(node.parent)
         self.current_protocol = protocol_info
         # iterate over the methods of the protocol
         for method in node.methods:
@@ -143,7 +142,7 @@ class TypeBuilder:
                 f"In the return type of the function '{node.function_name}', there is no type defined with the name '{function_info.return_type}'"
             )
             self.errors.append(error)
-            function_info.return_type = ErrorType.static_name()
+            function_info.return_type = NoneType.static_name()
 
     @visitor.when(MethodNode)
     def visit(self, node: MethodNode, scope: HulkScopeLinkedNode):
@@ -172,7 +171,7 @@ class TypeBuilder:
                 f"In the method '{method_name}', there is no type defined with the name '{node.return_type}'"
             )
             self.errors.append(error)
-            node.return_type = ErrorType.static_name()
+            node.return_type = NoneType.static_name()
 
         current_type.define_method(
             TypeMethodInfo(method_name, arguments, node.return_type, node)
@@ -183,7 +182,7 @@ class TypeBuilder:
         """This method is executed for processing the assignment of a variable
         inside a type. This type is stored in the variable self.current_type"""
         # TODO: Find out what to do with the Expression Initialization of the variable. Remember this is necessary for the interpreter
-        current_type = self.current_type
+        current_type: TypeInfo = self.current_type
         var_definition: VarDefNode = node.var_definition
         var_name: str = var_definition.var_name
         if current_type.is_attribute_defined(var_name):
@@ -192,13 +191,13 @@ class TypeBuilder:
             )
             self.errors.append(error)
             var_name = var_definition.var_name = get_unique_name_with_guid(var_name)
-        var_info = get_variable_info_from_var_def(var_definition)
+        var_info: VariableInfo = get_variable_info_from_var_def(var_definition)
         if not scope.is_type_defined(var_definition.var_type):
             error = SemanticError(
                 f"In the type '{current_type.name}', in the attribute '{var_name}', there is no type defined with the name '{var_definition.var_type}'"
             )
             self.errors.append(error)
-            var_info.type = var_definition.var_type = ErrorType.static_name()
+            var_info.type = var_definition.var_type = NoneType.static_name()
         var_info.initialization_expression = node.expression_to_evaluate
         current_type.define_attribute(var_info)
 
@@ -207,29 +206,22 @@ class TypeBuilder:
         """This method is executed for processing the declaration of a method
         inside a protocol. This protocol type is stored in the variable self.current_protocol
         """
-        current_protocol = self.current_protocol
-        protocol_method_name = node.protocol_method_name
-        # Check if the name of the protocol method is already defined
-        if current_protocol.is_method_defined(protocol_method_name):
-            error = SemanticError(
-                f"The method '{protocol_method_name}' is already defined in the protocol '{current_protocol.protocol_id}'"
-            )
-            self.errors.append(error)
-            # Give a new name to the method with a GUID
-            protocol_method_name = node.protocol_method_name = (
-                get_unique_name_with_guid(protocol_method_name)
-            )
-        arguments: list[VariableInfo] = self.check_arguments(
-            node.arguments, scope, f"In the method '{protocol_method_name}'"
+        current_protocol: ProtocolInfo = self.current_protocol
+        protocol_method_name: str = node.protocol_method_name
+        protocol_method: MethodInfoBase = current_protocol.get_method(
+            protocol_method_name
         )
-        fix_method_return_type(node)
+        # Check the arguments of the protocol method
+        arguments: list[VariableInfo] = self.check_arguments(
+            node.arguments, scope, f"In the protocol method '{protocol_method_name}'"
+        )
+        protocol_method.arguments = arguments
+        # Check the return type of the protocol method
         if not scope.is_type_defined(node.return_type):
             error = SemanticError(
-                f"In the protocol '{current_protocol.name}', in the method '{protocol_method_name}', there is no type defined with the return type name '{node.return_type}'"
+                f"In the return type of the protocol method '{protocol_method_name}', there is no type defined with the name '{node.return_type}'"
             )
             self.errors.append(error)
             node.return_type = ErrorType.static_name()
-
-        current_protocol.define_method(
-            MethodInfoBase(protocol_method_name, arguments, node.return_type)
-        )
+        protocol_method.return_type = node.return_type
+        # TODO: In the next pass is needed to check if some of the methods in the protocol are defined in a parent protocol

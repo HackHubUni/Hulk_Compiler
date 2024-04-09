@@ -69,6 +69,7 @@ class TypeCollector:
         self.errors = errors if len(errors) >= 0 else []
         self.global_scope: HulkScopeLinkedNode = scope
         fill_scope_with_builtin_data(self.global_scope)
+        self.current_protocol: ProtocolInfo = None
 
     @visitor.on("node")
     def visit(self, node: AstNode, scope: HulkScopeLinkedNode):
@@ -110,7 +111,50 @@ class TypeCollector:
                 SemanticError(f"Protocol {node.protocol_name} is already defined")
             )
             node.protocol_name = get_unique_name_with_guid(node.protocol_name)
-        scope.define_protocol(node.protocol_name)
+
+        # Check if the parent of the protocol is not the same protocol. Because that's not possible
+        # TODO: Remove this and do it in the next pass
+        if node.parent and node.parent == node.protocol_name:
+            self.errors.append(
+                SemanticError(f"Protocol '{node.protocol_name}' cannot extends itself")
+            )
+            node.parent = None
+
+        protocol_info: ProtocolInfo = scope.define_protocol(node.protocol_name)
+        self.current_protocol = protocol_info
+        # Now we define the protocol methods
+        for method in node.methods:
+            self.visit(method, scope)
+
+    # TODO: Remove this and added it in the next pass
+    @visitor.when(ProtocolMethodNode)
+    def visit(self, node: ProtocolMethodNode, scope: HulkScopeLinkedNode):
+        method_name: str = node.protocol_method_name
+        method_return_type: str = node.return_type
+
+        if not scope.is_type_defined(method_return_type):
+            self.errors.append(
+                SemanticError(
+                    f"Return type {method_return_type} is not defined in the scope"
+                )
+            )
+            method_return_type = ErrorType.static_name()
+        # Now the arguments
+        arguments: list[VariableInfo] = [
+            get_variable_info_from_var_def(arg) for arg in node.arguments
+        ]
+        if self.current_protocol.is_method_defined(method_name):
+            self.errors.append(
+                SemanticError(
+                    f"Method {method_name} is already defined in protocol {self.current_protocol.name}"
+                )
+            )
+            node.protocol_method_name = get_unique_name_with_guid(method_name)
+            method_name = node.protocol_method_name
+        method_info_base: MethodInfoBase = MethodInfoBase(
+            method_name, arguments, method_return_type
+        )
+        self.current_protocol.define_method(method_info_base)
 
     @visitor.when(FunctionDeclarationNode)
     def visit(self, node: FunctionDeclarationNode, scope: HulkScopeLinkedNode):

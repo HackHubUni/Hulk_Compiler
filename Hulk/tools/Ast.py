@@ -607,14 +607,14 @@ class ProtocolDeclarationNode(DeclarationNode):
         self,
         protocol_name: str,
         methods: list[ProtocolMethodNode],
-        parents: list[str] = None,
+        parent: str = None,
     ):
         self.protocol_name: str = protocol_name
         """This is the name of the Protocol"""
         self.methods: list[ProtocolMethodNode] = methods
         """A list with all the protocol methods"""
-        self.parents: list[str] = parents
-        """A list with all the protocol parents that this protocol extends"""
+        self.parent: str = parent
+        """The parent protocol that this protocol extends"""
 
 
 # endregion

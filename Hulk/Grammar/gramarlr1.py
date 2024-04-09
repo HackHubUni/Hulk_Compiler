@@ -204,7 +204,7 @@ class Gramarlr1:
         Feature_List %= G.Epsilon, lambda h, s: []
 
         Protocol_Declaration %= protocol_ + type_id_ + o_brace_ + Protocol_Methods + c_brace_, lambda h, s: ProtocolDeclarationNode(s[2], s[4])
-        Protocol_Declaration %= protocol_ + type_id_ + extends_ + Type_List + o_brace_ + Protocol_Methods + c_brace_, lambda h, s: ProtocolDeclarationNode(
+        Protocol_Declaration %= protocol_ + type_id_ + extends_ + type_id_ + o_brace_ + Protocol_Methods + c_brace_, lambda h, s: ProtocolDeclarationNode(
             s[2], s[6], s[4])
 
         Protocol_Methods %= id_ + o_par_ + Full_Type_Arguments + c_par_ + colon_ + type_id_ + semi_colon_ + Protocol_Methods, lambda h, s: [
@@ -226,5 +226,5 @@ class Gramarlr1:
         Fully_Typed_Tail %= comma_ + id_ + colon_ + type_id_ + Fully_Typed_Tail, lambda h, s: [VarDefNode(s[2], s[4])] + s[5]
         Fully_Typed_Tail %= G.Epsilon, lambda h, s: []
 
-        Type_List %= type_id_, lambda h, s: [s[1]]
-        Type_List %= type_id_ + comma_ + Type_List, lambda h, s: [s[1]] + s[3]
+        # Type_List %= type_id_, lambda h, s: [s[1]]
+        # Type_List %= type_id_ + comma_ + Type_List, lambda h, s: [s[1]] + s[3]

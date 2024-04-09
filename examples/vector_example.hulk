@@ -1,0 +1,7 @@
+protocol P {
+    nothing(x)
+}
+
+
+let v = [x || x in range(0,11)] in
+                print(v[0+5]);

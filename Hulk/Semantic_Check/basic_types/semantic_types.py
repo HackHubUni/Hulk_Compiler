@@ -41,7 +41,7 @@ class MethodInfoBase:
 
     def __eq__(self, other):
         eq: Callable[[VariableInfo, VariableInfo], bool] = lambda x, y: x.type == y.type
-        if not isinstance(other, TypeMethodInfo):
+        if not isinstance(other, MethodInfoBase):
             return False
         return (
             other.name == self.name
@@ -144,16 +144,13 @@ class TypeInfo:
         self.attributes[attribute.name] = attribute if not clone else attribute.clone()
 
     def is_method_defined(self, name: str) -> bool:
-        """Returns True if the method with this name is defined in the type or in an ancestor.
+        """Returns True if the method with this name is defined in the type.
         False otherwise."""
-        if name in self.methods:
-            return True
-        if self.parent is None:
-            return False
-        return self.parent.is_method_defined(name)
+        return name in self.methods
 
     def get_method(self, name: str):
-        """Returns the method with this name. If not found raise a SemanticError"""
+        """Returns the method with this name int this type. If not found in this type, then it search in the parents.
+        And if still not found, then it raise a SemanticError"""
         if name in self.methods:
             return self.methods[name]
         if self.parent is None:
@@ -193,16 +190,18 @@ class TypeInfo:
             or self.parent is not None
             and self.parent.conforms_to(other)
         )
-    
+
     @staticmethod
-    def common_ancestor(type_1:Self, type_2: Self):
+    def common_ancestor(type_1: Self, type_2: Self):
         pass
-    
+
     @staticmethod
-    def common_ancestor(types:list[Self]):
+    def common_ancestor(types: list[Self]):
         if len(types) == 0:
-            raise Exception(f'There is no element in the type list to check for common ancestors')
-        ancestor:TypeInfo = types[0]
+            raise Exception(
+                f"There is no element in the type list to check for common ancestors"
+            )
+        ancestor: TypeInfo = types[0]
         pass
 
     def bypass(self):
@@ -285,7 +284,10 @@ class ProtocolInfo:
         """Define the parent protocol of this protocol"""
         self.parent = parent
 
-    def is_method_defined(self, method_name: str) -> bool:
+    def is_method_defined(
+        self,
+        method_name: str,
+    ) -> bool:
         """Returns True if the method with this name is defined in the protocol or in an ancestor.
         False otherwise."""
         if method_name in self.methods:
@@ -302,6 +304,22 @@ class ProtocolInfo:
                 f"The method with name '{protocol_method.name}' is already defined in the protocol '{self.name}'"
             )
         self.methods[protocol_method.name] = protocol_method
+
+    def have_as_ancestor(self, other_protocol: Self) -> bool:
+        """Returns True if this protocol have the other protocol as ancestor. False otherwise."""
+        if self.name == other_protocol.name:
+            return True
+        if self.parent is None:
+            return False
+        return self.parent.have_as_ancestor(other_protocol)
+
+    def get_method(self, protocol_method_name: str) -> MethodInfoBase:
+        """Returns the method with this name. If not found raise a SemanticError"""
+        if protocol_method_name in self.methods:
+            return self.methods[protocol_method_name]
+        raise SemanticError(
+            f"The protocol ({self.name}) has no method with name ({protocol_method_name})"
+        )
 
     def __str__(self):
         output = f"protocol {self.name}"

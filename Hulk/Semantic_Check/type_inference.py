@@ -59,9 +59,7 @@ class TypeInference:
             self.errors.append(error)
         return expression_type
 
-    def check_argument_types[
-        T
-    ](
+    def check_argument_types(
         self,
         argument_types: list[TypeInfo],
         original_arguments_defs: list[VarDefNode],
@@ -143,6 +141,22 @@ class TypeInference:
         return scope.get_type(
             variable.type
         )  # TODO: Check if there is possible that this returns an error
+
+    @visitor.when(VarDefNode)
+    def visit(
+        self,
+        node: VarDefNode,
+        scope: HulkScopeLinkedNode,
+        from_where: str,
+    ) -> TypeInfo:
+        """This node represents the declaration of a variable. It will return the type of the variable. Or the ErrorType if the type annotated is not defined"""
+        if not scope.is_type_defined(node.var_type):
+            error = SemanticError(
+                f"{from_where}the type {node.var_type} is not defined"
+            )
+            self.errors.append(error)
+            return ErrorType()
+        return scope.get_type(node.var_type)
 
     # endregion
 
@@ -368,6 +382,87 @@ class TypeInference:
 
         # TODO: Change this to return a type from the scope NOT A STRING
         return function.return_type
+
+    # endregion
+
+    # region Miscellaneous
+
+    @visitor.when(ExpressionBlockNode)
+    def visit(
+        self, node: ExpressionBlockNode, scope: HulkScopeLinkedNode, from_where: str
+    ) -> TypeInfo:
+        """This node represents a block of expressions. It will return the type of the last expression"""
+        from_where += "when calling the block of expressions, "
+        return_type = NoneType()
+        for expression in node.expression_list:
+            return_type = self.visit(expression, scope, from_where)
+        return return_type
+
+    # endregion
+
+    # region Declarations
+
+    @visitor.when(FunctionDeclarationNode)
+    def visit(
+        self,
+        node: FunctionDeclarationNode,
+        scope: HulkScopeLinkedNode,
+        from_where: str,
+    ) -> TypeInfo:
+        """This node represents the declaration of a function. It will return the return type of the function"""
+        from_where += f"when declaring the function '{node.function_id}', "
+        # Check the argument types
+        arguments_names: list[str] = [var_def.var_name for var_def in node.arguments]
+        argument_types: list[TypeInfo] = [
+            self.visit(
+                var_def,
+                scope,
+                from_where + f"in the argument with name '{var_def.var_name}'",
+            )
+            for var_def in node.arguments
+        ]
+        variables_for_new_scope = [
+            VariableInfo(name, type)
+            for name, type in zip(arguments_names, argument_types)
+        ]
+        new_scope = HulkScopeLinkedNode(scope)
+        for var in variables_for_new_scope:
+            new_scope.define_variable(var)
+        return_type: TypeInfo = self.visit(
+            node.body, new_scope, from_where + "in the body of the function, "
+        )
+
+    @visitor.when(ProtocolDeclarationNode)
+    def visit(
+        self,
+        node: ProtocolDeclarationNode,
+        scope: HulkScopeLinkedNode,
+        from_where: str,
+    ) -> TypeInfo:
+        """This node represents the declaration of a protocol. It will return the protocol type"""
+        from_where += f"when declaring the protocol '{node.protocol_name}', "
+        # In this pass we need to check the following:
+        # - If there is a cyclic inheritance
+        # - If the methods defined in this protocol doesn't exists in any of the parent protocols
+        protocol_info: ProtocolInfo = scope.get_protocol(node.protocol_name)
+        if not node.parent:
+            return protocol_info
+        parent_protocol: ProtocolInfo = scope.get_protocol(node.parent)
+        if parent_protocol.have_as_ancestor(protocol_info):
+            error = SemanticError(
+                f"{from_where}the protocol '{node.protocol_name}' have a cyclic reference with the protocol '{node.parent}'"
+            )
+            self.errors.append(error)
+            node.parent = None
+            protocol_info.parent = None
+        # Now it's time to check if a method declaration in the protocol is not in any of the parent protocols
+        for method in node.methods:
+            if parent_protocol.is_method_defined(method.protocol_method_name):
+                error = SemanticError(
+                    f"{from_where}the method '{method.protocol_method_name}' is already defined in a parent protocol"
+                )
+                self.errors.append(error)
+        return protocol_info
 
 
 # endregion
