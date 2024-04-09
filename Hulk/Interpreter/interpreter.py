@@ -155,15 +155,15 @@ class Interpreter(object):
             varx=[]
             #Tomar los nombres de los atributos
             for attr in attrs.values():
-                name=attr.name
+                name_attr=attr.name
 
-                attrs_name.append(name)
+                attrs_name.append(name_attr)
                 var:TypeContainer=self.visit(attr.initialization_expression,new_scope)
                 varx.append(var)
-                new_scope.set_attr(name,var)
+                new_scope.set_attr(name_attr,var)
 
 
-
+            #Ahora se guardan en el scope las ast para convertir de los metodos
 
             #Ahora se devuelve un TypeContainer con el scope donde se trabaja
             return self.get_Type_Container(new_scope,name)
@@ -196,10 +196,20 @@ class Interpreter(object):
             args.append(val.value)
             new_scope.set_arg(args_name[i], val)
 
-    # TODO:Terminar Este
+    @visitor.when(MethodCallListNode)
+    def visit(self,node:MethodCallListNode,parent_scope: CallScope):
+        lis=[]
+        for method in node.methods:
+            type_container=self.visit(method,parent_scope)
+            lis.append(type_container)
+        return lis[-1]
+
     @visitor.when(MethodCallWithIdentifierNode)
     def visit(self, node: MethodCallWithIdentifierNode, parent_scope: CallScope):
         try:
+
+           get_the_Type_instance_
+
             type_id:str=node.object_id
             name:str=node.method_id
             new_scope = parent_scope.get_scope_child()
@@ -230,7 +240,8 @@ class Interpreter(object):
     def visit(self, node: LetNode, parent_scope: CallScope):
         try:
 
-            new_scope=parent_scope.get_scope_child()
+            new_scope:CallScope=parent_scope.get_scope_child()
+            new_scope.set_let()
             #Por cada asignacion hace visit al varDefNode para agregarla al scope
             for arg in node.assign_list:
                 self.visit(arg, new_scope)

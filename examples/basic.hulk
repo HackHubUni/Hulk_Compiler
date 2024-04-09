@@ -10,20 +10,18 @@ function xxx()=>4;
 //p=xxx();
 //}
 
-type Point (x,y) {
-    x = x;
-    y = y;
+type Point {
+    x = 0;
+    y = 0;
 
     getX() => self.x;
-    getY() => self.getX();
+    getY() => self.y;
 
-
-
+    setX(x) => self.x := x;
+    setY(y) => self.y := y;
 }
-
-
-let pt = new Point(3,4) in
-    print("Hola");
+let pt = new Point() in
+    print(pt.getY());
 
 
 

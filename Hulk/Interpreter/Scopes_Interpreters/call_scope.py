@@ -7,6 +7,7 @@ from Hulk.tools.Ast import VarNode
 
 
 class Type_Scope(Enum):
+    Let = 4
     Program=-1
     Null = 0
     Func_Call = 1
@@ -73,6 +74,11 @@ class InterpreterScope:
         self.name = name
         return self.get_type_info_(name)
 
+    def set_let(self):
+        """Le dice al scope que es de un let y pone el nombre del let"""
+        self.tag=Type_Scope.Let
+
+
     def get_father_type_name_by_method(self,method_name:str)->str:
         if self.parent is None:
             raise SemanticError(f'El método {method_name} no existe en ningún type')
@@ -123,11 +129,13 @@ class InterpreterScope:
         except:
             raise SemanticError(f'El atributo {attr_name} no existe')
 
+
+
 class TypeInstantiateScope(InterpreterScope):
     def __init__(self, scope: HulkScope, parent: Self = None, iter_count=0):
         super().__init__(scope, parent, iter_count)()
         self.types_instantiates: dict[str, Self] = {}
-
+        self.methods_nodes:dict[str,MethodNode]={}
 
 class CallScope(InterpreterScope):
 
@@ -135,3 +143,7 @@ class CallScope(InterpreterScope):
         super().__init__(scope, parent, iter_count,it_from_program_node)
 
         self.types_instantiates: dict[str, TypeInstantiateScope] = {}
+
+
+    def get_the_type_instance_by_type_id(self,type_id):
+        if self.tag==Type_Scope.Type_Instantiate or self.tag==Type_Scope.Let
