@@ -183,6 +183,7 @@ class Interpreter(object):
         except SemanticError as e:
             self.errors.append(e)
 
+      #FIXME:Cambiar el nombre de la funcion de abajo en realidad solo setea los argumentos en el scope
     def devolver_en_type_container_los_argumentos_de_inicialización_y_ponerlos_en_el_scope(self,args_name: list[str],arguments: list,new_scope:CallScope,name:str):
         args = []
         temp: list[TypeContainer] = [self.visit(arg, new_scope) for arg in arguments]
@@ -208,31 +209,44 @@ class Interpreter(object):
     def visit(self, node: MethodCallWithIdentifierNode, parent_scope: CallScope):
         try:
 
-           get_the_Type_instance_
+
 
             type_id:str=node.object_id
             name:str=node.method_id
-            new_scope = parent_scope.get_scope_child()
-            method_info:TypeMethodInfo=new_scope.set_method_call(type_id,name)
-            node.args
+            instance_type_container=parent_scope.get_the_type_instance_by_type_id(type_id)
+            #en el contenedor es que esta el scope a usar
+            method_instance_scope:CallScope = instance_type_container.value
+            type_=method_instance_scope.name
+
+            #Ahora se cra un hijo del scope de la instancia para trabajr con la funcion
+            new_scope=method_instance_scope.get_scope_child()
+            #Se setea el nuevo scope
+            method_info: TypeMethodInfo = new_scope.set_method_call(type_, name)
+
             #Se clona para evitar problemas en las próximas instancias
             method_info:TypeMethodInfo=copy.deepcopy(method_info)
+
             #encontrar los argumentos del metodo
             args_name: list[str] = method_info.get_arguments_name()
             args=node.args
             self.devolver_en_type_container_los_argumentos_de_inicialización_y_ponerlos_en_el_scope(args_name,args,new_scope,name)
 
             #Tomar el arbol del Ast que lo inicializa
-            new_scope.get_method_info_(name)
             node_declaration_pointer:MethodNode=method_info.declaration_pointer
             body=node_declaration_pointer.body
-            type_container_return:TypeContainer=self.visit(body,new_scope)
 
-            return self.is_this_type(type_container_return,node_declaration_pointer.return_type)
+            #Valor de retorno del llamado
+            type_container_return: TypeContainer = self.visit(body, new_scope)
+
+            if not self.is_this_type(type_container_return,node_declaration_pointer.return_type,is_checking=True):
+                raise SemanticError(f"El type esperado era {node_declaration_pointer.return_type} y el obtenido es {type_container_return.type}")
+
+
+            return type_container_return
 
 
 
-            self.visit(method, new_scope)
+
 
         except SemanticError as e:
             self.errors.append(e)

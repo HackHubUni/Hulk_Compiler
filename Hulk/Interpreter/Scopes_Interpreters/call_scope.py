@@ -8,7 +8,7 @@ from Hulk.tools.Ast import VarNode
 
 class Type_Scope(Enum):
     Let = 4
-    Program=-1
+    Program = -1
     Null = 0
     Func_Call = 1
     Type_Instantiate = 2
@@ -16,17 +16,19 @@ class Type_Scope(Enum):
 
 
 class InterpreterScope:
-    def __init__(self, scope: HulkScope, parent: Self = None, iter_count=0,it_from_program_node:bool=False):
+    def __init__(self, scope: HulkScope, parent: Self = None, iter_count=0, it_from_program_node: bool = False):
         self.name: str = ""
         self.tag: Type_Scope = Type_Scope.Program if it_from_program_node else Type_Scope.Null
         self.scope = scope.clone()
         self.parent = parent
         self.childs = []
         self.args: dict[str:TypeContainer] = {}
-        self.attrs:dict[str:TypeContainer]={}
+        """Para guardar los argumentos de definicion"""
+        self.attrs: dict[str:TypeContainer] = {}
+        """Para guardar los atributos de los types"""
         self.iteration_num = iter_count
         self.vector: dict[str:list] = {}
-        #self.attrs:
+        # self.attrs:
         if self.iteration_num > 500:
             raise SemanticError(f"La StackOverFlow {500} llamados")
 
@@ -56,12 +58,12 @@ class InterpreterScope:
 
         self.args[name] = typeContainer
 
-    def set_attr(self,name: str, typeContainer: TypeContainer):
+    def set_attr(self, name: str, typeContainer: TypeContainer):
         if name in self.attrs:
-            raise SemanticError(f'El atributo ya ha sido declarado: {name} no se puede mediante una asignación redefinir su valor')
+            raise SemanticError(
+                f'El atributo ya ha sido declarado: {name} no se puede mediante una asignación redefinir su valor')
 
         self.attrs[name] = typeContainer
-
 
     def set_func_call(self, name: str) -> FunctionInfo:
         self.tag = Type_Scope.Func_Call
@@ -76,34 +78,34 @@ class InterpreterScope:
 
     def set_let(self):
         """Le dice al scope que es de un let y pone el nombre del let"""
-        self.tag=Type_Scope.Let
+        self.tag = Type_Scope.Let
 
-
-    def get_father_type_name_by_method(self,method_name:str)->str:
+    def get_father_type_name_by_method(self, method_name: str) -> str:
         if self.parent is None:
             raise SemanticError(f'El método {method_name} no existe en ningún type')
         if self.tag == Type_Scope.Method_Instantiate:
             return self.name
         return self.parent.get_father_type_name_by_method(method_name)
-    def set_method_call(self,type_name:str,method_name:str)->TypeMethodInfo:
+
+    def set_method_call(self, type_name: str, method_name: str) -> TypeMethodInfo:
+        """Me da el método de llamada"""
+
         self.tag = Type_Scope.Method_Instantiate
         self.name = method_name
-        if type_name=="self":
-            type_name=self.get_father_type_name_by_method(method_name)
-        return self.get_method_info_(type_name,method_name)
+        if type_name == "self":
+            type_name = self.get_father_type_name_by_method(method_name)
+        return self.get_method_info_(type_name, method_name)
 
-    def get_method_info_(self,type_name:str,method_name:str)->TypeMethodInfo:
+    def get_method_info_(self, type_name: str, method_name: str) -> TypeMethodInfo:
         try:
-            type_i:TypeInfo=self.get_type_info_(type_name)
+            type_i: TypeInfo = self.get_type_info_(type_name)
             return type_i.get_method(method_name)
         except KeyError:
             raise SemanticError(f'El método {method_name} no existe en el type {type_name}')
 
-
-
-    def get_var_value(self, var_node_name: str)->TypeContainer:
+    def get_var_value(self, var_node_name: str) -> TypeContainer:
         try:
-            #Como el unico con parent=None es el Program node que no tiene variables
+            # Como el unico con parent=None es el Program node que no tiene variables
             if self.parent is None:
                 raise SemanticError(f'La variable {var_node_name} no existe')
 
@@ -115,13 +117,13 @@ class InterpreterScope:
         except:
             raise SemanticError(f'La variable {var_node_name} no existe')
 
-    def get_attr_value(self,attr_name:str)->TypeContainer:
+    def get_attr_value(self, attr_name: str) -> TypeContainer:
         try:
             # Como el unico con parent=None es el Program node que no tiene ese atributo
             if self.parent is None:
                 raise SemanticError(f'El atributo {attr_name} no existe')
 
-            if attr_name in self.args:
+            if attr_name in self.attrs:
                 return self.attrs[attr_name]
 
             return self.parent.get_attr_value(attr_name)
@@ -130,20 +132,29 @@ class InterpreterScope:
             raise SemanticError(f'El atributo {attr_name} no existe')
 
 
-
 class TypeInstantiateScope(InterpreterScope):
     def __init__(self, scope: HulkScope, parent: Self = None, iter_count=0):
         super().__init__(scope, parent, iter_count)()
         self.types_instantiates: dict[str, Self] = {}
-        self.methods_nodes:dict[str,MethodNode]={}
+        self.methods_nodes: dict[str, MethodNode] = {}
+
 
 class CallScope(InterpreterScope):
 
-    def __init__(self, scope: HulkScope, parent: Self = None, iter_count=0,it_from_program_node:bool=False):
-        super().__init__(scope, parent, iter_count,it_from_program_node)
+    def __init__(self, scope: HulkScope, parent: Self = None, iter_count=0, it_from_program_node: bool = False):
+        super().__init__(scope, parent, iter_count, it_from_program_node)
 
         self.types_instantiates: dict[str, TypeInstantiateScope] = {}
 
+    def get_the_type_instance_by_type_id(self, type_id) -> TypeContainer:
 
-    def get_the_type_instance_by_type_id(self,type_id):
-        if self.tag==Type_Scope.Type_Instantiate or self.tag==Type_Scope.Let
+        if self.parent is None:
+            raise SemanticError(f"No se a encontrado el type:{type_id} instanciado")
+        if self.tag == Type_Scope.Type_Instantiate or self.tag == Type_Scope.Let:
+            if type_id in self.attrs:
+                return self.attrs[type_id]
+            if type_id in self.args:
+                return self.args[type_id]
+        if  type_id != "self":
+            return self.parent.get_the_type_instance_by_type_id(type_id)
+        else:  SemanticError(f"No se a encontrado el type:{type_id} instanciado")

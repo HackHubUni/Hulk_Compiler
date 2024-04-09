@@ -83,7 +83,17 @@ class ScopeInterpreter:
 
 
 
-    def is_this_Type(self,type_container:TypeContainer,type_name:str|Dynamic_Types)->bool:
+    def is_this_Type(self,type_container:TypeContainer,type_name:str|Dynamic_Types,is_checking:bool=False)->bool:
+        """
+        El is_checking en True significa que se quiere chequear con el valor esperado en la función por tanto si el valor esperado
+        es <None> el cual no ha sido inferenciado se devuelve True
+        """
+
+        if is_checking and isinstance(type_name,str):
+            if type_name=="<None>":
+                return True
+
+
 
         if isinstance(type_name,Dynamic_Types):
             return type_container.type == type_name
