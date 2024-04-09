@@ -2,7 +2,7 @@ from Hulk.Interpreter.Scopes_Interpreters.call_scope import CallScope
 from Hulk.Interpreter.Scopes_Interpreters.scope_interpreter import ScopeInterpreter
 from Hulk.Interpreter.utils import TypeContainer
 from Hulk.Semantic_Check.basic_types.scopes import *
-
+import copy
 
 class Interpreter(object):
     def __init__(self, context: HulkScopeLinkedNode, errors=[]):
@@ -77,18 +77,6 @@ class Interpreter(object):
         try:
             parent_scope = self.get_new_Call_Scope(None,True)
             self.visit(node.expr, parent_scope)
-
-            #for decl in node.declarations:
-            #    if isinstance(decl,TypeDeclarationNode):
-            #        decl:TypeDeclarationNode=decl
-            #        feat=decl.features
-            #        for v in feat:
-            #            if isinstance(v,AssignNode):
-            #                v:AssignNode = v
-            #                if isinstance(v.expression_to_evaluate,InstantiateNode):
-            #                     self.visit(v.expression_to_evaluate, parent_scope)
-
-
         except SemanticError as e:
             self.errors.append(e)
 
@@ -139,39 +127,43 @@ class Interpreter(object):
     @visitor.when(InstantiateNode)
     def visit(self, node: InstantiateNode, parent_scope: CallScope):
         try:
+
             name =node.type_id
             new_scope=parent_scope.get_scope_child()
-            type_info:TypeInfo=new_scope.get_type_info_(name)
+            type_info:TypeInfo=new_scope.set_type_call(name)
+            #Se clona para que no haya problemas en las próximas instancias
+            type_info=copy.deepcopy(type_info)
             args_name:list[str]=type_info.get_args_name()
             args = []
             temp: list[TypeContainer] = [self.visit(arg, new_scope) for arg in node.initialization_expressions]
+
+            if len(temp)!=len(args_name):
+                #Por si la instancia de llamado difiere con la definida
+                raise SemanticError(f"La función {name} requiere {len(args_name)} argumentos y tiene {len(temp)}")
             for i, val in enumerate(temp, 0):
                 if val is None:
                     raise SemanticError(f"No pueden ver argumentos en la función {name} None")
                 args.append(val.value)
                 new_scope.set_arg(args_name[i], val)
 
-
+            #Ahora con el puntero al nodo del ast es que se trabaja
 
             #Instanciar los atributos
+
             attrs=type_info.attributes
             attrs_name:list[str]=[]
             varx=[]
             #Tomar los nombres de los atributos
             for attr in attrs.values():
                 name=attr.name
-                varx.append(var)
+
                 attrs_name.append(name)
-                var:TypeContainer=self.visit(attr.initialization_expression,parent_scope)
-                new_scope.set_arg(name,var)
+                var:TypeContainer=self.visit(attr.initialization_expression,new_scope)
+                varx.append(var)
+                new_scope.set_attr(name,var)
 
-
-            #Ahora hay que instanciar los métodos
-            methods_info=type_info.methods
-
-            for method_name, method_info in methods_info.items():
-                method = method_info.declaration_pointer
-                self.visit(method, new_scope)
+            #Ahora se devuelve un TypeContainer con el scope donde se trabaja
+            return self.get_Type_Container(new_scope,name)
 
 
         except SemanticError as e:
@@ -179,7 +171,29 @@ class Interpreter(object):
 
 
 
+    @visitor.when(AttrCallNode)
+    def visit(self, node: AttrCallNode, parent_scope: CallScope):
+        try:
+                name=node.variable_id
 
+                return parent_scope.get_attr_value(name)
+        except SemanticError as e:
+            self.errors.append(e)
+
+    # TODO:Terminar Este
+    @visitor.when(MethodCallWithIdentifierNode)
+    def visit(self, node: MethodCallWithIdentifierNode, parent_scope: CallScope):
+        try:
+            type_id:str=node.object_id
+            name:str=node.method_id
+            new_scope = parent_scope.get_scope_child()
+            new_scope.set_method_call(type_id,name)
+
+
+            self.visit(method, new_scope)
+
+        except SemanticError as e:
+            self.errors.append(e)
     @visitor.when(LetNode)
     def visit(self, node: LetNode, parent_scope: CallScope):
         try:
